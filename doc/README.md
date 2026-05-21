@@ -33,7 +33,7 @@
 - `kummer-quartic.md`: `degree04` Kummer quartic 的数学解释、奇异集穷尽证书和 `16_6` 配置说明。
 - `togliatti-quintic.md`: `degree05` Togliatti quintic 的两个模型、special 分支 31 节点证书链和 determinant 分支 blocker。
 - `degree05-lessons.md`: `degree05` 复现后的数学/工程经验总结，解释 length、saturation、Hessian 和 lift 证书的作用。
-- `barth-sextic.md`: `degree06` Barth sextic 的数学预备文档，整理方程、A/B/C 节点 orbit、`65=15+30+20` 的几何来源、`mu(6)=65` 上界来源和 Rust 证书路线。
+- `barth-sextic.md`: `degree06` Barth sextic 的数学复现文档，整理方程归一化、A/B/C 节点 orbit、`65=15+30+20` 的几何来源、support-strata/lift 证书和 `mu(6)=65` 上界来源。
 - `surfer-web-reuse-audit.md`: 对已有 `surfer-web` 项目中公式、gallery、parser、渲染资产的复用判断。
 
 ## 暂定原则

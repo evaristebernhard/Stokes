@@ -1,0 +1,77 @@
+# barth_support_08_lift
+# coefficient_field Qsqrt5
+# singular_order dp
+source_count 8
+target_count 4
+target 0
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+1 0 0 0 0
+end
+target 1
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+1 0 0 0 0
+end
+poly
+end
+target 2
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+1 0 0 0 0
+end
+poly
+end
+poly
+end
+target 3
+poly
+end
+poly
+end
+poly
+end
+poly
+end
+poly
+1 0 0 0 0
+end
+poly
+end
+poly
+end
+poly
+end

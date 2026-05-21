@@ -4,7 +4,7 @@ This is the first external-CAS import format used by `nodal-core`.
 
 The purpose is deliberately narrow: an external system may compute a candidate
 Groebner basis, but Rust verifies the certificate by exact rational arithmetic.
-For a certificate with generators `F` and candidate basis `G`, the verifier checks:
+For a `.cert` file with generators `F` and candidate basis `G`, the verifier checks:
 
 ```text
 1. G is a Groebner basis by Buchberger's criterion:
@@ -17,8 +17,10 @@ ideal containing the original generators. It can also compute the standard monom
 of the leading monomial ideal when the basis is visibly zero-dimensional, giving the
 quotient algebra length. For a full chart certificate we still need the surrounding
 projective chart/saturation and reducedness checks. When we need ideal equality,
-degree05 adds a separate `.lift` certificate proving every imported basis element
-lies in the original ideal.
+the workspace uses a separate `.lift` certificate proving every imported basis
+element lies in the original ideal. The `.lift` parser and identity verifier now
+live in `nodal-core::GroebnerLiftCertificate`, so `degree05` and `degree06` share
+the same semantics instead of carrying per-degree parsers.
 
 ## Syntax
 
@@ -102,8 +104,9 @@ quotient-dimension/reducedness evidence
 algebraic point certificates for ordinary nodes
 ```
 
-This file documents only the imported basis layer. The projective and reducedness
-layers are still part of the active `degree05` work.
+This file documents the imported basis layer plus the shared lift-identity layer.
+Projective support metadata is represented in Rust by `nodal-core::ProjectiveSupport<N>`;
+the `.cert` format itself remains deliberately small and does not embed support masks.
 
 Strict degree05 affine chart certificates now exist for all four charts:
 
@@ -174,3 +177,43 @@ Each lift file stores coefficients `L[i,j]` for identities
 `BigQuadraticRational`, because the Hessian-bad unit witness has coefficients too
 large for the older `i128`-backed `QuadraticRational`. This closes the reverse
 inclusion `G subset I`; the original normal-form check gives `I subset <G>`.
+The same `nodal-core::GroebnerLiftCertificate` implementation also verifies
+degree06 Barth lift witnesses. For degree05 special Togliatti, the verifier maps
+the original `QuadraticRational` generators and basis into `BigQuadraticRational`
+before checking identities; for degree06 the `.cert` and `.lift` already live over
+`BigQuadraticRational`.
+
+## Degree06 Role
+
+The Barth sextic uses the same support-strata pattern at full projective level:
+
+```text
+crates/degree06/certificates/barth-support-01-grevlex.cert
+...
+crates/degree06/certificates/barth-support-15-grevlex.cert
+```
+
+and matching lift witnesses:
+
+```text
+crates/degree06/certificates/barth-support-01-grevlex.lift
+...
+crates/degree06/certificates/barth-support-15-grevlex.lift
+```
+
+These certificates are parsed over `BigQuadraticRational` for coefficients in
+`Q(sqrt(5))`. Rust verifies generators, Buchberger, normal-form reduction,
+quotient lengths, and lift identities. The 15 support lengths are:
+
+```text
+[0,1,2,1,2,0,4,1,2,0,4,0,4,12,32]
+```
+
+Their sum is `65`, matching the 65 explicit ordinary nodes from Catanese's Table
+1. This is the first degree in the workspace where the support-cover/lift route
+proves the full projective singular-scheme length for the chosen model.
+
+The Barth implementation also keeps Table 1 as a regression oracle while adding
+the Catanese Proposition 205 `A5` orbit route: `sigma=(123)` and `tau=(14)(25)`
+generate the three node orbits of sizes `15,30,20`, and the same digit
+permutation is checked against the mid-line and centre-line labels.

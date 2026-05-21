@@ -12,6 +12,7 @@ crates/
   degree03/
   degree04/
   degree05/
+  degree06/
 ```
 
 设计意图：
@@ -21,7 +22,8 @@ crates/
 - `degree03`: Cayley cubic 的四个 ordinary double points 的 exact 验证。
 - `degree04`: Kummer quartic 的完整奇异集穷尽、16 个 ordinary double points、以及经典 `16_6` tropes 配置的 exact 验证。
 - `degree05`: Togliatti quintic 的 determinant 方程和基础 exact 验证外壳。
-- 后续可增加 `degree06`, ..., `degree08`，每个次数独立实现该次数的经典例子，同时复用 `nodal-core`。
+- `degree06`: Barth sextic 的 65 个 ordinary double points、A/B/C 线配置和 support-strata Groebner/lift 穷尽证书。
+- 后续可增加 `degree07`, `degree08`，每个次数独立实现该次数的经典例子，同时复用 `nodal-core`。
 
 `nodal-core` 当前已从只支持 `Q` 推进到支持一个二次扩张域 `Q(sqrt(d))`。这一步是为了 Kummer quartic 的节点坐标，它们自然落在 `Q(sqrt(2))` 中。
 
@@ -32,9 +34,11 @@ crates/
 - `normal_form(f, G, order)`、`s_polynomial(f, g, order)`、`is_groebner_basis(G, order)`：Groebner certificate verifier 的第一版 Buchberger 判据核心。
 - `standard_monomials(G, order)`、`quotient_dimension(G, order)`：当 leading ideal 有 pure-power bounds 时，计算零维 quotient 长度。
 - `GroebnerCertificate<N>`：第一版行式文本导入格式，见 `doc/groebner-certificate-format.md`。
+- `ProjectiveSupport<N>`：统一 projective support mask、chart 选择和 support 变量枚举语义，已由 `degree05` 和 `degree06` 共享。
+- `GroebnerLiftCertificate<N, T>`：统一 `.lift` 文件解析和 identity verifier，支持同系数域验证，也支持 `QuadraticRational -> BigQuadraticRational` 的映射验证。
 - `BigQuadraticRational`：`Q(sqrt(5))` 上的大有理数系数，用于验证 special Togliatti lift 证书中很大的线性组合系数。
 
-这些能力已经被 `degree05` 的 Togliatti determinant builder 使用；后续还要迁移 `degree04` 的局部 ternary helper。
+这些能力已经被 `degree05` 的 Togliatti 证书和 `degree06` 的 Barth support-strata 证书使用；后续还要迁移 `degree04` 的局部 ternary helper。
 
 ## surfer-web 参考原则
 
@@ -170,17 +174,27 @@ xyz + xyw + xzw + yzw = 0 in P^3
 数学解释见 `doc/togliatti-quintic.md`。
 复现经验总结见 `doc/degree05-lessons.md`。
 
-## Degree 6 数学预备状态
+## Degree 6 已实现检查
 
-`degree06` 暂时不急着开代码，先固定 Barth sextic 的可复现对象。预备文档见 `doc/barth-sextic.md`，当前已经整理：
+`degree06` 已复现 Barth sextic 的第一轮证书闭环。数学解释见 `doc/barth-sextic.md`。当前代码固定坐标顺序 `[w:x:y:z]`，在 `Q(sqrt(5))` 上使用清分母方程：
 
-- Catanese 综述中使用的 Barth sextic 方程，系数域为 `Q(sqrt(5))`。
-- 二十面体 `A5` 对称下的 A/B/C 三类节点 orbit。
-- `65 = 15 + 30 + 20 = 15*3 + 10*2` 的线配置来源：15 条 mid lines 每条 3 个节点，10 条 centre lines 每条 2 个节点。
-- `mu(6)=65` 的上界来源：Jaffe-Ruberman / Wahl / Pignatelli 的 code/topology 路线，本项目短期只引用，不在 Rust 中复现。
-- Rust 证书路线：先 exact 实现方程和 A/B/C 候选点 ordinary-node 验证，再用 support-strata Groebner certificates 证明 saturated projective singular scheme 总 length 为 65。
+```text
+F = 4*(tau^2*x^2-y^2)*(tau^2*y^2-z^2)*(tau^2*z^2-x^2)
+    - (2*tau+1)*w^2*(x^2+y^2+z^2-w^2)^2.
+```
 
-重要边界：degree06 目前只有数学预备文档，还没有 `crates/degree06`。下一步实现应从表格节点坐标做 regression oracle 开始，再补 `A5` 轨道生成，最后推进 projective 穷尽证书。
+已验证：
+
+- 多项式次数为 `6`，系数在 `Q(sqrt(5))`，并满足 `tau^2=tau+1`、`tau+tau_bar=1`、`tau*tau_bar=-1`。
+- 从 Catanese Table 1 转录 A/B/C 三类节点，数量为 `15+30+20=65`，projective 去重后仍为 `65`。
+- 用 Catanese Proposition 205 的 `A5` 置换表示，从 A/B/C 三个代表点生成三个单 orbit，orbit sizes 为 `15,30,20`，并与 Table 1 exact 对齐。
+- 每个候选点 exact 满足 `F=0`、`grad F=0`、Hessian rank 为 `3`，因此都是 ordinary double point。
+- 15 条 mid lines 每条含 3 个共线节点；10 条 centre lines 每条含 2 个不同节点；`sigma=(123)` 与 `tau=(14)(25)` 对 line labels 的作用和节点置换相容。
+- 15 个 projective support strata 的 grevlex Groebner certificates 已由 Rust verifier 复查：generators 与模型一致、basis 通过 Buchberger、原 generators 全部 reduce 到 0、quotient length 分布为 `[0,1,2,1,2,0,4,1,2,0,4,0,4,12,32]`，总和 `65`。
+- 每个 support stratum 还有 `.lift` 证书，Rust exact 验证 imported basis 每个元素都在原 support ideal 中，从而关闭 ideal equality。
+- `degree05` 与 `degree06` 现在共享 `nodal-core` 的 support/lift 语义；各 degree crate 只保留方程、stratum 生成元和期望长度这些数学特例。
+
+因此当前 Barth 方程的 saturated projective singular scheme length 为 `65`；结合显式 65 个 ordinary nodes，得到该方程恰有 `65` 个 reduced ordinary nodes，没有第 `66` 个奇点。`mu(6)<=65` 的全局上界仍引用 Jaffe-Ruberman / Wahl / Pignatelli，不在本项目中复现。
 
 ## 下一步
 

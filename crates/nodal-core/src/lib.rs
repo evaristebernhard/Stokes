@@ -10,6 +10,48 @@ use std::str::FromStr;
 pub const P3_VARIABLE_COUNT: usize = 4;
 pub const AFFINE_P3_VARIABLE_COUNT: usize = 3;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ProjectiveSupport<const N: usize> {
+    mask: u8,
+}
+
+impl<const N: usize> ProjectiveSupport<N> {
+    pub fn new(mask: u8) -> Self {
+        assert!(N > 0, "projective support needs at least one coordinate");
+        assert!(
+            N <= u8::BITS as usize,
+            "projective support mask is u8-backed"
+        );
+        assert!(
+            (1..(1usize << N)).contains(&usize::from(mask)),
+            "support mask must be a nonempty subset of projective coordinates"
+        );
+
+        Self { mask }
+    }
+
+    pub fn mask(self) -> u8 {
+        self.mask
+    }
+
+    pub fn chart_variable(self) -> usize {
+        (0..N)
+            .find(|&variable| self.contains_projective_variable(variable))
+            .expect("support is nonempty")
+    }
+
+    pub fn contains_projective_variable(self, variable: usize) -> bool {
+        assert!(variable < N, "projective variable index out of range");
+        self.mask & (1 << variable) != 0
+    }
+
+    pub fn projective_variables(self) -> Vec<usize> {
+        (0..N)
+            .filter(|&variable| self.contains_projective_variable(variable))
+            .collect()
+    }
+}
+
 pub trait FieldElement:
     Clone
     + Eq
@@ -164,6 +206,98 @@ impl GroebnerCertificateVerification {
 
     pub fn verified(self) -> bool {
         self.basis_is_groebner && self.generators_reduce_to_zero
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct GroebnerLiftCertificate<const N: usize, T: FieldElement = BigQuadraticRational> {
+    source_count: usize,
+    coefficients: Vec<Vec<SparsePolynomial<T, N>>>,
+}
+
+impl<const N: usize, T: FieldElement> GroebnerLiftCertificate<N, T> {
+    pub fn new(source_count: usize, coefficients: Vec<Vec<SparsePolynomial<T, N>>>) -> Self {
+        assert!(
+            coefficients
+                .iter()
+                .all(|target_coefficients| target_coefficients.len() == source_count),
+            "each lift target needs one coefficient polynomial per source"
+        );
+
+        Self {
+            source_count,
+            coefficients,
+        }
+    }
+
+    pub fn source_count(&self) -> usize {
+        self.source_count
+    }
+
+    pub fn target_count(&self) -> usize {
+        self.coefficients.len()
+    }
+
+    pub fn coefficients(&self) -> &[Vec<SparsePolynomial<T, N>>] {
+        &self.coefficients
+    }
+
+    pub fn verifies_targets(
+        &self,
+        generators: &[SparsePolynomial<T, N>],
+        targets: &[SparsePolynomial<T, N>],
+    ) -> bool {
+        if self.source_count != generators.len() || self.coefficients.len() != targets.len() {
+            return false;
+        }
+
+        self.coefficients
+            .iter()
+            .zip(targets)
+            .all(|(target_coefficients, target)| {
+                if target_coefficients.len() != generators.len() {
+                    return false;
+                }
+
+                let reconstructed = target_coefficients
+                    .iter()
+                    .zip(generators)
+                    .fold(SparsePolynomial::zero(), |sum, (coefficient, generator)| {
+                        sum.add(&coefficient.mul(generator))
+                    });
+                reconstructed == *target
+            })
+    }
+
+    pub fn verifies_mapped_targets<U: FieldElement>(
+        &self,
+        generators: &[SparsePolynomial<U, N>],
+        targets: &[SparsePolynomial<U, N>],
+        mut map_polynomial: impl FnMut(&SparsePolynomial<U, N>) -> SparsePolynomial<T, N>,
+    ) -> bool {
+        if self.source_count != generators.len() || self.coefficients.len() != targets.len() {
+            return false;
+        }
+
+        let mapped_generators = generators
+            .iter()
+            .map(&mut map_polynomial)
+            .collect::<Vec<_>>();
+        let mapped_targets = targets.iter().map(&mut map_polynomial).collect::<Vec<_>>();
+
+        self.verifies_targets(&mapped_generators, &mapped_targets)
+    }
+}
+
+impl<const N: usize> GroebnerLiftCertificate<N, BigQuadraticRational> {
+    pub fn verifies_quadratic_targets(
+        &self,
+        generators: &[SparsePolynomial<QuadraticRational, N>],
+        targets: &[SparsePolynomial<QuadraticRational, N>],
+    ) -> bool {
+        self.verifies_mapped_targets(generators, targets, |polynomial| {
+            polynomial.map_coefficients(|coefficient| BigQuadraticRational::from(*coefficient))
+        })
     }
 }
 
@@ -1871,6 +2005,151 @@ fn enumerate_exponents_below_bounds<const N: usize>(
         current[variable] = exponent;
         enumerate_exponents_below_bounds(bounds, current, variable + 1, visit);
     }
+}
+
+pub fn parse_groebner_lift_certificate<const N: usize, T>(
+    input: &str,
+) -> Result<GroebnerLiftCertificate<N, T>, String>
+where
+    T: FieldElement + FromStr,
+    <T as FromStr>::Err: fmt::Display,
+{
+    let lines = input
+        .lines()
+        .enumerate()
+        .filter_map(|(zero_based_line, raw_line)| {
+            let without_hash_comment = raw_line
+                .split_once('#')
+                .map_or(raw_line, |(before_comment, _)| before_comment);
+            let without_slash_comment = without_hash_comment
+                .split_once("//")
+                .map_or(without_hash_comment, |(before_comment, _)| before_comment);
+            let line = without_slash_comment.trim();
+            (!line.is_empty()).then_some((zero_based_line + 1, line.to_string()))
+        })
+        .collect::<Vec<_>>();
+    let mut cursor = 0;
+
+    let source_count = parse_lift_count(&lines, &mut cursor, "source_count")
+        .ok_or_else(|| "lift certificate is missing a source_count declaration".to_string())?;
+    let target_count = parse_lift_count(&lines, &mut cursor, "target_count")
+        .ok_or_else(|| "lift certificate is missing a target_count declaration".to_string())?;
+
+    let mut coefficients = Vec::with_capacity(target_count);
+    for target_index in 0..target_count {
+        let (line_number, line) = lines
+            .get(cursor)
+            .ok_or_else(|| format!("missing target {target_index} declaration"))?;
+        let tokens = line.split_whitespace().collect::<Vec<_>>();
+        match tokens.as_slice() {
+            ["target", value] => {
+                let parsed_target = value.parse::<usize>().map_err(|error| {
+                    format!("line {line_number}: invalid target index `{value}`: {error}")
+                })?;
+                if parsed_target != target_index {
+                    return Err(format!(
+                        "line {line_number}: expected target {target_index}, got {parsed_target}"
+                    ));
+                }
+            }
+            _ => {
+                return Err(format!(
+                    "line {line_number}: expected target {target_index} declaration"
+                ));
+            }
+        }
+        cursor += 1;
+
+        let mut target_coefficients = Vec::with_capacity(source_count);
+        for _ in 0..source_count {
+            target_coefficients.push(parse_lift_polynomial(&lines, &mut cursor)?);
+        }
+        coefficients.push(target_coefficients);
+    }
+
+    if let Some((line_number, line)) = lines.get(cursor) {
+        return Err(format!(
+            "line {line_number}: unexpected trailing lift certificate line `{line}`"
+        ));
+    }
+
+    Ok(GroebnerLiftCertificate::new(source_count, coefficients))
+}
+
+fn parse_lift_count(lines: &[(usize, String)], cursor: &mut usize, keyword: &str) -> Option<usize> {
+    let (line_number, line) = lines.get(*cursor)?;
+    let tokens = line.split_whitespace().collect::<Vec<_>>();
+    let [found_keyword, value] = tokens.as_slice() else {
+        return None;
+    };
+    if *found_keyword != keyword {
+        return None;
+    }
+
+    let count = value
+        .parse::<usize>()
+        .map_err(|error| format!("line {line_number}: invalid {keyword} `{value}`: {error}"))
+        .ok()?;
+    *cursor += 1;
+    Some(count)
+}
+
+fn parse_lift_polynomial<const N: usize, T>(
+    lines: &[(usize, String)],
+    cursor: &mut usize,
+) -> Result<SparsePolynomial<T, N>, String>
+where
+    T: FieldElement + FromStr,
+    <T as FromStr>::Err: fmt::Display,
+{
+    let (line_number, line) = lines
+        .get(*cursor)
+        .ok_or_else(|| "missing lift polynomial block".to_string())?;
+    if !line.eq_ignore_ascii_case("poly") {
+        return Err(format!("line {line_number}: expected `poly`"));
+    }
+    *cursor += 1;
+
+    let mut terms = Vec::new();
+    loop {
+        let (line_number, line) = lines
+            .get(*cursor)
+            .ok_or_else(|| "unterminated lift polynomial block".to_string())?;
+        *cursor += 1;
+        if line.eq_ignore_ascii_case("end") {
+            return Ok(SparsePolynomial::from_terms(terms));
+        }
+
+        terms.push(parse_lift_term::<N, T>(*line_number, line)?);
+    }
+}
+
+fn parse_lift_term<const N: usize, T>(
+    line_number: usize,
+    line: &str,
+) -> Result<(T, [usize; N]), String>
+where
+    T: FieldElement + FromStr,
+    <T as FromStr>::Err: fmt::Display,
+{
+    let tokens = line.split_whitespace().collect::<Vec<_>>();
+    if tokens.len() != N + 1 {
+        return Err(format!(
+            "line {line_number}: expected coefficient plus {N} exponents"
+        ));
+    }
+
+    let coefficient = tokens[0]
+        .parse::<T>()
+        .map_err(|error| format!("line {line_number}: invalid coefficient: {error}"))?;
+    let mut exponents = [0; N];
+    for (index, token) in tokens[1..].iter().enumerate() {
+        exponents[index] = token
+            .parse::<usize>()
+            .map_err(|error| format!("line {line_number}: invalid exponent `{token}`: {error}"))?;
+    }
+
+    Ok((coefficient, exponents))
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

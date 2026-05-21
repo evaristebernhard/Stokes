@@ -37,6 +37,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "degree06"
+version = "0.1.0"
+dependencies = [
+ "nodal-core",
+]
+
+[[package]]
 name = "nodal-core"
 version = "0.1.0"
 dependencies = [

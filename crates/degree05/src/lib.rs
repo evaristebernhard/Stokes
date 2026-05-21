@@ -1,8 +1,8 @@
 use nodal_core::{
     AFFINE_P3_VARIABLE_COUNT, BigQuadraticRational, BigRational, GroebnerCertificate,
-    GroebnerCertificateParseError, HomogeneousPolynomialP3, Matrix, MonomialOrder,
-    P3_VARIABLE_COUNT, ProjectivePoint, QuadraticRational, Rational, SparsePolynomial,
-    p3_affine_variable_indices,
+    GroebnerCertificateParseError, GroebnerLiftCertificate, HomogeneousPolynomialP3, Matrix,
+    MonomialOrder, P3_VARIABLE_COUNT, ProjectivePoint, ProjectiveSupport, QuadraticRational,
+    Rational, SparsePolynomial, p3_affine_variable_indices, parse_groebner_lift_certificate,
 };
 use std::fmt;
 
@@ -15,6 +15,9 @@ type QuadraticPolynomialP3 = SparsePolynomial<QuadraticRational, P3_VARIABLE_COU
 type QuadraticPolynomialA3 = SparsePolynomial<QuadraticRational, AFFINE_P3_VARIABLE_COUNT>;
 type QuadraticPolynomialA4 =
     SparsePolynomial<QuadraticRational, TOGLIATTI_PROJECTIVE_STRATUM_VARIABLE_COUNT>;
+pub type TogliattiProjectiveSupport = ProjectiveSupport<P3_VARIABLE_COUNT>;
+pub type QuadraticGroebnerLiftCertificate<const N: usize> =
+    GroebnerLiftCertificate<N, BigQuadraticRational>;
 
 const TOGLIATTI_AFFINE_CHART_GREVLEX_CERTIFICATES: [&str; P3_VARIABLE_COUNT] = [
     include_str!("../certificates/togliatti-chart0-grevlex.cert"),
@@ -365,9 +368,7 @@ pub fn special_togliatti_affine_chart3_grevlex_certificate()
 
 pub fn special_togliatti_affine_chart3_grevlex_lift_certificate()
 -> Result<QuadraticGroebnerLiftCertificate<AFFINE_P3_VARIABLE_COUNT>, String> {
-    parse_quadratic_groebner_lift_certificate(
-        SPECIAL_TOGLIATTI_AFFINE_CHART3_GREVLEX_LIFT_CERTIFICATE,
-    )
+    parse_groebner_lift_certificate(SPECIAL_TOGLIATTI_AFFINE_CHART3_GREVLEX_LIFT_CERTIFICATE)
 }
 
 pub fn special_togliatti_hessian_degenerate_grevlex_certificate()
@@ -381,7 +382,7 @@ pub fn special_togliatti_hessian_degenerate_grevlex_certificate()
 
 pub fn special_togliatti_hessian_degenerate_grevlex_lift_certificate()
 -> Result<QuadraticGroebnerLiftCertificate<AFFINE_P3_VARIABLE_COUNT>, String> {
-    parse_quadratic_groebner_lift_certificate(
+    parse_groebner_lift_certificate(
         SPECIAL_TOGLIATTI_AFFINE_CHART3_HESSIAN_BAD_GREVLEX_LIFT_CERTIFICATE,
     )
 }
@@ -412,7 +413,7 @@ pub fn special_togliatti_infinity_support_grevlex_lift_certificate(
         .filter(|&index| index < SPECIAL_TOGLIATTI_INFINITY_SUPPORT_STRATUM_COUNT)
         .ok_or_else(|| format!("support mask {support_mask} is out of range"))?;
 
-    parse_quadratic_groebner_lift_certificate(
+    parse_groebner_lift_certificate(
         SPECIAL_TOGLIATTI_INFINITY_SUPPORT_GREVLEX_LIFT_CERTIFICATES[index],
     )
 }
@@ -450,46 +451,6 @@ pub fn special_togliatti_singular_scheme_certificate()
             .map_err(|error| error.to_string())?,
         infinity_support_lifts: special_togliatti_infinity_support_grevlex_lift_certificates()?,
     })
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct TogliattiProjectiveSupport {
-    mask: u8,
-}
-
-impl TogliattiProjectiveSupport {
-    pub fn new(mask: u8) -> Self {
-        assert!(
-            (1..(1 << P3_VARIABLE_COUNT)).contains(&usize::from(mask)),
-            "support mask must be a nonempty subset of P3 coordinates"
-        );
-
-        Self { mask }
-    }
-
-    pub fn mask(self) -> u8 {
-        self.mask
-    }
-
-    pub fn chart_variable(self) -> usize {
-        (0..P3_VARIABLE_COUNT)
-            .find(|&variable| self.contains_projective_variable(variable))
-            .expect("support is nonempty")
-    }
-
-    pub fn contains_projective_variable(self, variable: usize) -> bool {
-        assert!(
-            variable < P3_VARIABLE_COUNT,
-            "P3 variable index out of range"
-        );
-        self.mask & (1 << variable) != 0
-    }
-
-    pub fn projective_variables(self) -> Vec<usize> {
-        (0..P3_VARIABLE_COUNT)
-            .filter(|&variable| self.contains_projective_variable(variable))
-            .collect()
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -685,62 +646,6 @@ impl TogliattiSingularSchemeCertificate {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct QuadraticGroebnerLiftCertificate<const N: usize> {
-    source_count: usize,
-    coefficients: Vec<Vec<SparsePolynomial<BigQuadraticRational, N>>>,
-}
-
-impl<const N: usize> QuadraticGroebnerLiftCertificate<N> {
-    pub fn source_count(&self) -> usize {
-        self.source_count
-    }
-
-    pub fn target_count(&self) -> usize {
-        self.coefficients.len()
-    }
-
-    pub fn coefficients(&self) -> &[Vec<SparsePolynomial<BigQuadraticRational, N>>] {
-        &self.coefficients
-    }
-
-    pub fn verifies_targets(
-        &self,
-        generators: &[SparsePolynomial<QuadraticRational, N>],
-        targets: &[SparsePolynomial<QuadraticRational, N>],
-    ) -> bool {
-        if self.source_count != generators.len() || self.coefficients.len() != targets.len() {
-            return false;
-        }
-
-        let big_generators = generators
-            .iter()
-            .map(quadratic_polynomial_to_big_quadratic)
-            .collect::<Vec<_>>();
-        let big_targets = targets
-            .iter()
-            .map(quadratic_polynomial_to_big_quadratic)
-            .collect::<Vec<_>>();
-
-        self.coefficients
-            .iter()
-            .zip(&big_targets)
-            .all(|(target_coefficients, target)| {
-                if target_coefficients.len() != big_generators.len() {
-                    return false;
-                }
-
-                let reconstructed = target_coefficients
-                    .iter()
-                    .zip(&big_generators)
-                    .fold(SparsePolynomial::zero(), |sum, (coefficient, generator)| {
-                        sum.add(&coefficient.mul(generator))
-                    });
-                reconstructed == *target
-            })
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SpecialTogliattiSingularSchemeCertificate {
     affine_chart3: SpecialTogliattiAffineChartGroebnerCertificate,
     affine_chart3_lift: QuadraticGroebnerLiftCertificate<AFFINE_P3_VARIABLE_COUNT>,
@@ -787,7 +692,7 @@ impl SpecialTogliattiSingularSchemeCertificate {
         if !affine_verification.verified() {
             return None;
         }
-        if !self.affine_chart3_lift.verifies_targets(
+        if !self.affine_chart3_lift.verifies_quadratic_targets(
             self.affine_chart3.certificate().generators(),
             self.affine_chart3.certificate().basis(),
         ) {
@@ -805,7 +710,7 @@ impl SpecialTogliattiSingularSchemeCertificate {
             if !stratum.verify().verified_empty() {
                 return None;
             }
-            if !lift.verifies_targets(
+            if !lift.verifies_quadratic_targets(
                 stratum.certificate().generators(),
                 stratum.certificate().basis(),
             ) {
@@ -819,7 +724,7 @@ impl SpecialTogliattiSingularSchemeCertificate {
     pub fn verified_reduced_ordinary_node_count(&self) -> Option<usize> {
         let projective_length = self.verified_projective_length()?;
         if self.hessian_degenerate.verify().verified_empty()
-            && self.hessian_degenerate_lift.verifies_targets(
+            && self.hessian_degenerate_lift.verifies_quadratic_targets(
                 self.hessian_degenerate.certificate().generators(),
                 self.hessian_degenerate.certificate().basis(),
             )
@@ -1235,142 +1140,6 @@ fn affine_hessian_determinant(polynomial: &QuadraticPolynomialA3) -> QuadraticPo
         .sub(&h[2][2].mul(&h[0][1].pow_usize(2)))
 }
 
-fn parse_quadratic_groebner_lift_certificate<const N: usize>(
-    input: &str,
-) -> Result<QuadraticGroebnerLiftCertificate<N>, String> {
-    let lines = input
-        .lines()
-        .enumerate()
-        .filter_map(|(zero_based_line, raw_line)| {
-            let without_hash_comment = raw_line
-                .split_once('#')
-                .map_or(raw_line, |(before_comment, _)| before_comment);
-            let without_slash_comment = without_hash_comment
-                .split_once("//")
-                .map_or(without_hash_comment, |(before_comment, _)| before_comment);
-            let line = without_slash_comment.trim();
-            (!line.is_empty()).then_some((zero_based_line + 1, line.to_string()))
-        })
-        .collect::<Vec<_>>();
-    let mut cursor = 0;
-
-    let source_count = parse_lift_count(&lines, &mut cursor, "source_count")
-        .ok_or_else(|| "lift certificate is missing a source_count declaration".to_string())?;
-    let target_count = parse_lift_count(&lines, &mut cursor, "target_count")
-        .ok_or_else(|| "lift certificate is missing a target_count declaration".to_string())?;
-
-    let mut coefficients = Vec::with_capacity(target_count);
-    for target_index in 0..target_count {
-        let (line_number, line) = lines
-            .get(cursor)
-            .ok_or_else(|| format!("missing target {target_index} declaration"))?;
-        let tokens = line.split_whitespace().collect::<Vec<_>>();
-        match tokens.as_slice() {
-            ["target", value] => {
-                let parsed_target = value.parse::<usize>().map_err(|error| {
-                    format!("line {line_number}: invalid target index `{value}`: {error}")
-                })?;
-                if parsed_target != target_index {
-                    return Err(format!(
-                        "line {line_number}: expected target {target_index}, got {parsed_target}"
-                    ));
-                }
-            }
-            _ => {
-                return Err(format!(
-                    "line {line_number}: expected target {target_index} declaration"
-                ));
-            }
-        }
-        cursor += 1;
-
-        let mut target_coefficients = Vec::with_capacity(source_count);
-        for _ in 0..source_count {
-            target_coefficients.push(parse_lift_polynomial(&lines, &mut cursor)?);
-        }
-        coefficients.push(target_coefficients);
-    }
-
-    if let Some((line_number, line)) = lines.get(cursor) {
-        return Err(format!(
-            "line {line_number}: unexpected trailing lift certificate line `{line}`"
-        ));
-    }
-
-    Ok(QuadraticGroebnerLiftCertificate {
-        source_count,
-        coefficients,
-    })
-}
-
-fn parse_lift_count(lines: &[(usize, String)], cursor: &mut usize, keyword: &str) -> Option<usize> {
-    let (line_number, line) = lines.get(*cursor)?;
-    let tokens = line.split_whitespace().collect::<Vec<_>>();
-    let [found_keyword, value] = tokens.as_slice() else {
-        return None;
-    };
-    if *found_keyword != keyword {
-        return None;
-    }
-
-    let count = value
-        .parse::<usize>()
-        .map_err(|error| format!("line {line_number}: invalid {keyword} `{value}`: {error}"))
-        .ok()?;
-    *cursor += 1;
-    Some(count)
-}
-
-fn parse_lift_polynomial<const N: usize>(
-    lines: &[(usize, String)],
-    cursor: &mut usize,
-) -> Result<SparsePolynomial<BigQuadraticRational, N>, String> {
-    let (line_number, line) = lines
-        .get(*cursor)
-        .ok_or_else(|| "missing lift polynomial block".to_string())?;
-    if !line.eq_ignore_ascii_case("poly") {
-        return Err(format!("line {line_number}: expected `poly`"));
-    }
-    *cursor += 1;
-
-    let mut terms = Vec::new();
-    loop {
-        let (line_number, line) = lines
-            .get(*cursor)
-            .ok_or_else(|| "unterminated lift polynomial block".to_string())?;
-        *cursor += 1;
-        if line.eq_ignore_ascii_case("end") {
-            return Ok(SparsePolynomial::from_terms(terms));
-        }
-
-        terms.push(parse_lift_term::<N>(*line_number, line)?);
-    }
-}
-
-fn parse_lift_term<const N: usize>(
-    line_number: usize,
-    line: &str,
-) -> Result<(BigQuadraticRational, [usize; N]), String> {
-    let tokens = line.split_whitespace().collect::<Vec<_>>();
-    if tokens.len() != N + 1 {
-        return Err(format!(
-            "line {line_number}: expected coefficient plus {N} exponents"
-        ));
-    }
-
-    let coefficient = tokens[0]
-        .parse::<BigQuadraticRational>()
-        .map_err(|error| format!("line {line_number}: invalid coefficient: {error}"))?;
-    let mut exponents = [0; N];
-    for (index, token) in tokens[1..].iter().enumerate() {
-        exponents[index] = token
-            .parse::<usize>()
-            .map_err(|error| format!("line {line_number}: invalid exponent `{token}`: {error}"))?;
-    }
-
-    Ok((coefficient, exponents))
-}
-
 fn variables() -> [PolynomialP3; P3_VARIABLE_COUNT] {
     std::array::from_fn(PolynomialP3::variable)
 }
@@ -1397,12 +1166,6 @@ fn rational_polynomial_to_big_rational(polynomial: PolynomialA3) -> BigPolynomia
 
 fn rational_stratum_polynomial_to_big_rational(polynomial: PolynomialA4) -> BigPolynomialA4 {
     polynomial.map_coefficients(|coefficient| BigRational::from(*coefficient))
-}
-
-fn quadratic_polynomial_to_big_quadratic<const N: usize>(
-    polynomial: &SparsePolynomial<QuadraticRational, N>,
-) -> SparsePolynomial<BigQuadraticRational, N> {
-    polynomial.map_coefficients(|coefficient| BigQuadraticRational::from(*coefficient))
 }
 
 fn lift_affine3_polynomial_to_stratum(polynomial: PolynomialA3) -> PolynomialA4 {
@@ -1671,7 +1434,7 @@ mod tests {
             certificate.certificate().generators().len()
         );
         assert_eq!(lift.target_count(), certificate.certificate().basis().len());
-        assert!(lift.verifies_targets(
+        assert!(lift.verifies_quadratic_targets(
             certificate.certificate().generators(),
             certificate.certificate().basis()
         ));
@@ -1723,7 +1486,7 @@ mod tests {
             certificate.certificate().generators().len()
         );
         assert_eq!(lift.target_count(), certificate.certificate().basis().len());
-        assert!(lift.verifies_targets(
+        assert!(lift.verifies_quadratic_targets(
             certificate.certificate().generators(),
             certificate.certificate().basis()
         ));
@@ -1760,7 +1523,7 @@ mod tests {
                 certificate.certificate().generators().len()
             );
             assert_eq!(lift.target_count(), certificate.certificate().basis().len());
-            assert!(lift.verifies_targets(
+            assert!(lift.verifies_quadratic_targets(
                 certificate.certificate().generators(),
                 certificate.certificate().basis()
             ));
@@ -1774,15 +1537,19 @@ mod tests {
 
         assert_eq!(certificate.infinity_support_strata().len(), 7);
         assert_eq!(certificate.infinity_support_lifts().len(), 7);
-        assert!(certificate.affine_chart3_lift().verifies_targets(
+        assert!(certificate.affine_chart3_lift().verifies_quadratic_targets(
             certificate.affine_chart3().certificate().generators(),
             certificate.affine_chart3().certificate().basis()
         ));
         assert!(certificate.hessian_degenerate().verify().verified_empty());
-        assert!(certificate.hessian_degenerate_lift().verifies_targets(
-            certificate.hessian_degenerate().certificate().generators(),
-            certificate.hessian_degenerate().certificate().basis()
-        ));
+        assert!(
+            certificate
+                .hessian_degenerate_lift()
+                .verifies_quadratic_targets(
+                    certificate.hessian_degenerate().certificate().generators(),
+                    certificate.hessian_degenerate().certificate().basis()
+                )
+        );
         assert_eq!(certificate.verified_projective_length(), Some(31));
         assert_eq!(certificate.verified_reduced_ordinary_node_count(), Some(31));
         assert_eq!(

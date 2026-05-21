@@ -5,6 +5,7 @@ members = [
     "crates/degree03",
     "crates/degree04",
     "crates/degree05",
+    "crates/degree06",
 ]
 resolver = "3"
 
