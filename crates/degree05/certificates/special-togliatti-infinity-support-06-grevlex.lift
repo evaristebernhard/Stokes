@@ -1,0 +1,31 @@
+# special_togliatti_infinity_support_06_lift
+# coefficient_field Qsqrt5
+# singular_order dp
+source_count 7
+target_count 1
+target 0
+poly
+end
+poly
+1/10 0 0 0 0
+end
+poly
+end
+poly
+end
+poly
+-1 3 0 0 0
+-2 2 1 0 0
+(-1/10*t+1/2) 0 3 0 0
+6 1 0 0 0
+-2 0 1 0 0
+end
+poly
+4 3 0 0 0
+-2 1 2 0 0
+(2*t+2) 1 1 1 0
+-8 1 0 2 0
+4 1 0 0 0
+end
+poly
+end

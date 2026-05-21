@@ -1,0 +1,15 @@
+[package]
+name = "degree02"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+nodal-core = { path = "../nodal-core" }
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "degree02"
+path = "src/main.rs"

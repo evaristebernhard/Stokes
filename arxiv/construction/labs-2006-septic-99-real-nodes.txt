@@ -1,0 +1,950 @@
+REND. SEM. MAT. UNIV. PADOVA, Vol. 116 (2006)
+
+A Septic with 99 Real Nodes.
+OLIVER LABS (*)
+
+ABSTRACT - We find a surface of degree 7 in P3 (R) with 99 real nodes within a family
+of surfaces with dihedral symmetry: First, we consider this family over some
+small prime fields, which allows us to test all possible parameter sets using
+computer algebra. In this way we find some examples of 99-nodal surfaces over
+some of these finite fields. Then, the examination of the geometry of these
+surfaces allows us to determine the parameters of a 99-nodal septic in characteristic zero. This narrows the possibilities for m(7), the maximum number of
+nodes on a septic, to: 99  m(7)  104. When reducing our surface modulo 5, we
+even obtain a 100-nodal septic in P3 (F5 ).
+
+Introduction.
+The study of surfaces in P3 (C) of some degree d w.r.t. the possible
+combinations of singularities on them is one of the most classical subjects
+in algebraic geometry. SchlaÈfli [17] already established a complete classification for the case of cubic surfaces (i.e., d  3) in 1863. It took more than
+130 years until the corresponding problem was solved for quartics (d  4)
+using K3 lattice theory. Most of this work was done by Nikulin, Urabe, and
+finally Yang [19].
+For surfaces of higher degree, we cannot hope to establish an analogous
+classification at the moment, even for d  5, because the knowledge on
+surfaces of general type is still far from sufficient for such a purpose.
+Kummer [10] had a similar problem for the case of d  4 in 1864. So, he
+restricted himself to the question on the maximum number m(d) of nodes
+(i.e. singularities of type A1 , also called ordinary double points, locally
+
+(*) Indirizzo dell'A.: Mathematik und Informatik, GebaÈude E2.4, UniversitaÈt des Saarlandes, D-66123 Saarbru
+È cken, Germany.
+E-mail: Labs@math.uni-sb.de, mail@OliverLabs.net
+Primary 14J17, 14Q10; Secondary 14G15
+
+300
+
+Oliver Labs
+
+given by x2  y2  z2  0) which can occur on a surface of degree d in
+P3 (C). Kummer proved m(4)  16 by noticing that Fresnel's Wave Surface
+actually had 16 nodes and that one could use a formula for the degree of the
+dual of a surface to show that there could not be more such singularities.
+Dispite many attempts to determine m(d) in the 20th century, this
+number is only known for d  6 until now (for a historical overview of about
+50 pages, see [13]). All restrictions established so far are summarized in the
+table below:
+degree
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+12
+
+d
+
+m(d) 
+
+0
+
+1
+
+4
+
+16
+
+31
+
+65
+
+93
+
+5 3
+d
+168 216 345 425 600  12
+
+m(d) 
+
+0
+
+1
+
+4
+
+16
+
+31
+
+65
+
+104 174 246 360 480 645  49 d3
+
+In the present article we show:
+1
+
+m(7)  99:
+
+The best known upper bound in the case of septics is given by
+Varchenko's spectral bound [18]: m(7)  104. Notice that Miyaoka's
+bound [14] yields 112, but Givental's bound [6] also computes to 104. The
+previously known septic with the greatest number of nodes was the example of Chmutov [2] with 93 nodes: Chmutov's construction works for
+any degree d. For d  5 and the even degrees d  6; 8; 10; 12 there are
+examples exceeding Chmutov's lower bound: [1], [4], [16]. These had
+been obtained by using some beautiful geometric arguments based on
+the idea to globalize the local equation of a node. This method goes back
+at least to Rohn who constructed quartics with 8; 9; . . . ; 16 nodes in the
+19th century [15].
+In the present note, we consider a family of surfaces depending on some
+parameters which is based on Rohn's construction and whose generic
+member has 63 nodes. Given an explicit equation of a family of nodal hypersurfaces, there is in fact an algorithm in characteristic zero to find those
+examples with the greatest number of nodes: We applied this succesfully in
+[12], but we cannot use this technique in the present case because of
+computer performance restrictions.
+Here, we choose a more geometric approach to study the family:
+The main obstacle towards the construction of the recent examples
+which achieve the currently greatest number of nodes (d  6; 8; 10; 12)
+was to have a good intuitive idea about the geometry of a potentially
+existing surface. Our starting point is to replace this intuition by a
+
+A Septic with 99 real Nodes
+
+301
+
+computer search over all possible parameters over some finite fields of
+prime order. Once we have found some examples of septics with many
+nodes over these fields explicitly, we study their geometry and use
+this to construct the corresponding septic in characteristic zero. The
+99-nodal septic which we find in this way is the first surface of odd
+degree greater than 5 that exceeds Chmutov's general lower bound.
+Moreover, the idea to use the geometry of prime field experiments can
+certainly be applied to many other problems in constructive algebraic
+geometry.
+I thank D. van Straten for his permanent motivation and many valuable discussions. Furthermore, I thank W. Barth for his invitation to Erlangen which was a good motivation to complete this work. I thank S. Cynk
+for helpful discussions. Finally, I thank St. Endra for discussions, motivation and his Ph.D. thesis which is a great source for dihedral-symmetric
+surfaces with many singularities.
+
+1. The Family
+Inspired by many authors (see in particular: [15], [1], [3], [4]), we look
+for septics with many nodes in P3 (C) within a 7-parameter family of surfaces Sa1 ;a2 ;...;a7 : P Ua1 ;a2 ;...;a7 of degree 7 admitting the dihedral symmetry D7 of a 7-gon:
+  
+ 
+
+2pj
+2pj
+6
+6
+P : 2  P j0 cos
+x  sin
+y z
+7
+7
+
+
+ x  x6 3  7  x4 y2  5  7  x2 y4 7  y6
+h
+3 3 2 2
+2
+i
+ 7  z  x2  y2
+2  z  x  y2  2 4  z 4  x 2  y 2
+
+26  z 7 ;
+
+2
+Ua1 ;a2 ;...;a7 :(z  a5 w) a1 z3  a2 z2 w  a3 zw2  a4 w3  (a6 z  a7 w)(x2  y2 ) :
+P is the product of 7 planes in P3 (C) meeting in the point (0 : 0 : 0 : 1)
+and admitting D7 -symmetry with rotation axes fx  y  0g: In fact, P is
+invariant under the map y 7! y and P \ fz  z0 g is a regular 7-gon for
+z0 6 0. U is also D7 -symmetric, because x and y only appear as x2  y2 .
+ A generic surface S has nodes at the 3  21  63 intersections of the
+7
+2  21 doubled lines of P with the doubled cubic of U. We are
+looking for parameters a1 ; a2 ; . . . ; a7 , s.t. the corresponding surface has
+99 nodes.
+
+302
+
+Oliver Labs
+
+As Sa1 ;a2 ;...;a7 (x; y; z; lw)  Sa1 ;la2 ;l2 a3 ;l3 a4 ;la5 ;a6 ;la7 (x; y; z; w) 8l 2 C , we
+choose a7 : 1. Moreover, experiments over prime fields suggest that the
+maximum number of nodes on such surfaces is 99 and that such examples
+exist for a6  1. As we are mainly interested in finding an example with 99
+nodes, we restrict ourselves to the sub-family:
+S : Sa1 ;a2 ;a3 ;a4 ;a5 ;1;1  P
+
+Ua1 ;a2 ;a3 ;a4 ;a5 ;1;1 :
+
+Some other cases, e.g. a6  0, also lead to 99-nodal septics (see [13]).
+
+2. Reduction to the Case of Plane Curves
+To simplify the problem of locating examples with 99 nodes within our
+family S, we restrict our attention to the fy  0g-plane and search for
+plane curves Sjy0 (we write Sy for short) with many nodes. This is motivated by the symmetry of the construction:
+LEMMA 1 (see [3]). A member S  Sa1 ;a2 ;a3 ;a4 ;a5 ;1;1 of our family of surfaces has only ordinary double points as singularities, if (1 : i : 0 : 0) 2
+=S
+and the surface does only contain ordinary double points as singularities
+in the plane fy  0g. If the plane septic Sy has exactly n nodes and if exactly nxy of these nodes are on the axes fx  y  0g then the surface S has
+exactly nxy  7  (n nxy ) nodes and no other singularities. Each singularity of Sy which is not on fx  y  0g gives an orbit of 7 singularities of S
+under the action of the dihedral group D7 .
+PROOF. Because of the D7 -symmetry of the construction, we only have
+to show that there are no other singularities than the claimed ones. It is
+easy to prove (see [3, p. 18, cor. 2.3.10] for details) that any isolated singularity of S which is not contained in one of the orbits of the nodes of Sy
+would yield a non-isolated singularity which intersects the plane fy  0g.
+But this contradicts the assumption that the surface S does only contain
+ordinary double points on fy  0g.
+p
+So, we first look for septic plane curves of the form Sy with many nodes,
+then we verify that these singularities are indeed also nodes of the surface.
+Via the lemma, we are then able to conclude that the surface has only
+ordinary double points. In order to understand the geometry of the plane
+septic Sy better we look at the singularities that occur for generic values of
+the parameters. First, we compute:
+
+A Septic with 99 real Nodes
+
+303
+
+Pjy0  x7  7  x6 z
+
+7  23  x4 z3  7  24  x2 z5 26  z7
+2
+2
+2
+(x z)
+
+ x  ( r)z  2x  (r2  4r)z  2x  ( r2 2r  8)z ;
+4
+|{z}
+|{z}
+|{z}
+2
+:L1
+
+:L2
+
+:L3
+
+Ujy0  (z  a5 w) (z  w)x2  a1 z3  a2 z2 w  a3 zw2  a4 w3
+|{z}
+
+2
+
+;
+
+:C
+
+where r satisfies:
+2
+
+r3  22 r2
+
+22 r
+
+23  0:
+
+The three points Gij of intersection of C with the line Li are ordinary
+double points of the plane septic Sy  Pjy0 Ujy0 for generic values of
+the parameters, s.t. we have 3  3  9 generic singularities (see fig. 1).
+
+Fig. 1. ± The three doubled lines Li and the doubled cubic C intersect in 3  3  9
+points Gij . These are the generic singularities of the plane septic Sy .
+
+3. Finding Solutions over some Prime Fields
+By running over all possible parameter combinations over some
+small prime fields Fp using the computer algebra system SINGULAR [8],
+we find some 99-nodal surfaces over these fields: For a given set of
+
+304
+
+Oliver Labs
+
+parameters a1 ; a2 ; . . . ; a5 , we can easily check the actual number of
+nodes on the corresponding surface using computer algebra (see [7,
+appendix A, p. 487]).
+As indicated in the previous section, we work in the plane fy  0g
+for faster computations. It turns out that the greatest number of nodes
+on Sy is 15 over the small prime fields Fp , 11  p  53: See table 1 on
+the next page. The prime fields Fp , 2  p  7, are not listed because
+they are special cases: These primes appear as coefficients or exponents
+in the equation of our family. In each of the cases we checked, one of
+the 15 singular points lies on the axes fx  0g, such that the corresponding surface has exactly 14  7  1  99 nodes and no other singularities.
+
+4. The Geometry of the 15-nodal septic Plane Curve
+To find parameters a1 ; a2 ; . . . ; a5 in characteristic 0 we want to use
+geometric properties of the 15-nodal septic plane curve Sy . But as we do
+not know any such property yet, we use our prime field examples to get
+some good ideas:
+OBSERVATION 1. In all our prime field examples of 15-nodal plane
+septics Sy , we have:
+1) Sy splits into a line Sy;1 and a sextic Sy;6 : Sy  Sy;1  Sy;6 . The
+plane curve Sy;6 of degree 6 has 15 6  9 singularities. Note that this
+property is similar to the one of the 31-nodal D5 -symmetric quintic in
+P3 (C) constructed by W. Barth: See [3, p. 27-32] for a description.
+The line and the sextic have some interesting geometric properties (see
+fig. 3):
+2) Sy;1 \ Sy;6  fR; G1j1 ; G2j2 ; G3j3 ; O1 ; O2 g, where R is a point on the
+axes fx  0g and the Gijk are three of the 9 generic singularities Gij of Sy ,
+one on each line Li , and O1 ; O2 are some other points that neither lie on
+fx  0g, nor on one of the Li .
+3) The sextic Sy;6 has the six generic singularities Gij ; (i; j) 2
+f1; 2; 3g2 n f(1; j1 ); (2; j2 ); (3; j3 )g, and three exceptional singularities:
+E1 ; E2 ; E3 .
+In many prime field experiments, we have furthermore:
+4) In the projective x; z; w-plane, the point R has the coordinates
+
+A Septic with 99 real Nodes
+
+305
+
+(0 : 1 : 1), s.t. the line Sy;1 has the form Sy;1 : z  t  x  w  0 for some
+parameter t (see also table 1).
+The other cases (R  (0 : c : 1); c 6 1) lead to more complicated
+equations and will not be discussed here.
+TABLE 1. A few examples of parameters giving 15-nodal septic plane curves (and
+99-nodal surfaces) over prime fields.
+Field
+
+a1
+
+a2
+
+a3
+
+a4
+
+a5
+
+Sy;1
+
+F11
+
+2
+
+3
+
+5
+
+2
+
+-5
+
+zx
+
+w
+
+a
+
+F19
+F19
+F19
+
+±7
+2
+5
+
+±2
+0
+±9
+
+7
+1
+7
+
+1
+9
+±3
+
+8
+7
+±1
+
+z  8x
+z  9x
+z  2x
+
+w
+w
+w
+
+a7
+a 4
+a 3
+
+F23
+
+±5
+
+11
+
+10
+
+1
+
+7
+
+z
+
+w
+
+a
+
+F31
+F31
+F31
+
+± 15
+1
+14
+
+± 13
+±2
+± 10
+
+±5
+14
+± 13
+
+13
+±9
+± 14
+
+± 10
+11
+± 11
+
+z  2x w
+z  15x w
+z  13x w
+
+a  13
+a  11
+a 7
+
+F43
+F43
+F43
+
+± 11
+20
+±9
+
+15
+16
+3
+
+0
+±1
+±3
+
+± 13
+± 14
+± 11
+
+±6
+10
+5
+
+z  6x w
+z  12x w
+z  18x w
+
+a7
+a  14
+a  21
+
+F53
+F53
+F53
+
+±8
+±2
+10
+
+20
+± 10
+25
+
+14
+± 14
+-4
+
+18
+± 26
+22
+
+11
+16
+25
+
+z  25x w
+z  9x w
+z  16x w
+
+a4
+a  24
+a  25
+
+9x
+
+a
+3
+
+2
+
+Using this observation as a guess for our septic in characteristic 0, we
+obtain several polynomial conditions on the parameters. Using SINGULAR
+to eliminate variables, we find the following relation between the parameters a4 and t:
+2
+t  a4 t3  t  t 1  0;
+3
+| {z }
+:a
+
+1
+2
+which can be parametrized by a: t  1a
+1)(1  a2 )2 :
+2 ; a4  (a(1  a )
+Further eliminations allow us to express all the other parameters in terms
+of a:
+ a1  a7  7a5 a4  7a3 2a2 7a 1;
+ a2  (a2  1)(3a5  14a3 3a2  7a 3);
+ a3  (a2  1)2 (3a3  7a 3);
+2
+:
+ a5  1a
+a2
+
+306
+
+Oliver Labs
+
+5. The 1-parameter Family of Plane Sextics
+Once more we use our explicit examples of 15-nodal septic plane curves
+over prime fields to finally be able to write down a condition for a in
+characteristic 0.
+First, note that we can now easily obtain the equation of Sy;6 by dividing
+the equation of our septic curve Sy by the equation of the line
+1
+Sy;1  z  tx  w  z 1a
+2 x  w. Sy;6 is a sextic which has 6 nodes for
+generic a, but should have 9 double points for some special values of a. One
+idea to determine these particular values is to find a geometric relation
+between the 6 generic singular points and the 3 exceptional ones.
+
+5.1 ± Three Conics
+Looking at the equations describing the singular points of our examples
+of 9-nodal sextics Sy;6 over the prime fields, we see the following:
+OBSERVATION 2. For all our 9-nodal examples of plane sextics over
+prime fields, there are three conics through six of these points each (see
+fig. 2):
+
+Fig. 2. ± Three conics relating the 9 double points of the sextic Sy;6 . E1 ; E2 ; and E3
+(black) are the exceptional singularities (i.e. they do not lie on one of the lines Li ,
+see fig. 1). The white points are the generic singularities, coming from the
+intersection of the doubled cubic C with the three doubled lines Li .
+
+A Septic with 99 real Nodes
+
+307
+
+1) one conic C0 through the 6 generic singularities,
+2) one conic C1 through the 3 exceptional singularities and 3 of the
+generic ones,
+3) one conic C2 through the 3 exceptional singularities and the other
+3 generic ones.
+Moreover, over the prime fields the three conics have the following
+properties:
+4) C1 has the form:
+C1 : x2  kz2  (k  4)zw  0;
+
+4
+
+where k is a still unknown parameter. In particular, C1 is symmetric with
+respect to x 7! x and contains the point (0 : 0 : 1).
+5) C0 intersects the other two conics on the fx  0g -axes (see fig. 2 on
+the preceding page):
+5
+
+X1 : C0 \ C1 \ fx  0g;
+
+X2 : C0 \ C2 \ fx  0g:
+
+To determine the new parameter k in equation (4), we will use (5). We
+compute the two points of C0 on the fx  0g-axes explicitly using SINgen
+GULAR: First, the ideal IS describing the six generic singularities of Sy;6
+y;6
+can be computed from the ideal ISgen
+: (C; L1 L2 L3 ) describing the 9 geny
+eric singularities of Sy by calculating the following ideal quotient:
+ ISgen
+: Sy;1 . Now, the equation of C0 can be obtained by taking the
+ISgen
+y;6
+y
+:
+degree-2-part of the ideal ISgen
+y;6
+ax2  (a3  5a
+
+C0 :
+6
+
+(a5  6a3
+
+a2  a
+
+1)xz  (a3  a
+
+1)z2  (2a5  8a3
+5
+
+2a2  6a
+
+2)zw
+
+a  a 1)w2  0:
+ (a  2a
+n
+o
+3
+3a 1)(1a2 )b(a)
+0 : 2(a
+:
+1
+; where
+Thus, fP ; P g : C0 \ fx  0g 
+5
+3
+2
+2(a 6a a a 1)
+7
+
+b(a)2
+
+:
+
+16a(2a5  4a3
+
+3
+
+1)xw
+
+a2  2a
+
+2
+
+1):
+
+C1 intersects the fx  0g-axes in exactly two points: (0 : 0 : 1) and X1 .
+Hence, we can determine the two possibilities for the parameter
+k 2 Q(a; b(a)) in equation (4) for C1 : Together with the z and w-coordinates
+of the points P , C1 \ fx  0g  fkz(z  w)  4zw  0g leads to the following two possibilities:
+8
+
+C1 :
+
+x2 
+
+4P
+z
+z(z  w)  4zw  0:
+
+P
+z (Pz  1)
+
+308
+
+Oliver Labs
+
+5.2 ± The Condition on a
+The equations of the conics C0 and C1 will allow us to compute the
+condition on a, s.t. the sextic Sy;6 has 9 singularities, using the following
+(see observation 2 and fig. 2):
+ C0 intersects the three doubled lines Li exactly in the six generic
+singularities.
+ C1 intersects the three doubled lines Li exactly in three of these six
+generic singularities and the origin (which counts three times).
+Thus, the set of z-coordinates of the three points (C1 \ L1 L2 L3 ) n
+f(0 : 0 : 1)g has to be contained in the set of z-coordinates of the six points
+C0 \ L1 L2 L3 . This means that the remainder q of the following division
+(resx denotes the resultant with respect to x)
+
+
+1
+resx (C0 ; L1 L2 L3 )  p(z)  3  resx (C1 ; L1 L2 L3 )  q(z)
+9
+z
+should vanish: q  0.
+
+Fig. 3. ± The 15-nodal plane septic SyaR  Sy;1a  Sy;6a (see (11)); the singularities of
+R
+R
+the sextic Sy;6a are marked by large circles: The three exceptional singularities
+R
+E1 ; E2 ; E3 are marked in black, the generic singularities in white. The five left-most
+nodes are real isolated ones. Only five of the six intersections of the line Sy;1a and
+R
+the sextic Sy;6a are visible because we just show a small part of the whole (x; z)-plane.
+R
+
+A Septic with 99 real Nodes
+
+309
+
+As the degree of the remainder is deg (q)  2, this gives 3 conditions on
+a and b(a), coming from the fact that all the 3 coefficients of q(z) have to
+vanish. It turns out that it suffices to take one of these, the coefficient of z2 ,
+which can be written in the form c(a)  b(a)d(a), where c(a) and d(a) are
+polynomials in Q[a]. As a condition on a only we can take:
+
+cond(a) : c(a)  b(a)d(a)  c(a)
+
+
+b(a)d(a) 2 Q[a];
+
+which is of degree 150.
+This condition cond(a) vanishes for those a for which the corresponding
+surface has 99 nodes and for several other a. To obtain a condition which
+exactly describes those a we are looking for, we factorize cond(a) 
+f1  f2    fk (e.g., using SINGULAR again). Substituting in each of these factors our solutions over the prime fields, we see that the only factor that
+vanishes is: 7a3  7a  1  0:
+
+6. The Equation of the 99-nodal Septic
+Up to this point, it is still only a guess Ð verified over some prime fields
+Ð that the values a satisfying the condition above give 99-nodal septics in
+characteristic 0. But we have indeed:
+THEOREM 1 [99-nodal Septic]. Let a 2 C satisfy:
+7a3  7a  1  0:
+
+10
+
+Then the surface Sa in P3 (C) of degree 7 with equation Sa : P Ua has
+exactly 99 ordinary double points and no other singularities, where
+
+
+P : x  x6 3  7  x4 y2  5  7  x2 y4 7  y6
+h
+3 3 2 2
+2
+i
+ 7  z  x2  y2
+2  z  x  y2 24  z4  x2  y2
+26  z 7 ;
+2
+Ua :(z  a5 w) (z  w)(x2  y2 )  a1 z3  a2 z2 w  a3 zw2  a4 w3 ;
+a1 :
+
+12 2
+a
+7
+
+a3 :
+
+4a2 
+
+a5 : 49a2
+
+384
+a
+49
+24
+a 4
+49
+7a  50:
+
+8
+;
+7
+
+a2 :
+
+32 2 24
+a  a
+7
+49
+
+4;
+
+a4 :
+
+8 2
+8
+a  a
+7
+49
+
+8
+;
+7
+
+310
+
+Oliver Labs
+
+There is exactly one real solution aR 2 R to the condition (10),
+11
+
+aR 
+
+0:14010685;
+
+and all the singularities of SaR are also real.
+PROOF. By computer algebra. The total tjurina number (i.e., 99) of Sa
+can be computed as follows:
+ring r = (0, alpha), (x, y, w, z), dp; minpoly = 7*alpha^3 + 7*alpha + 1;
+poly S_alpha = ...;
+ideal sl = jacob(S_alpha); option(redSB); sl = std(sl);
+degree(sl);
+
+// gives: proj. dim: 0, mult: 99
+
+Using the hessian criterion, we can check in a similar way that the
+singularities are all nodes:
+matrix mHess = jacob(jacob(S)); ideal nonnodes = minor(mHess,2), sl;
+nonnodes = std(nonnodes); degree(nonnodes);
+
+// gives: proj. dim: -1
+
+See [11] for the complete SINGULAR code and for more information
+which may help you to verify the result by hand. Using the geometric
+description of the singularities of the plane septic given in the previous
+sections, it is straightforward to verify the reality assertion (see fig. 4 for a
+visualization).
+p
+
+7. Concluding Remarks
+The existence of the real aR allows us to use the program SURFEX [9]
+(which uses SURF [5]) to compute an image of the 99-nodal septic SaR
+(fig. 4 on the following page). When denoting the maximum number of
+real singularities a septic in P3 (R) can have by mR (7), we get, with the
+remarks mentioned in the introduction:
+COROLLARY 2.
+99  mR (7)  m(7)  104:
+Note that the previously known lower bounds were reached by
+S. V. Chmutov (93 complex nodes: [2]) and D. van Straten (84 real nodes: a
+variant of Chmutov's construction using regular polygons instead of folding polynomials).
+
+A Septic with 99 real Nodes
+
+311
+
+Fig. 4 ± A part of the affine chart w  1 of the real septic with 99 nodes, see [11] for
+more images and movies.
+
+As it can be computed using deformation theory and SINGULAR that the
+space of obstructions for globalizing all local deformations is zero Ð this is
+based on ideas of D. van Straten, details will be published elsewhere Ð we
+obtain:
+COROLLARY 3. There exist surfaces of degree 7 in P3 (R) with exactly k
+real nodes and no other singularities for k  0; 1; 2; . . . ; 99.
+Recently there has been some interest in surfaces that do exist over
+some finite fields, but which are not liftable to characteristic 0. The reduction of our 99-nodal septic Sa modulo 5 (note: 1 2 F5 satisfies (10):
+7  13  7  1  1  0 modulo 5) neither gives a 99-nodal surface nor a highly
+degenerated one as one might expect because the exponent 5 appears
+several times in the defining equation. Instead, we can easily verify the
+following using computer algebra:
+COROLLARY 4. For a5 : 1 2 F5 the surface Sa5  P3 (F5 ) defined as in
+the above theorem has 100 nodes and no other singularities.
+
+312
+
+Oliver Labs
+
+Of course, not all the coordinates of its singularities are in F5 , but in
+some algebraic extension. The septic has similar geometric properties as
+our 99-nodal surface; in addition it has one node at the intersection of the
+fx  y  0g axes and fw  0g. Until now, we were not able to determine if
+this 100-nodal septic defined over F5 can be lifted to characteristic zero.
+We hope to be able to apply our technique for finding surfaces with
+many nodes within families of surfaces to similar problems. E.g., it should
+be possible to study surfaces with dihedral symmetry of degree 9 and 11
+with many ordinary double points using the same ideas. Another application could be the search for surfaces with many cusps. We already studied
+families of such surfaces succesfully using computer algebra in simpler
+cases [12].
+
+REFERENCES
+[1] W. BARTH, Two Projective Surfaces with Many Nodes, Admitting the
+Symmetry of the Icosahedron, J. Algebraic Geom., 5, 1 (1996), pp. 173±186.
+[2] S. W. CHMUTOV, Examples of Projective Surface with Many Singularities, J.
+Algebraic Geom., 1, 2 (1992), pp. 191±196.
+Èchen mit vielen gewoÈhnlichen Doppelpunkten,
+[3] S. ENDRAû, Simmetrische Fla
+Ph.D. thesis, Fr.-A.-UniversitaÈt Erlangen-Nu
+Èrnberg, 1996.
+[4] S. ENDRAû, A Projective Surface of Degree Eight with 168 Nodes, J. Algebraic
+Geom., 6, 2 (1997), pp. 325±334.
+[5] S. ENDRAû, SURF 1.0.3, http://surf.sourceforge.net, 2001, A Computer Software for Visualising Real Algebraic Geometry.
+[6] A. B. GIVENTAL, Maximum number of singular points on a projective
+hypersurface, Funct. Anal. Appl., 17 (1984), pp. 223±225.
+[7] G.-M. GREUEL - G. PFISTER, A Singular Introduction to Commutative
+Algebra, Springer-Verlag Berlin Heidelberg, 2002.
+[8] G.-M. GREUEL - G. PFISTER - H. SCHOÈNEMANN, SINGULAR 2.0, A Computer
+Algebra System for Polynomial Computations, Centre for Computer Algebra,
+Univ. Kaiserslautern, 2001, http://www.singular.uni.kl.de
+[9] S. HOLZER - O. LABS - R. MORRIS, SURFEX - Visualization of Real Algebraic
+Surfaces, www.surfex.AlgebraicSurface.net, 2005.
+È ber die Fla
+Èchen vierten Grades mit sechzehn singula
+Èren
+[10] E. KUMMER, U
+Punkten, Collected Papers, vol. 2, Springer-Verlag (1975), pp. 418±432.
+[11] O. LABS, Algebraic Surface Homepage. Information, Images and Tools on
+Algebraic Surfaces, www.AlgebraicSurface.net, 2003.
+[12] O. LABS, A Sextic with 35 Cusps, Preprint, math.AG/0502520, 2005.
+[13] O. LABS, Hypersurfaces with Many Singularities, Ph.D. thesis, Johannes
+Gutenberg UniversitaÈt Mainz, 2005, available from www.OliverLabs.net
+[14] Y. MIYAOKA, The Maximal Number of Quotient Singularities on Surfaces
+with Given Numerical Invariants, Math. Ann., 268 (1984), pp. 159±171.
+
+A Septic with 99 real Nodes
+
+313
+
+Èchen vierter Ordnung hinsichtlich ihrer Knotenpunkte und
+[15] K. ROHN, Die Fla
+ihrer Gestaltung, Preisschriften der Fu
+Èrstlich Jablonowski'schen Gesellschaft, no. IX, Leipzig, 1886.
+[16] A. SARTI, Pencils of symmetric surfaces in P3 , J. Algebra, 246, 1 (2001), pp.
+429±452.
+[17] L. SCHLAÈFLI, On the Distribution of Surfaces of the Third Order into Species,
+in Reference to the Presence or Absence of Singular Points and the Reality of
+their Lines, Philos. Trans. Royal Soc., CLIII (1863), 193±241.
+[18] A. N. VARCHENKO, On the Semicontinuity of the Spectrum and an Upper
+Bound for the Number of Singular Points of a Projective Hypersurface, J.
+Soviet Math. 270, (1983), 735±739.
+[19] J.-G. YANG, Enumeration of Combinations of Rational Double Points on
+Quartic Surfaces, AMS/IP Studies in Advanced Mathematics, 5 (1997), pp.
+275±312.
+Manoscritto pervenuto in redazione il 21 novembre 2005.
+
+

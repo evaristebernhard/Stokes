@@ -1,0 +1,391 @@
+arXiv:math/0210440v3 [math.AG] 11 Jul 2003
+
+A note on octic hypersurfaces with many nodes
+Marco Kühnel
+November 8, 2018
+
+Abstract
+In the present note we use rank-2-bundles over P3 to construct octic hypersurfaces
+with many nodes. We give an example with 128 nodes.
+
+Introduction
+Given a nodal octic S in P3 , one can construct a Calabi-Yau-threefold, which is a desingularization of a double cover of P3 ramified over S (cf. [Cl83]). So the usual way is first
+to prove existence of octics with a certain number of nodes and then to construct from
+this Calabi-Yau-threefolds with certain Euler numbers. This can also be done for octic
+arrangements with isolated singularities (cf. [Cy99, CS99]).
+It has been proved, that for every given number not larger than 108 there are octic
+hypersurfaces with this number of nodes ([We87, Bo90]). Furthermore there are examples for many numbers between 108 and 168. For the probably most complete list of
+constructed numbers we refer to [La]. In the references the interested reader may find the
+most important sources for constructions of octics with many nodes. The author likes to
+thank Oliver Labs for pointing out several references. Miyaoka proved in [Mi84] an upper
+bound of 174 possible nodes.
+In this note the way is reversed: Calabi-Yau-threefolds, which are desingularizations
+of double covers of P3 are constructed, what gives rise to octics with a certain number of
+nodes. To construct the Calabi-Yau-threefolds we look at hypersurfaces of projectivized
+rank-2-bundles over P3 . For this class it turns out that, indeed, the octics can only have
+nodes as singularities. Finally, we construct an example with 128 nodes as our maximal
+case up to now.
+
+1
+
+Construction of the octic hypersurface
+p
+
+Let E −→ P3 be a rank-2-bundle and s ∈ H 0 (−KP(E)) a section such that X = {s = 0}
+is smooth. We denote γ(E) := deg(c21 (E) − 4c2 (E)). This is invariant under tensorizing E
+with line bundles, and moreover
+c3 (X) = −8γ − 168,
+what can be computed by standard methods. Hence γ is a topological invariant of X.
+The restriction to X of the projection p we call π : X −→ P3 . The map π is a generic
+double cover. If we take the Stein factorization
+c
+
+φ
+
+X −→ X ′ −→ P3 ,
+
+π = φ ◦ c,
+
+the map φ is a double cover, whose ramification locus we denote by B ⊂ P3 . We call B
+also the ramification divisor of π and denote B̃ := π −1 (B). Another description of B is
+obtained by looking at the discriminant map.
+
+1
+
+Construction 1.1 Let X = {s = 0}, with s ∈ H 0 (−KP(E) ) and
+B := {p ∈ P3 |π is locally in p not an étale covering}.
+We define the discriminant
+∆E : S 2 E ⊗ F −→ (det(E) ⊗ F )⊗2
+by
+∆E (
+
+X
+
+1≤i<j≤2
+
+cij si sj ⊗ f ) := (c212 − 4c11 c22 )(s1 ∧ s2 ⊗ f )⊗2 ,
+
+where s1 , s2 is a O(U )-basis of E(U ), F −→ P3 a line bundle and f ∈ F (U ) a generator
+of F (U ) for a small open set U ⊂ P3 .
+It is an easy computation that this definition is independent of the chosen bases.
+Now we specify
+F = det E ∨ ⊗ O(4).
+Then the discriminant is a map
+∆E : p∗ (−KP(E) ) −→ O(8),
+with
+{∆E (p∗ s) = 0} = B
+set theoretically: in local coordinates
+s=
+
+X
+
+sij xi xj ,
+
+where [x0 : x1 ] denotes the coordinates of the fibre, B is the locus, where the zeroes of
+P
+sij (z)xi xj = 0
+are not two distinct points. By definition this is the discriminant locus of the qudratic
+equation in x0 , x1 , given by
+s201 − 4s00 s11 = 0.
+This coincides with the discriminant locus of p∗ s.
+Since on a trivializing neighbourhood U ⊂ P3 the map is given by
+∆E (t)|U = t212 − 4t11 t22 ,
+if t ∈ H 0 (p∗ (−KP(E))) and t|U = (t11 , t12 , t22 ), we see, that, in particular, H 0 (∆E ) is a
+holomorphic map.
+Moreover,
+H 0 (∆E )(rt) = r2 H 0 (∆E )(t)
+for r ∈ C, t ∈ H 0 (−KP(E) ). Hence we can projectivize, not exclude, however, that
+H 0 (∆E )(s′ ) = 0 for some s′ 6= 0. Therefore we get a rational map
+δE : P(H 0 (−KP(E) )) · · · → P(H 0 (O(8))) ∼
+= P164 .
+Let for the moment B ′ := {z ∈ P3 |H 0 (∆E )(s)(z) = 0} in the sense of ideals. If we
+denote
+P := {z ∈ P3 | dim π −1 (z) = 1},
+then we see, that
+P = {z ∈ P3 |
+
+X
+
+sij xi xj = 0 für alle[xo : x1 ]}
+
+2
+
+and hence
+P = {z ∈ P3 |s00 (z) = s01 (z) = s11 (z) = 0} ⊂ Sing(B ′ ).
+Moreover, this shows
+
+P = {z ∈ P3 |π −1 (z) ∼
+= P1 }.
+
+Now let z ∈ Sing(B ′ ). If s00 (z) = s01 (z) = s11 (z) = 0, then z ∈ P . So let us assume
+s00 (z) 6= 0 or s01 (z) 6= 0. Let us define
+x := [s01 (z) : −2s00 (z)] ∈ p−1 (z).
+Since z ∈ B, we get that ∆E (s)(z) = s01 (z)2 − 4s00 (z)s11 (z) = 0. Therefore
+s(x) = s00 (z)s01 (z)2 − 2s00 (z)s01 (z)2 + 4s11 (z)s00 (z)2 = −s00 (z)∆E (s)(z) = 0,
+hence x ∈ X.
+We want to show that x ∈ X is singular. For this we have to compute in the point x
+∂s
+=
+∂x0
+∂s
+=
+∂x1
+∂s
+=
+∂zi
+
+2s00 x0 + s01 x1
+
+=0
+
+(1)
+
+s01 x0 + 2s11 x1
+
+=0
+
+(2)
+
+∂s00 2
+∂s01
+∂s11 2
+∂zi x0 + ∂zi x0 x1 + ∂zi x1
+
+=0
+
+(3)
+
+and we know moreover, since z ∈ Sing(B ′ ), that in the point z holds
+s201 − 4s00 s11
+∂s00
+∂s11
+∂s01
+− 4s11
+− 4s00
+2s01
+∂zi
+∂zi
+∂zi
+
+= 0
+
+(4)
+
+= 0.
+
+(5)
+
+Using the expression for x in (1), (2) and (3) we compute
+∂s
+=
+∂x0
+∂s
+=
+∂x1
+∂s
+=
+∂zi
+=
+=
+
+2s00 s01 − 2s00 s01
+
+=0
+
+s201 − 4s00 s11
+
+=0
+
+∂s00 2
+∂s01
+∂s11 2
+∂zi s01 − 2 ∂zi s00 s01 + 4 ∂zi s00
+
+=
+
+∂s01
+∂s11 2
+00
+4 ∂s
+∂zi s00 s11 − 2 ∂zi s00 s01 + 4 ∂zi s00
+
+=
+
+∂s00
+∂s11
+01
+−s00 (2s01 ∂s
+∂zi − 4s11 ∂zi − 4s00 ∂zi )
+
+= 0,
+
+with the last equation using (4) as well as (5).
+Thus we have proved that x ∈ X is singular. But we assumed X to be smooth. Hence
+it is proven that P = Sing(B ′ ). In particular, B ′ is reduced and therefore B ′ = B in the
+sense of ideals.
+△
+Now we know, if X = {s = 0} for some s ∈ H 0 (−KP(E) ) then
+Lemma 1.2 B = δE (X) ∈ |O(8)| and P = {p∗ s = 0} = Sing(B).
+Note that p∗ s gives the three local equations of P . For example, if E splits, then
+we can conclude that P is the complete intersection of three hypersurfaces of degrees
+√
+√
+4 − γ, 4 and 4 + γ. (Indeed, if E splits, then γ is a square.)
+Let us now specify the type of the singularities.
+Lemma 1.3 B has only double points of type A1 as singularities.
+
+3
+
+Proof:
+Lemma 1.2
+
+First, singularities of B̃ can only occur over singularities of B, hence by
+s00 (z) = s01 (z) = s11 (z) = 0,
+
+if y ∈ B̃ is singular and z = π(y). From this we conclude again by the local descriptions
+that y is singular in X. Hence B̃ is non-singular. In particular, B has only isolated
+singularities. Now we look at the rational curves F = Fp := π −1 (p) for p ∈ P . The
+adjunction formula yields
+O(−2) = KF = KB̃ |F ⊗ NF |B̃ .
+Since again by adjunction formula deg KB̃ |F = B̃.F = p−1 (B).F = 0 we conclude
+NF |B̃ = O(−2)
+and hence p is a double point of type A1 .
+
+
+
+Lemma 1.4 |P | = 64 − 4γ.
+Proof: Since by Lemma 1.2 and Lemma 1.3 we know that dim P ≤ 0 and P ∩ U =
+{z ∈ P3 |s00 (z) = s01 (z) = s11 (z) = 0} in a trivializing neighbourhood U , we conclude
+[P ] = c3 (p∗ (−KP(E))).
+Again by standard methods (cf. [Ha, p. 423]) we compute c3 (p∗ (−KP(E) )) = 64 − 4γ. 
+This method has only limitated applications, since by Lemma 1.4 we see, that the
+number of nodes must be divisible by 4. But there is an additional restriction:
+Lemma 1.5 γ(E) mod 8 ∈ {0, 1, 4}.
+Proof: By definition γ(E) mod 4 is a square. The case γ(E) mod 8 = 5 can be
+excluded by the Schwarzenberger condition c1 (E).c2 (E) ≡ 0(2).
+
+
+Since Miyaoka proved an upper bound of 174 nodes, by Lemma 1.5 the theoretical
+maximum of our method lies at γ = −24, i.e. at most 160 nodes. Furthermore, Lemma
+1.5 implies that the only new constructed numbers of nodes can be 124 and 156.
+
+2
+
+Construction of some bundles
+
+By looking at the splitting bundles allowing for smooth X we obtain immediately examples of octics with 28, 48, 60 and 64 nodes. Moreover, it is not hard to see the existence of
+elliptic curves in P3 of degrees d ≤ 7 which are cut out by quartics (cf. [Bot95, Hu]). The
+Serre construction, more detailed explained below, then yields examples of octics with
+80, 96 and 112 nodes. It is a little bit more work to see the existence of elliptic curves of
+degree 8 cut out by quartics.
+We use the Serre construction of rank-2-bundles to get the desired example (cf. [OSS]).
+Let Y ⊂ P3 be an elliptic curve of degree 8. Then there is a rank-2-bundle with an exact
+sequence
+0 −→ O −→ E −→ IY (4) −→ 0,
+since by adjunction formula det NY |P3 = O(4)|Y . If we choose concretely Y as the image
+of C := {y 2 z − x3 + xz 2 = 0} ⊂ P2 via
+i : P2 · · · → P3
+[x : y : z]
+7→
+[x2 y + xyz + z 3 : xy 2 + yz 2 + zx2 : x2 y + xyz + xz 2 : xy 2 + y 2 z + z 3 ],
+
+4
+
+we can compute with MACAULAY, that
+M
+IY :=
+H 0 (IY (n))
+n∈N
+
+is generated by three quartics q1 , q2 , q3 and four quintics. But also with MACAULAY
+we can verify that the projective schemes Y and {z ∈ P3 |q1 (z) = q2 (z) = q3 (z) = 0}
+are identical. Hence IY (4) is generated by global sections and we conclude that E is
+generated by global sections. Therefore −KP(E) = OP(E) (2) is globally generated and we
+can choose s ∈ H 0 (−KP(E) ) such that X is smooth.
+By construction c1 (E) = 4h and c2 (E) = 8h2 , hence γ(E) = −16 and |P | = 128.
+Remark 2.1 (i) Note that this case is extremal in some sense: Any elliptic curve in
+P3 of degree d ≥ 9 cannot be cut out by quartics. This can be seen like follows:
+If the contrary would be the case, the Serre construction would yield a globally
+generated vector bundle E and a sequence
+0 −→ O −→ E −→ IY (4) −→ 0.
+Since −KP(E) = OP(E) (2) would then be globally generated as well, we conclude
+(−KP(E) )4 ≥ 0. On the other hand, γ(E) = 16 − 4d ≤ −20 and hence (−KP(E) )4 =
+32γ + 512 ≤ −128.
+
+(ii) This example is extremal also in some other sense: A general member of | − KP(E) |
+is an elliptic fibre space over a quadric, which is the restriction of an elliptic fibre
+space P(E) −→ P3 (see [Kü01]).
+
+The cases where γ is odd are more complicated to deal with. In these cases we cannot
+use elliptic curves. Instead of genus 1 we have to choose negative genera, hence Y is not
+irreducible and the extendability condition of the normal bundle is harder to check. So
+the Serre construction does not appear to be useful.
+
+References
+[AGV] Arnold, V.I., Gusein-Zade, S.M., Varchenko, A.N.: Singularities of Differential
+Maps Vol. II, Boston 1985-1988
+[Bo90] Borcea, C.: Nodal quintic threefolds and nodal octic surfaces, Proc. of AMS 109,
+627-635, 1990
+[Bot95] von Bothmer, H.-C.: Syzygien von glatten Raumkurven, Diplomarbeit, Bayreuth
+1995
+[Ch92] Chmutov, S.V.: Examples of projective surfaces with many singularities, J. Alg.
+Geom. 1, 191-196, 1992
+[Cl83]
+
+Clemens, C. H.: Double Solids, Adv. in Math. 47, 107-230, 1983
+
+[CS99] Cynk, S., Szemberg, T.:
+math.AG/9902057, 1999
+
+Double covers of P3 and Calabi-Yau varieties,
+
+[Cy99] Cynk, S.: Double coverings of octic arrangements with isolated singularities,
+Adv. Theor. Math. Phys. 3, No.2, 217-225, 1999
+[En97] Endraß, S.: A projective surface of degree eight with 168 nodes, J. Algebr. Geom.
+6, No.2, 325-334, 1997
+[Ga54] Gallarati, D.: Sopra una superficie dell’ottavo ordine dotata di 157 nodi, Atti
+Accad. naz. Lincei, Rend., Cl. Sci. fis. Mat. natur., VIII. Ser. 16, 454-459, 1954
+[Ga58] Gallarati, D.: Una superficie dell’ottavo ordine con 160 nodi, Accad. Ligure Sci.
+Lett. 14, 1958
+
+5
+
+[Ha]
+
+Hartshorne, R.: Algebraic Geometry, New York, 1977
+
+[Hu]
+
+Hulek, K.: Projective geometry of elliptic curves, Astérisque 137, Paris, 1986
+
+[Kü01] Kühnel, M.: Über gewisse Calabi-Yau-3-faltigkeiten mit Picardzahl ρ(X) = 2,
+doctoral thesis, Bayreuth 2001
+[Kr56] Kreiss, H. O.: Über syzygetische Flächen, Annali die Matematica Pura et Appl.
+41, 105-111, 1956
+[La]
+
+Labs, O.: http://www.algebraicsurface.net/octics/, 2003
+
+[Mi84] Miyaoka, Y.: The maximal number of quotient singularities on surfaces with
+given numerical invariants, Mathematische Annalen 268, 159-171, 1984
+[OSS]
+
+Okonek, Ch., Schneider, M., Spindler H.: Vector bundles on Complex Projective
+Spaces, Boston (1988)
+
+[Sa01]
+
+Sarti, A:. Pencils of symmetric surfaces in P3 , J. Algebra 246, no. 1, 429-452,
+2001
+
+[Se53]
+
+Segre, B.: Sul massimo numero di nodi delle superficie algebriche, Atti Accad.
+Ligure Sci. Lett. 9, 15-22, 1953
+
+[We87] Werner, J.: Kleine Auflösungen spezieller dreidimensionaler Varietäten, Bonner
+Mathematische Schriften 186, 1987
+
+6
+
+

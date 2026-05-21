@@ -1,0 +1,425 @@
+C. R. Acad. Sci. Paris, Ser. I 351 (2013) 699–702
+
+Contents lists available at ScienceDirect
+
+C. R. Acad. Sci. Paris, Ser. I
+www.sciencedirect.com
+
+Algebraic geometry
+
+On a family of complex algebraic surfaces of degree 3n
+Sur une famille de surfaces algébriques complexes de degré 3n
+Juan García Escudero
+Universidad de Oviedo, Facultad de Ciencias, 33007 Oviedo, Spain
+
+a r t i c l e
+
+i n f o
+
+Article history:
+Received 21 January 2013
+Accepted 17 September 2013
+Available online 21 October 2013
+Presented by Claire Voisin
+
+a b s t r a c t
+We study a class of algebraic surfaces of degree 3n in the complex projective space
+with only ordinary double points. They are obtained by using bivariate polynomials with
+complex coeﬃcients related to the generalized cosine associated with the aﬃne Weyl
+group of the root system A 2 .
+© 2013 Académie des sciences. Published by Elsevier Masson SAS. All rights reserved.
+
+r é s u m é
+Nous étudions une classe de surfaces algébriques de degré 3n dans l´espace projectif
+complexe, avec seulement des points doubles ordinaires. Ils sont générés par des
+polynômes complexes qui sont liés au cosinus généralisé associé au groupe de Weyl aﬃne
+du système de racines A 2 .
+© 2013 Académie des sciences. Published by Elsevier Masson SAS. All rights reserved.
+
+In [2], Chmutov introduced surfaces V d of degree d in the complex projective space P3 (C) given by the aﬃne equations
+P d (u , v ) + T d ( w ) = 0, where P d s are the generalized Chebyshev polynomials or folding polynomials [6,7] associated with
+the aﬃne Weyl group W̃ ( A 2 ) of the root system A 2 , and T d is a Chebyshev polynomial. In this work, we study a class of
+surfaces of degree 3n that have more singularities than the Chmutov surfaces of the same degree.
+For d = 3n, n = 1, 2, 3, . . . the surfaces U d are given by the aﬃne equations:
+
+Q d (u , v ) + T d ( w ) = 0
+
+(1)
+
+where T d is the Chebyshev polynomial of degree d with two critical values 2 and 3, and Q d is deﬁned as follows. The
+generalized cosine associated with the aﬃne Weil group W̃ ( A 2 ) is h(u , v ) = (h1 , h2 ), where:
+
+h1 (u , v ) := e−2π iu + e−2π iv + e2π i(u + v ) ,
+
+h2 (u , v ) := e2π iu + e2π iv + e−2π i(u + v )
+
+(2)
+
+The polynomials P d appearing in the surfaces V d are deﬁned in such a way that P d (h1 (u , v ), h2 (u , v )) := C d (u , v ), where
+C d (u , v ) := h1,d (u , v ) + h2,d (u , v ), h1,d (u , v ) = h1 (du , dv ), h2,d (u , v ) = h2 (du , dv ). For (x, y ) := h(u , v ), it can be shown [6,2]
+that P d (x, y ) = jd (x, y ) + jd ( y , x), where jd (x, y ) is the determinant of a dxd matrix:
+
+E-mail address: jjge@uniovi.es.
+1631-073X/$ – see front matter © 2013 Académie des sciences. Published by Elsevier Masson SAS. All rights reserved.
+http://dx.doi.org/10.1016/j.crma.2013.09.009
+
+700
+
+J.G. Escudero / C. R. Acad. Sci. Paris, Ser. I 351 (2013) 699–702
+
+⎛
+
+x
+⎜ 2y
+⎜
+⎜ 3
+⎜
+⎜ 0
+jd (x, y ) = det ⎜
+⎜ 0
+
+1
+x
+y
+1
+0
+
+0
+1
+x
+y
+1
+
+0
+0
+1
+x
+y
+
+0
+0
+0
+1
+x
+
+0
+0
+0
+0
+1
+
+...
+...
+...
+...
+0...
+⎜
+⎜... ... ... ... ... ... ...
+⎝... ... ... 0 1
+y
+x
+0 ... ... 0
+0
+1
+y
+
+⎞
+
+0
+0⎟
+⎟
+0⎟
+⎟
+0⎟
+⎟
+0⎟
+⎟
+0⎟
+⎠
+1
+x
+
+The number of non-degenerate singularities of V d for d = 3n is [2]:
+
+
+
+d
+
+d
+
+2
+
+2
+
++
+
+ 2
+d
+
+3
+
+d−1
+
+−d
+
+(3)
+
+2
+
+For the construction of the surfaces U d , we use:
+2
+
+1
+
+1
+
+2
+
+g 1,d (u , v ) := e−2π i(du + 3 ) + e−2π i(dv − 3 ) + e2π i(d(u + v )+ 3 ) ,
+
+There are bivariate polynomials Q d such that Q d (h1 (u , v ), h2 (u , v )) := H d (u , v ), where:
+
+
+
+H d (u , v ) := g 1,d (u , v ) + g 2,d (u , v ) = 2 cos 2π du −
+Having in mind that g 1,d (u , v ) = e
+
+Q d (x, y ) = e
+
+2π i
+3
+
+jd (x, y ) + e
+
+2π i
+3
+
+i
+− 2π
+3
+
+
+2π
++ 2 cos 2π dv −
+
+2π
+3
+
+1
+
+1
+
+g 2,d := e2π i(du + 3 ) + e2π i(dv − 3 ) + e−2π i(d(u + v )+ 3 )
+(4)
+
+3
+
+h1,d (u , v ) and g 2,d (u , v ) = e
+
+i
+− 2π
+3
+
+
+2π
++ 2 cos 2π d(u + v ) +
+3
+
+h2,d (u , v ), we get, for (x, y ) := h(u , v ):
+
+jd ( y , x)
+
+The homogeneous part of highest degree in Q d (x, y ) is e
+d(d−3)
+
+(5)
+
+(6)
+2π i
+3
+
+x +e
+d
+
+i
+− 2π
+3
+
+y ; therefore, Q d has (d − 1) critical points.
+d
+
+d
+
+2
+
+2
+
+Lemma. The polynomial Q d has
+critical points with critical value 6, 2 critical points with critical value −2 and d3 − d + 1
+6
+critical points with critical value −3. All the critical points of Q d are non-degenerate.
+Proof. We restrict H d and h on the plane with real coordinates. The Jacobi matrices satisfy J ( H d ) = J ( Q d ) ◦ J (h). Zeros of
+the Jacobian determinant of h:
+
+det J (h) = 4π 2 e−2π i(u + v ) e−2π iv − e−2π iu e2π i(u +2v ) − 1 e2π i(2u + v ) − 1
+
+(7)
+
+are the sides of the triangle  whose interior is given by u − v > 0, u + 2v > 0, 2u + v < 1, which is the fundamental region
+of W̃ ( A 2 ). All the points from one orbit of W̃ ( A 2 ) are mapped by h into a single point, and the images of the critical points
+of H d from the interior of  by h are the critical points of Q d .
+A direct computation of the critical points of H d leads to three cases. In the following list, we indicate the critical value
+ζ and the number of points N ζ corresponding to ζ inside  by (ζ, N ζ ):
+1
+(a) (6, d(d6−3) ); u = 3kd+1 , v = 3l+
+; k, l ∈ Z.
+d
+2
+
+k
+(b) (−3, d3 − d + 1); u = 3d
+, v = 3dl , with k = 3m − 1, l = 3p − 1 or k = 3m, l = 3p; m, p ∈ Z.
+d(d−3)
+); u = 3m3d+2 , v = 3p3d+2 ; m, p ∈ Z.
+6
+d(d−3)
+(b2) (−3, 6 ); u = m
+, v = dp ; m, p ∈ Z.
+d
+d
++2
++2
+(c) (−2, 2 ); u = 3k6d
+, v = 3l6d
+with k or l odd.
+3p −1
+d(d−1)
+(c1) (−2, 3 ); u = 6m6d−1 , v = 6d ; m, p ∈ Z.
+6p −1
+d(d−1)
+(c2) (−2, 6 ); u = 6m6d+2 , v = 6d ; m, p ∈ Z.
+
+(b1) (−3, 1 +
+
+The hessian matrix of H d :
+
+
+
+−8π 2 d2 (cos(2π du − 23π ) − cos(2π d(u + v ) + 23π ))
+−8π 2 d2 cos(2π d(u + v ) + 23π )
+2π
+2 2
+2 2
+−8π d cos(2π d(u + v ) + 3 )
+−8π d (cos(2π dv − 23π ) − cos(2π d(u + v ) + 23π ))
+
+has full rank in all the critical points, hence they are non-degenerate. By adding the critical points in (a), (b) and (c), we
+obtain that H d has (d − 1)2 critical points in the interior of . 2
+In Figs. 1, 2, we can see the critical points of H d inside  for d = 6, 9. Critical points with critical values 6, −2, −3
+are represented by ◦, ∗, •, respectively. The distance between two consecutive lines in the (u , v ) oblique coordinate system
+1
+.
+is 6d
+
+J.G. Escudero / C. R. Acad. Sci. Paris, Ser. I 351 (2013) 699–702
+
+701
+
+Fig. 1. The critical points of H 6 inside the fundamental region  of the aﬃne Weyl group W̃ ( A 2 ).
+
+Fig. 2. The critical points of H 9 inside .
+
+Theorem. The number of singular points of U d is:
+
+
+
+d
+
+d
+
+2
+
+2
+
++
+
+ 2
+d
+
+3
+
+−d+1
+
+d−1
+2
+
+(8)
+
+All the singular points are non-degenerate. The surface cannot have singular points at inﬁnity.
+1
+Proof. The Chebyshev polynomials T d ( w ) have  d2  critical points with critical value 2 and  d−
+ critical points with critical
+2
+value 3. The surface is singular at the points where the sum of the critical values of T d ( w ) and Q d (u , v ) is zero. The result
+d
+for the number of non-degenerate singularities of U d follows then from the Lemma: Q d has 2 critical points with critical
+2
+
+value −2 and d3 − d + 1 critical points with critical value −3.
+
+In the Lemma, we have also shown that the number of distinct critical points of Q d is (d − 1)2 , therefore U d can not
+have singular points at inﬁnity. 2
+
+Consider a surface of degree d in P3 (C) with N (d) double points and no other singularities, and let μ(d) = max N (d).
+Then we have:
+Corollary. μ(3n) ⩾
+
+3n 3n
+ 2  + (3n2 − 3n + 1) 3n2−1 .
+2
+
+We notice that U 3n has  3n2−1  more singularities than V 3n (see Eq. (3)). Also of interest are hypersurfaces in P4 (C) with
+aﬃne equations:
+
+Q 3n (u 1 , u 2 ) − Q 3n (u 3 , u 4 ) = 0
+
+(9)
+
+−1) 2
+They have ( 3n(3n
+) + (3n(n − 1) + 1)2 + ( 3n(n2−1) )2 non-degenerate singularities. We ﬁnd 3n(n − 1) more singularities than
+2
+in the Chmutov hypersurfaces P 3n (u 1 , u 2 ) − P 3n (u 3 , u 4 ) = 0. Hypersurfaces with A j -singularities in Pn (C) can be obtained
+
+702
+
+J.G. Escudero / C. R. Acad. Sci. Paris, Ser. I 351 (2013) 699–702
+
+along the lines of [5]. In particular, there is a family of Belyi polynomials associated with a series of planar trees obtained
+by a substitution process, which, when used in combination with Q d + 2, allows us to show the existence of surfaces with
+a high number of cusps (see Appendix B and Fig. 1 in [5]).
+Real variants of V d were studied in [1], and the authors showed that the known lower bounds for the maximum number
+of ordinary double points on a surface of degree d can be attained with only real singularities. Recently, we have shown that
+a construction connected with the derivation of substitution tilings [3] can be used for the generation of algebraic surfaces
+with many real nodes [4]. One of the two types of surfaces obtained is equivalent to real variants of V d . The other type
+consists in surfaces of degree 3n that have the same number of singularities as the surfaces presented in this work. In fact,
+they are related to the real variants of U 3n (u , v , w ) with u = x + iy , v = x − iy , w = z, for x, y , z ∈ R.
+We have considered only the polynomials Q d for d = 3n. The study of the critical points of Q d for d = 3n shows that
+d
+1
+the Chmutov lower bound μ(d) ⩾ 2  d2  + ( 13 d2 − d + 23 ) d−
+ is not improved for such cases with surfaces of the type
+2
+described by Eq. (1).
+References
+[1] S. Breske, O. Labs, D. van Straten, Real line arrangements and surfaces with many real nodes, in: B. Jüttler, R. Piene (Eds.), Geometric Modeling and
+Algebraic Geometry, Springer, Berlin, 2008, pp. 47–54.
+[2] S.V. Chmutov, Examples of projective surfaces with many singularities, J. Algebr. Geom. 1 (1992) 191–196.
+[3] J.G. Escudero, Random tilings of spherical 3-manifolds, J. Geom. Phys. 58 (2008) 1451–1464.
+[4] J.G. Escudero, A construction of algebraic surfaces with many real nodes, http://arxiv.org/abs/1107.3401, 2011.
+[5] J.G. Escudero, Hypersurfaces with many A j -singularities: Explicit constructions, J. Comput. Appl. Math. (2013), http://dx.doi.org/10.1016/j.cam.
+2013.03.045, in press.
+[6] M.E. Hoffman, D. Withers, Generalized Chebyshev polynomials associated with aﬃne Weyl groups, Trans. Amer. Math. Soc. 282 (1988) 555–575.
+[7] D. Withers, Folding polynomials and their dynamics, Amer. Math. Monthly 95 (1988) 399–413.
+
+

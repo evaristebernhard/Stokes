@@ -1,0 +1,867 @@
+Jahresber Dtsch Math-Ver (2017) 119:273–292
+DOI 10.1365/s13291-017-0164-7
+O B I T U A RY
+
+Wolf Barth (1942–2016)
+Thomas Bauer1 · Klaus Hulek2 · Sławomir Rams3 ·
+Alessandra Sarti4 · Tomasz Szemberg5
+
+Published online: 11 May 2017
+© The Author(s) 2017. This article is published with open access at Springerlink.com
+
+Photo: Erich Malter (with kind permission)
+
+1
+
+Fachbereich Mathematik und Informatik, Philipps-Universität Marburg, Hans-Meerwein-Straße,
+Lahnberge, 35032 Marburg, Germany
+
+2
+
+Institut für Algebraische Geometrie, Leibniz Universität Hannover, Welfengarten 1,
+30167 Hannover, Germany
+
+3
+
+Institute of Mathematics, Jagiellonian University, Łojasiewicza 6, 30348 Cracow, Poland
+
+4
+
+Laboratoire de Mathématiques et Applications UMR 7348 du CNRS, Université de Poitiers,
+Téléport 2 Boulevard Marie et Pierre Curie, BP 30179, 86962 FUTUROSCOPE
+CHASSENEUIL Cedex, France
+
+5
+
+Department of Mathematics, Pedagogical University of Cracow, Podchorazych 2,
+30-084 Cracow, Poland
+
+274
+
+T. Bauer et al.
+
+1 Life
+1.1 Youth
+Wolf Paul Barth was born on 20th October 1942 in Wernigerode, a small town in the
+Harz mountains. This is where his family, originally living in Nuremberg, had sought
+refuge from the bombing raids. In 1943 the family moved to Simmelsdorf, which
+is close to Nuremberg, but was less vulnerable to attacks. In 1945 Barth’s brother
+Hannes was born. The family, the father was a town employee, then moved back to
+Nuremberg and Wolf Barth’s home was close to the famous Nuremberg castle—his
+playgrounds were the ruins of Nuremberg.
+In 1961 Wolf Barth successfully completed the Hans Sachs Gymnasium in Nuremberg. He was an excellent student (except in sports), and he then chose to study mathematics and physics at the nearby Universität Erlangen, officially called FriedrichAlexander Universität Erlangen-Nürnberg.
+1.2 Studies and Early Academic Career
+As it was the standard at the time, Wolf Barth enrolled for the Staatsexamen, the
+German high school teacher’s examination. At this time, Reinhold Remmert was a
+professor of mathematics in Erlangen and Wolf Barth soon felt attracted to this area
+of mathematics. So, when Remmert moved to Göttingen in 1963, Barth went with
+him. Göttingen had at that time started to recover to some extent after its losses in the
+Nazi period and Hans Grauert was one of the leading figures who attracted many talented mathematicians. And indeed, it was Grauert, who became Barth’s second academic teacher and a figure who influenced his mathematical thinking greatly. Wolf
+Barth not only completed his studies in Göttingen, but in May 1967 he also obtained
+his PhD with a thesis on Einige Eigenschaften analytischer Mengen in kompakten
+komplexen Mannigfaltigkeiten (Some properties of analytic sets in compact complex
+manifolds). In 1967 Remmert moved again, this time to take up a chair at Westfälische Wilhelms-Universität Münster where Heinrich Behnke had been a professor, and
+whose successor Remmert became. Münster, the home of the Behnke school, was at
+that time one of the international centres of the school of several complex variables.
+Again, Barth followed Remmert and worked for the next two years in Münster. These
+were lively times at German universities (the ’68 revolt) and Barth became interested
+in and attracted to the ideas of the 1968 generation.
+Wolf Barth went to spend the academic year 1969/70 as a visiting lecturer at MIT
+in Cambridge, USA, a period where he encountered many new faces and ideas. In
+1971, a year after returning from the USA, he obtained his Habilitation in Münster,
+where he also became a professor. In 1972 Wolf Barth took up a chair at Rijksuniversiteit Leiden in the Netherlands. At the time he was the youngest full professor
+in Leiden. It was here that he started his close collaboration with Antonius Van de
+Ven—an encounter which would greatly influence his future mathematical interests
+and career, as we will outline below. Barth married his wife Regina in 1972.
+
+Wolf Barth (1942–2016)
+
+275
+
+1.3 The Erlangen Period
+In 1976 Wolf Barth was offered a professorship at Universität Erlangen, his original
+Alma Mater. Erlangen is of course well known to mathematicians, not least through
+the Klein programme, made famous by the inaugural lecture of Felix Klein, who
+was a professor there from 1872 to 1875. Another famous professor had been Max
+Noether, one of the 19th century masters of algebraic geometry—the field of mathematics which had become Wolf Barth’s own area of research. Also, his daughter
+Emmy Noether had been a student in Erlangen where she wrote her thesis in invariant theory under the guidance of Paul Gordan.
+This call also reflected the international reputation which Barth had gained in such
+a short period on the strength of his research; he was offered the very chair which had
+been established for Max Noether and which had been held by such prominent mathematicians as Heinrich Tietze, Johannes Radon, Wolfgang Krull and Georg Nöbeling.
+This in itself was a great honour. But it was also the chance to move back to Franconia, his home region, which made this offer irresistible. Wolf Barth truly loved his
+Franconia and in fact he stayed there for the rest of his life. In 1977 his son Matthias
+was born and in 1981 his daughter Ursula followed.
+In Erlangen, Barth took on multiple duties which came with the position of
+Lehrstuhlinhaber (full professor). It should be emphasized that teaching was not simply a duty for him, he took it very seriously and was very conscientious—we will
+come back to this aspect of his mathematical life later. As one of the full professors
+Barth was also constantly involved in running the Institute of Mathematics (which
+later became part of the Department of Mathematics). In particular, he was Dean of
+Naturwissenschaftliche Fakultät I from 1981 to 1983.
+Barth’s arrival in Erlangen created a very lively research atmosphere. In fact, there
+were two active research seminars related to algebraic geometry in Erlangen at the
+time: the seminar run by Wolf Barth and the seminar organized by Wulf-Dieter Geyer
+and Herbert Lange. Often one of the seminars was devoted to lectures on ongoing or
+recently completed research with many guests and visitors as speakers, whereas for
+the other seminar a subject was chosen to be presented in much detail by the participants of the seminar in turn. In the early 1980s preparations were made to apply
+to Deutsche Forschungsgemeinschaft (DFG) for a major research project in complex
+algebraic geometry. Several research groups collaborated to submit a proposal for a
+Priority Programme (Schwerpunktprogramm), including the newly established algebraic geometry group in Bayreuth, where Michael Schneider had taken up a chair, as
+well as the group led by Otto Forster in München. The application was successful and
+from 1985 onwards the DFG Schwerpunktprogramm Komplexe Mannigfaltigkeiten
+became an important factor of the German research activities in algebraic geometry.
+Wolf Barth became the coordinator of the programme and oversaw two successful
+applications for an extension of the programme. This was a very active and fruitful
+period for the researchers involved and it brought many visitors, both short and long
+term, to the participating groups in Germany. In particular, the extra funding allowed
+Wolf Barth to invite students from various countries (Mexico, Israel, Italy, Poland to
+name a few) to work under his guidance—we will discuss some results of his efforts
+to support development of research groups abroad in the last section of this account.
+
+276
+
+T. Bauer et al.
+
+For many years Barth was a regular organizer of Oberwolfach meetings. The meeting Mehrere komplexe Veränderliche, originally organized by Grauert, Remmert and
+Stein, is one of the oldest series of Oberwolfach conferences. In 1982 Wolf Barth
+was asked to replace Karl Stein as one of the organizers. In this capacity, together
+with Grauert and Remmert, he was in charge of the biannual meetings until 1994,
+when the organization of the series was taken over by Demailly, Hulek and Peternell.
+Apart from the regular meetings in this series, he often organized Oberwolfach workshops on more specialized topics, typically with Van de Ven as a co-organizer. In
+spite of these numerous obligations, Barth also served the mathematical community
+as an editor. Most importantly, he and Wolf von Wahl were joint Editors-in-Chief of
+Mathematische Zeitschrift from 1984 to 1990.
+Wolf Barth retired on 1st April 2011. Quite tellingly, the lecture he gave during
+the farewell conference “Groups and Algebraic Geometry”, organized by the EmmyNoether Zentrum to honour his achievements, was called “99 Semester Mathematik”.
+Even after Barth’s retirement, his former students sometimes obtained mails with his
+comments on their recent papers, and his teaching manuscripts were further available
+from the webpage of Universität Erlangen and were widely used by students. Wolf
+Barth died on December 30, 2016 in Nuremberg.
+
+2 Wolf Barth—Research
+2.1 Barth-Lefschetz Theorems
+Wolf Barth’s field of research was complex algebraic geometry and his original approach was strongly influenced by the German school of several complex variables,
+also known as the Behnke school, named after its founder Heinrich Behnke, and later
+led by Karl Stein, Hans Grauert and Reinhold Remmert. Barth became first famous
+through his work on the topology of subvarieties of projective space PN . The starting
+point of this work is the celebrated Lefschetz hyperplane theorem, which compares
+the topology of a projective manifold to that of a hyperplane section:
+Theorem 2.1 (Lefschetz hyperplane theorem) Let X ⊂ PN be a subvariety of dimension k and let Y = X ∩ H be a hyperplane section such that U = X \ Y is smooth.
+Then the restriction map H k (X) → H k (Y ) in (singular) cohomology is an isomorphism for k < N − 1 and injective for k = N − 1.
+Lefschetz proved this result using the by now famous technique of Lefschetz pencils. Another approach was later developed by Andreotti and Fraenkel using Morse
+theory. In his paper [6, p. 952] Barth generalized the Lefschetz theorem in the following way.
+Theorem 2.2 (Barth) Let X, Z ⊂ PN be manifolds of dimension n and m respectively, such that 2n ≥ N + s and n + m ≥ N + r. Then H k (X) → H k (X ∩ Z) is an
+isomorphism for k ≤ min{r − 1, s}.
+
+Wolf Barth (1942–2016)
+
+277
+
+Barth’s proof is analytic. It is based on his earlier work on extending meromorphic functions [5] and uses q-convexity, sheaf cohomology and the Leray spectral
+sequence. Barth and Larsen [18] further extended the work of Lefschetz from cohomology to homotopy groups. Again, their approach uses analytic tools, such as distance functions in projective space and pseudo-concavity of tubular neighborhoods.
+In particular, they proved [18, Theorem I]:
+Theorem 2.3 (Barth-Larsen) Let X ⊂ PN be smooth of dimension n with 2n ≥
+N + 1. Then X is simply connected, i.e. π1 (X) = 0.
+This was later strengthened further by Larsen [52]. Indeed, the concept of BarthLefschetz theorems became a well known term in the literature. The work of Barth
+and Larsen also influenced Fulton and Hansen [40] when they proved their famous
+connectedness theorem. This circle of ideas was further taken up in the work of Badescu, Sommese and Debarre leading, among other things, to Barth-Lefschetz theorems
+in products of projective spaces and, more generally, homogeneous varieties.
+2.2 Vector Bundles
+After moving to Leiden, Wolf Barth started collaborating with Van de Ven. It was
+at this time that Hartshorne [44, p. 1017] formulated his well-known conjecture on
+complete intersections, which, in its simple form, can be stated as
+Conjecture 2.4 (Hartshorne) Let X ⊂ PN be a smooth manifold of codimension 2.
+If N ≥ 7 then X is a complete intersection X = S1 ∩ S2 of two hypersurfaces.
+This conjecture was motivated, on the one hand, by a number of examples in
+small dimension and, on the other hand, by the fact that projective submanifolds
+in this range are subject to a number of strong topological constraints. Indeed, by
+the Lefschetz theorem, the Picard group, i.e. the group of line bundles on X, is a
+free abelian group of rank one, more precisely, the restriction Pic(PN ) → Pic(X) is
+an isomorphism. Further, by the Barth-Larsen Theorem 2.3, X is simply connected.
+This conjecture of Hartshorne’s can be rephrased as a statement about vector bundles
+on projective space. The connection is via the Serre construction, which establishes a
+relationship between locally complete intersections of codimension 2 and rank 2 vector bundles, generalizing the well-known correspondence between divisors and line
+bundles. Applied to projective space PN of dimension N ≥ 3 this says the following: Assume that X ⊂ PN is a codimension 2 manifold which is sub-canonical. Then
+there exists a rank 2 vector bundle E on PN and a section s ∈ H 0 (PN , E) such that
+X = {s = 0}. Here sub-canonical means that the canonical line bundle KX = det TX ,
+the determinant of the cotangent bundle, is the restriction of a line bundle on PN , i.e. it
+is of the form KX = OX (k) = OPN (k)|X where OPN (k) = OPN (1)⊗k and OPN (1) is
+the hyperplane bundle on PN . Since the canonical bundle can, by the adjunction formula, be written as KX = det NX/PN ⊗ KPN , where NX/PN is the normal bundle of X
+in PN , Serre’s construction can also be rephrased in more geometric terms as follows:
+if the determinant of the normal bundle of a codimension 2 submanifold X of PN can
+
+278
+
+T. Bauer et al.
+
+be extended to the surrounding projective space, then so can the normal bundle itself.
+Now it follows from the fact that the restriction map defines an isomorphism on the
+Picard groups, that every codimension 2 manifold in PN is sub-canonical, provided
+N ≥ 5. In particular, the Serre construction can be applied in this case and we obtain
+that X = {s = 0} for some section s of a rank 2 bundle E on PN . Using that the vector
+bundle E is uniquely determined, one can argue that X is a complete intersection if
+and only if E is a decomposable rank 2 bundle, i.e. a sum of two line bundles. Hence
+the Hartshorne conjecture can be restated in terms of vector bundles as
+Conjecture 2.5 If N ≥ 7, then every rank 2 bundle E on PN decomposes, i.e. is the
+sum of two line bundles.
+It should be noted that there are also no known indecomposable rank 2 bundles
+(apart from the Tango bundle on P5 in characteristic 2) for N = 5, 6. Barth and Van
+de Ven [29, Theorem I] proved the asymptotic version of this conjecture. To describe
+this, we fix a sequence of linear embeddings iN : PN → PN+1 . We say that a vector
+bundle E on PN extends to PN+1 if there exists a vector bundle E on PN+1 such
+∗ (E ). Similarly, we say that a submanifold X ⊂ PN extends to PN+1 (as
+that E = iN
+a submanifold) if there exists a submanifold X ⊂ PN+1 with iN (X) = iN (PN ) ∩ X .
+Theorem 2.6 (Babylonian Tower Theorem, Barth–Van de Ven) A rank 2 vector bundle E on PN which extends to PM for all M ≥ N , splits into the sum of two line
+bundles.
+By the Serre construction this implies the
+Corollary 2.7 A smooth codimension 2 submanifold X ⊂ PN which extends, as a
+submanifold, to PM , for all M ≥ N , is a complete intersection of two hypersurfaces.
+The paper by Barth and Van de Ven [29] contains many techniques which later
+became standard tools in the study of vector bundles, such as the idea to investigate
+vector bundles on PN by studying their restriction to lines L ⊂ PN . In their article, Barth and Van de Ven also rediscover the Serre construction, as did Horrocks,
+Hartshorne and Grauert and Mülich on different occasions.
+One area where Wolf Barth’s influence was, and is, extraordinary is the classification of vector bundles. Classifying vector bundles means, as is typically the case
+with classification problems in algebraic geometry, that one has to construct a moduli
+space, whose geometric properties one aims to understand. To be able to construct
+moduli spaces it is necessary to restrict to stable objects. As suitable notions of stability one can use Mumford-Takemoto stability or, alternatively, Gieseker stability.
+A vector bundle F of rank r on PN is called Mumford-Takemoto semi-stable if for
+every non-trivial coherent subsheaf E ⊂ F the inequality
+c1 (E)/rank(E) ≤ c1 (F )/rank(F )
+holds. Here c1 = c1 (E) ∈ H 2 (PN , Z) = Z denotes the first Chern class (which one
+can interpret as an integer) of a coherent sheaf E. The bundle F is called (properly)
+
+Wolf Barth (1942–2016)
+
+279
+
+stable if strict inequality always holds. Stable vector bundles are subject to topological constraints: Schwarzenberger [66, Theorem 7] showed that the Chern classes
+ci , i = 1, 2, of a stable rank 2 bundle F on P2 satisfy the inequality c12 < 4c2 . In
+[7, Corollary 2] Barth proved that this inequality also holds for stable bundles on
+any Pn , n ≥ 2. In this paper Barth also demonstrated the power of the, afterward
+universally used, method of studying a vector bundle on PN by its restriction to
+lines. If F is a rank 2 vector bundle then one can, after twisting with a suitable
+line bundle, assume that its first Chern class c1 (F ) ∈ {0, −1}. If c1 (F ) = 0 then,
+by the Grauert-Mülich theorem [43, §6, Satz 2], later extended to higher rank by
+Spindler, a stable rank 2 bundle F splits as the sum of two trivial line bundles on
+a general line L, namely F |L = OL ⊕ OL . The lines where this is not the case,
+i.e. where F |L = OL (k) ⊕ OL (−k) for some k > 0 define a divisor, and hence a
+curve C = C(F ) in the dual projective plane. These lines were called jumping lines
+by Barth and C(F ) was called the curve of jumping lines. Studying the curves of
+jumping lines and related objects became a central theme of the theory of vector
+bundles in the years after Barth’s paper.
+Constructing moduli spaces and understanding their properties is a crucial question in any classification problem in algebraic geometry. The fundamental theory for
+moduli spaces of vector bundles on higher-dimensional varieties was developed by
+Maruyama [54, 55] and Gieseker [41] (for surfaces). It was Barth in [8] who gave
+2 (P2 ) of rank 2 bundles
+a beautiful concrete construction of the moduli spaces M0,c
+2
+on P2 with even first Chern class. The main geometric result is that every stable
+rank 2 vector bundle F on P2 with even first Chern class, which we can assume to
+be c1 (F ) = 0, can be reconstructed from its curve of jumping lines C(F ), which is
+a plane curve of degree n = c2 (F ), together with an ineffective theta characteristic
+θ , i.e. a root of the canonical bundle without sections, on C(F ). The other important
+contribution of Barth in this paper is, that he made, for the first time, systematic use
+of monads in the study of moduli of vector bundles. The concept of monad was introduced by Horrocks [46], who considered monads as the elementary building blocks
+for constructing vector bundles. A monad is simply a complex
+f
+
+g
+
+A→B →C
+where A, B and C are vector bundles, f is a monomorphism of vector bundles, g is
+an epimorphism such that g ◦ f = 0. The cohomology of this complex
+F = ker(g)/im(f )
+is then a vector bundle. The advantage of monads is that one can often take A, B
+and C to be very simple bundles and in this way reduce a moduli problem to a linear
+algebra question. For stable rank 2 vector bundles with c1 (F ) = 0 and c2 (F ) = n,
+Barth showed that every such bundle can be realized as the cohomology of a monad
+of the form
+a
+
+c
+
+nOP2 −→ nΩP12 (1) −→ (n − 2)OP2 (1)
+where ΩP12 is the cotangent bundle on P2 . Moreover, for a given sheaf E, the sheaf
+E(k) = E ⊗OP2 (k) denotes the twist of E by OP2 (k), and nE is the n-fold direct sum
+
+280
+
+T. Bauer et al.
+
+of E. The crucial ingredient here is the construction of the map a (which in turn deter1 2
+0 (P2 , O (1)) →
+mines the map c). It is given by the middle part H
+P2
+ (P 1, F (−2))⊗H
+1
+2
+2
+H (P , F (−1)) of the 
+cohomology module
+H
+(P
+,
+F
+(k))
+over
+the
+homogek
+0 (P2 , O (k)). Via canonical identifications one can
+H
+neous coordinate ring
+2
+P
+k
+then view a as a net of quadrics in P2 and this net of quadrics determines the pair
+(C(F ), θ ) and vice versa. In particular, C(F ) is the discriminant of the net of quadrics
+and the theta-characteristic encodes how the net can be reconstructed from its discriminant.
+Having thus reduced the classification problem of stable rank 2 bundles with even
+first Chern class to a linear algebra problem, Barth was able to show in [8, p. 83]:
+2 (P2 ) of stable rank 2 bundles with first
+Theorem 2.8 (Barth) The moduli spaces M0,n
+Chern class c1 (F ) = 0 and second Chern class c2 (F ) = n are irreducible rational
+manifolds of dimension 4n − 3.
+
+It is worth mentioning that at that time mathematicians still thought it conceivable
+that all moduli spaces in algebraic geometry are (uni-)rational. It was only at the beginning of the 1980’s that Freitag, Tai and Mumford proved that the moduli space Ag
+of principally polarized abelian varieties of dimension g is of general type for g ≥ 7.
+This was the first time that such a phenomenon was observed. As it turned out, Barth’s
+2 (P2 ) and the proof of rationalproof gave unirationality rather than rationality of M0,n
+ity was finally completed by Maruyama [56]. Barth and Hulek then studied monads
+more systematically in their paper [19]. At the same time, Beilinson developed his
+very general approach, leading to the Beilinson spectral sequence [33], thereby linking the classification of vector bundles to derived categories. The geometry of moduli
+spaces on projective spaces was further pursued and advanced by many authors including Drezet-Le Potier [35], Ellingsrud [36], Forster-Hirschowitz-Schneider [39],
+Hirschowitz [45], Hulek [48], Le Potier [53], Strømme [67], and many others, cf. also
+the book by Okonek, Schneider and Spindler [63]. It is now known that all moduli
+spaces Mcr1 ,c2 (P2 ) of stable vector bundles on the projective plane are irreducible and
+rational. This is, however no longer true on higher-dimensional projective spaces,
+starting with P3 [19, Sect. 8].
+The late 1970’s was also a mathematically very exciting period in other respects.
+It was at this time that Atiyah and others developed new links between mathematical
+physics, notably quantum field theory, on the one side, and algebraic and differential
+geometry on the other side. The first prime example of this is non-abelian gauge
+theory and its connections with vector bundles. Yang-Mills fields can be described
+as anti-selfdual connections on SU(2)-bundles. Imposing asymptotic conditions on
+these connections at infinity, one obtains self-dual connections on SU(2)-bundles on
+the 4-sphere S 4 . At this point Penrose’s twistor theory comes into play. The twistor
+space of the 4-sphere S 4 is the complex projective 3-space and the twistor fibration
+becomes p : P3 → S 4 . Another interpretation of this map is that P3 = P(C4 ) is the
+complex projective space and that S 4 = P(H2 ) is the quaternionic projective line.
+Identifying C4 ∼
+= H2 , the twistor map
+ 
+ 
+p : P3 = P C4 → S 4 = P H2
+
+Wolf Barth (1942–2016)
+
+281
+
+is then given by associating to a complex line in C4 the quaternionic line containing it. Left-multiplication by j moreover gives P3 a real structure σ : P3 → P3 with
+σ 2 = −id. The fibres of the twistor map p : P3 → S 4 are projective lines which are
+invariant under σ , these are the so-called real lines. Now, given a pair (F, d), consisting of an SU(2)-bundle F , together with a connection d, one can, by the Atiyah-Ward
+correspondence [4], consider the pullback p ∗ (F ). Its associated vector bundle E is a
+C2 -bundle. The connection d defines an almost complex structure on E which, since
+d is assumed to be anti-selfdual, turns out to be integrable. In other words, E is a
+holomorphic (and by GAGA thus algebraic) rank 2 vector bundle on P3 . Moreover,
+E carries a real structure and, in particular, E is trivial on all real lines. It is then
+not hard to see that E is stable. Thus one can identify self-dual SU(2)-connections
+on S 4 with certain stable algebraic rank 2 vector bundles on P3 with a real structure, the so-called instanton bundles. Under this construction, the instanton number
+of the connection becomes the second Chern class of E. These vector bundles satisfy
+the additional property that the cohomology groups H 1 (P3 , E(−2)) vanish. This is a
+translation of the fact that certain differential equations admit only trivial solutions.
+Now every stable rank 2-bundle E on P3 with this additional property (these are the
+so-called mathematical instanton bundles) are given by a result of Barth and Hulek
+[19, Sect. 7] by a monad of the form
+a
+
+t a◦J
+
+nOP2 (−1) −→ (2n + 2)OP2 −→ nOP2 (1)
+where J is the standard symplectic form on the vector space C2n+2 . The map a
+is then nothing but an n × (2n + 2)-matrix with linear entries in the homogeneous
+coordinates of the projective plane. This can be viewed as a triple of matrices, and
+is often also called a Kronecker module. The famous Atiyah-Drinfeld-Hitchin-Manin
+(ADHM) correspondence [3] now says that all instanton bundles are given by monads
+of the above form satisfying a reality condition.
+We have already discussed that, conjecturally, all rank 2 bundles on PN split for
+N ≥ 6. Whereas there are plenty of indecomposable rank 2 vector bundles on P2 and
+P3 , only very few examples are known for higher-dimensional projective space. Essentially the only known example in characteristic 0 is the famous Horrocks-Mumford
+bundle F = FHM on P4 . This is a stable rank 2 vector bundle on P4 with Chern classes
+c1 (F ) = 5 and c2 (F ) = 10. The Horrocks-Mumford bundle is a beautiful mathematical object which is distinguished by its symmetry group N5 of order 15.000. The
+group N5 is the semi-direct product of the Heisenberg group of level 5, a group of order 125, and the binary icosahedral group SL(2, Z/5Z). This bundle was constructed
+by Horrocks and Mumford in [47] by means of a monad, but it can also be obtained
+via the Serre construction from an abelian surface A embedded as a surface of degree 10 into P4 . Barth, together with Hulek and Moore, studied the many beautiful
+aspects of the geometry of this vector bundle in detail. The paper [20] contains a
+complete classification of all Horrocks-Mumford surfaces, i.e. all surfaces obtained
+as zero-sets As = {s = 0} ⊂ P4 of sections 0 = s ∈ H 0 (P4 , F ). These surfaces are
+(1, 5)-polarized abelian surfaces and their degenerations and this establishes a connection with (modular) compactifications of moduli spaces of abelian surfaces.
+
+282
+
+T. Bauer et al.
+
+2.3 Algebraic Surfaces
+Barth’s interest in algebraic surfaces originated from his time at Leiden and became
+the major focus of his work since the 1980’s. Three main lines of research can be
+identified in his work in this area:
+• fundamental work in the theory of algebraic surfaces [2, 21–24]
+• work on abelian surfaces and Kummer surfaces [10–12, 25, 30, 31] motivated originally by their connection with the Horrocks Mumford bundle [9, 20]
+• surfaces with many symmetries and with special geometry: see Sect. 2.4 [13, 15,
+16, 26–28, 31].
+Algebraic Surfaces—The Classification One of the central tasks of any mathematical theory is the classification of its objects. A systematic study of algebraic
+surfaces had been initialized by Max Noether, who as Wolf Barth, was an Ordinarius
+at Universität Erlangen. The classification of complex projective surfaces was accomplished by Federigo Enriques. His works culminated in the book Le superficie
+algebriche [38] published in 1949, three years after his death. The classification was
+extended to non-algebraic compact surfaces by Kunihiko Kodaira in the late 60’s.
+One of the key points in the approach of Kodaira is the study of elliptic fibrations
+of compact surfaces. Barth, together with Gerhard Angermüller, presented in [2] a
+complete classification of singular elliptic fibres on Enriques surfaces. As is typical
+for Barth’s research, this paper contains a considerable list of explicit examples of
+Enriques surfaces and elliptic fibrations, in which fibres from the classification appear.
+In the paper [21] with Chris Peters, Barth continued his study of Enriques surfaces
+turning attention to their automorphisms. The main result of this article was quite
+surprising: the authors proved that the automorphism group of a generic (in the sense
+of moduli) Enriques surface is large, in particular infinite, whereas it can be small, in
+particular finite, for special Enriques surfaces. This is quite non-intuitive, as usually,
+for example for curves or surfaces of general type, the picture is opposite: large automorphism groups are attached to special, hence rare, varieties. The article, based on
+the global Torelli theorem for projective K3 surfaces, implies, as a byproduct, a result
+which Barth surely considered amusing. It says that a generic Enriques surface has
+• 527 elliptic fibrations
+• 67 456 realisations as a double plane in P4
+• 5 396 480 realisations as a sextic surface in P3 passing doubly through the edges
+of a tetrahedron and
+• 25 903 104 ways to be written as a surface of degree 10 in P5 .
+Of course, such sample results, amusing as they might be, are only the tip of the
+iceberg of Barth’s main contribution in the 80’s, namely his book Compact Complex
+Surfaces [22] co-authored with Chris Peters and Antonius Van de Ven. This book is
+the first instance where the aforementioned Enriques-Kodaira classification appears
+in full details in print in one place. The book contains numerous, up to date at that
+time, results on surfaces of general type and on K3 and Enriques surfaces, including
+the global Torelli theorem and the theory of periods. The authors’ approach to the
+
+Wolf Barth (1942–2016)
+
+283
+
+classification theory, based on Iitaka’s C2,1 -conjecture, incidentally reproved in the
+book, was new and original. The book went to print in 1984. Around the same time
+Shigefumi Mori introduced a completely new way of classifying algebraic varieties
+of higher dimensions, known nowadays as the Minimal Model Programme. Although
+aimed at higher-dimensional birational geometry, the minimal program also opens
+up a new view on surface classification. This is reflected in the second edition of
+the book, co-authored by Hulek, which appeared in 2004 [23]. It is considerably
+enlarged and reflects the developments of two decades, further including Reider’s
+results and the ensuing improvement of the treatment of pluricanonical maps, as well
+as the theory of Donaldson and Seiberg-Witten invariants. The book serves still as a
+standard text for compact complex surfaces.
+At the Roots of Algebraic Geometry—Equations Defining Algebraic Varieties
+Barth’s study of abelian varieties was strongly influenced by the series of articles
+by David Mumford [58–60] on equations defining abelian varieties. Mumford’s approach is highly abstract. In fact, his first article contains only one equation (expressed in homogeneous coordinates): that of an elliptic curve in a Hesse pencil.
+There is no doubt that Barth easily handled and created complex abstract objects
+and arguments in algebraic geometry. In particular in the later stages of his career,
+however, his research was guided by the desire to be as explicit as possible. He was
+intrigued by the question how abstract algebraic varieties can be explicitly described
+in terms of equations involving homogeneous coordinates. The fascination by specific equations was growing over the years, culminating in the beautiful symmetric
+constructions described in Sect. 2.4.
+Working still on the Horrocks-Mumford bundle, Barth suggested in [9] a way
+to obtain new rank 2 stable algebraic vector bundles on P4 . He showed that for a
+generic point P ∈ P4 the jumping lines (see Sect. 2.2) of FHM passing through P
+generate a cone with vertex at P over a smooth curve, which is the contact curve of
+two Kummer surfaces. Barth suggested to reverse the process and to construct vector
+bundles starting with suitable contact curves. The idea was pursued, among others, by
+Decker, Narasimhan and Schreyer, but despite these efforts it remains in the legacy
+of the not yet completed projects envisioned by Wolf Barth.
+Adler and van Moerbeke studied in [1] algebraically integrable geodesic flows on
+SO(4) and related them to affine parts of abelian surfaces in C6 defined as complete
+intersections of 4 quadrics. These affine parts come from abelian surfaces embedded in P7 by complete linear systems of type (2, 4). Inspired by these results, Barth
+studied in [10] abelian surfaces with (1, 2) polarization and gave a complete description of these surfaces and a description of their moduli space. In a paper dedicated
+to Friedrich Hirzebruch [11], Barth studied the question whether there exist other
+abelian surfaces, besides those discovered by Adler and van Moerbeke, which might
+be related to integrable Hamiltonian systems. He studied explicit equations of such
+potential abelian surfaces and their symmetries imposed by Heisenberg groups and
+arrived at the conclusion that among abelian surfaces with general moduli no such
+surfaces exist.
+Wolf Barth continued his studies of abelian surfaces defined by quadratic equations in [12]. There he considered principally polarized abelian surfaces A embedded
+
+284
+
+T. Bauer et al.
+
+in P8 by the third power of the theta divisor. By a result of Kempf [50] it was known
+that the homogeneous ideal of such surfaces is generated by forms of degree 2 and 3.
+Barth showed that quadrics suffice to generate the ideal sheaf if and only if the polarized abelian surface A is not a product of two elliptic curves. This paper is yet another
+example of Barth’s interest in concrete equations. He provides explicit equations of
+quadrics cutting out A ⊂ P8 .
+If A is an abelian surface, then its quotient X = A/(−1)A by the (−1)-involution
+ the smooth Kummer suris by definition a Kummer surface. Its desingularization X,
+face of A, is then a K3 surface which contains 16 skew smooth rational curves (corresponding to the half-periods of A). It is a result of Nikulin [62] that, conversely, every
+Kähler K3 surface with 16 skew smooth rational curves arises in this way as a smooth
+Kummer surface. Barth was interested in finding such surfaces with many skew rational curves in three-space—always with an eye towards concrete realisations of
+surfaces. In joint work with Nieto he rediscovered in [25] the smooth Kummer surfaces found by Traynard [68]. These contain 16 skew lines and they are associated
+with abelian surfaces of type (1, 3). It was his idea that one should be able to generalize the construction in order to obtain also smooth Kummer surfaces in P3 with 16
+skew conics (instead of lines). This was in fact possible and the surfaces constructed
+in this way turn out to be very interesting as they contain a surprisingly high number
+of conics in total [31]. It was shown later [32] that it is even possible to obtain 16
+skew smooth rational curves of any given degree.
+Visualizations of Algebraic Surfaces—From the First Steps to the Imaginary
+Exhibition In addition to his theoretical work, Barth had a great interest in visualizations of algebraic surfaces. He had a fascination for the models of algebraic surfaces that were produced in the 19th century (made in plaster, sometimes in wood),
+and he loved them both for the geometric insight they could provide as well as from
+a purely esthetical point of view. His contribution (with Horst Knörrer) to the volume
+Mathematical Models [24] shows his ample knowledge and his appreciation of these
+kinds of visualizations.
+With the availability of ever more powerful computers, it was his idea that given
+the polynomial equation f (x, y, z) = 0 of an algebraic surface in three-space, it
+should be possible to generate convincing images of the (real) surface (i.e. of the
+zero set of f in R3 ). The crucial breakthrough in this direction was achieved in the
+diploma thesis by Stephan Endrass (1992), supervised by Barth. In this thesis, the
+program surf was developed (on a Cadmus workstation), which was able to produce impressive images of algebraic surfaces from their equations. When Barth had
+constructed his now famous sextic surface [13] (see Sect. 2.4), it was a great moment for him to actually see the surface after he had found it by theoretical means.
+The program surf was extended and transferred to other systems during the 90s in
+Barth’s group in Erlangen. Since 2000, further development has been done by the
+algebraic geometry group in Mainz, and the program is still in constant use nowadays via the GUI program surfer (https://imaginary.org/de/program/surfer), which
+relies on the surf kernel for its computations. So we can enjoy the impressive images of algebraic surfaces in the Imaginary project (https://imaginary.org) thanks to
+Barth’s early interest in visualizations. Of course, Barth’s sextic surface deserves its
+prominent place in the exhibition.
+
+Wolf Barth (1942–2016)
+
+285
+
+Fig. 1 Barth’s sextic surface
+
+2.4 Symmetries
+In the last 20 years of his research activity Wolf Barth got very much interested in
+the use of symmetries in algebraic geometry. He was fascinated by the beauty of the
+surfaces that one can produce using symmetries. In particular, he investigated surfaces
+with many rational curves (resp. singularities obtained by contracting configurations
+of such curves) and constructed numerous examples.
+Recall that an A1 (resp. an A2 ) point of a surface is a singularity locally given by
+the equation
+x · y − z2 = 0
+(resp. x · y − z3 = 0). Such a point can be locally obtained as the quotient of the
+two-dimensional complex unit ball by an appropriate Z/2Z (resp. Z/3Z) action. An
+A1 (resp. A2 ) singularity is also called a node (resp. a cusp).
+A foundational work of W. Barth on this subject is the paper of 1996, [13], where
+he discovered what is now called Barth’s sextic (see Fig. 1). It is a surface of degree
+6 in three dimensional complex projective space with 65 nodes.
+In this paper he considers the symmetry group I of the icosahedron in euclidean
+three dimensional space R3 . It is well-known that this is isomorphic to the alternating group A5 and it acts on the ring of coordinates R[x, y, z]. The ring of invariant
+polynomials is generated by polynomials of degree 2, 6 and 10 respectively. The
+polynomial of degree 2 can be written as x 2 + y 2 + z2 and the other two invariants
+of degree 6 and 10 can be written in the following forms (they were already known
+to Goursat [42]):
+
+
+
+
+Q(x, y, z) = τ 2 x 2 − y 2 τ 2 y 2 − z2 τ 2 z2 − x 2
+
+
+
+
+R(x, y, z) = x 2 − τ 4 y 2 y 2 − τ 4 z2 z2 − τ 4 x 2 (x + y + z)(x + y − z)
+× (x − y + z)(x − y − z)
+√
+where τ = (1 + 5)/2 is the golden ratio. Combining these two equations with the
+equation of the three dimensional sphere S : x 2 + y 2 + z2 − 1 = 0, Barth obtains two
+families of symmetric surfaces invariant under the action of I . Barth’s sextic belongs
+
+286
+
+T. Bauer et al.
+
+Fig. 2 Barth’s decic surface
+
+to the family of surfaces with equation in affine coordinates
+
+2
+fα : Q(x, y, z) − α x 2 + y 2 + z2 − 1 = 0.
+For generic choice of the complex parameter α the surface has 45 nodes that belong to
+special lines of the icosahedron, the mid lines, as Barth called them, that connect two
+opposite mid points of edges. Then Barth imposes geometric conditions in a clever
+way to get an extra orbit of 20 nodes for the action of I . He finally obtains that by
+taking the parameter α = (2τ + 1)/4 the surface has in total 65 nodes. A very similar
+construction was then used by Barth to combine the degree ten polynomial R(x, y, z)
+and the equation of the sphere S to obtain Barth’s decic (Fig. 2) that has 345 nodes.
+As in the previous case, the singular points are located on special families of lines and
+planes related to the geometric properties of the icosahedron (the 10 planes through
+the origin, parallel to the twenty faces of the icosahedron).
+In the paper [57] of 1984, Miyaoka gave a bound for the maximum number of
+nodes that a surface of given degree in complex projective three-space can have. The
+bound is 66 for a surface of degree 6 and 360 for a surface of degree 10. The two
+examples produced by Barth are the best known examples so far in these two degrees.
+In particular the discovery of Barth’s sextic was quite surprising, since it was thought
+that no surface of degree 6 surface with 65 nodes could exist: fifteen years before,
+Catanese and Ceresa [34] had erroneously claimed that 64 was the maximum number
+of ordinary double points for a sextic surface. Soon after Barth’s discovery, Jaffe and
+Ruberman [49] showed, using coding theory, that in fact 65 is the maximum possible
+number of nodes for surfaces of degree 6. The problem of the maximum number of
+nodes in degree six was thus solved!
+Barth’s sextic remains until now an exceptional and beautiful example of how
+symmetries are a powerful tool in attacking problems in algebraic geometry.
+The lower bound of 345 given by Barth’s decic also remains to our knowledge the
+best so far. It is still not known whether Miyaoka’s bound of 360 nodes is possible
+or not for a surface of degree 10 in complex three-dimensional projective space. The
+idea of Barth of considering surfaces with many symmetries to attack the problem
+of finding surfaces with many nodes, paved the way to the discovery of more world
+record surfaces, as Barth termed them, and greatly influenced several mathematicians
+
+Wolf Barth (1942–2016)
+
+287
+
+working on the subject, in particular Barth’s PhD students: S. Endrass and A. Sarti.
+They found respectively a surface of degree 8 with 168 nodes in 1997, [37], and a
+surface of degree 12 with 600 nodes in 2001, [65]. These numbers of nodes approach
+the bounds of Miyaoka which are respectively 174 and 645 and are so far the best
+known examples. Both the surfaces are very symmetric, they have respectively the
+symmetries of some extension of order two of the dihedral group D8 and of the
+bipolyhedral icosahedral group of order 7200.
+The ideas of Barth affected the works of several other mathematicians such as
+D. van Straten and his students in Mainz, as well as S. Cynk in Crakow. His ideas also
+influenced the study of other difficult and classical problems in algebraic geometry
+such as the study of the maximum number of lines on projective surfaces. Around
+2001 Barth found a smooth quintic surface with 75 lines that was later described in
+the paper [69] (the author, as he said, followed a suggestion by W. Barth).
+In a paper of 2003 W. Barth and A. Sarti [28] studied the relation of the symmetric surfaces of the PhD thesis of A. Sarti, which had been conducted under the
+supervision of W. Barth, and K3 surfaces. In particular, they show that the minimal
+resolution of the quotient of the surface with 600 nodes by the bipolyhedral icosahedral group is a K3 surface with maximal Picard number, namely 20. Wolf Barth had
+always had a special interest in the beauty of the geometry of K3 surfaces and in his
+paper [16] he studied divisible sets of rational curves on K3 surfaces. More precisely,
+let L1 , . . . , Lk , k ≥ 1, be smooth disjoint rational curves on a K3 surface, Nikulin in
+[61] showed that if this set is 2-divisible, i.e. the sum L1 + · · · + Lk is equivalent to
+two times a divisor in the Nèron-Severi group, then k = 8 or k = 16 and 16 disjoint
+rational curves are always an even set. This is not the case for eight disjoint rational
+curves. In [16] Barth characterizes even sets of 8 rational curves on the most geometric projective models of K3 surfaces, such as double covers of P2 ramified along a
+sextic curve, quartics in P3 and double covers of P1 × P1 ramified along a curve of
+bi-degree (4, 4). The results provide a geometric expression of the lattice-theoretical
+results of Nikulin and they deeply affected the work of several other mathematicians,
+such as B. van Geemen and his students in Milan, working in particular on symplectic
+involutions on K3 surfaces (which are strictly related to the existence of such even
+sets).
+Wolf Barth also investigated sets of A2 singularities on surfaces. In general, techniques of enumerative geometry are not sensitive enough to give precise statements
+on the number of A-D-E points on degree d surfaces in P3 . In the case of quintics
+this problem was circumvented by Beauville, who associated to a surface with μ
+μ
+nodes a linear code in F2 . Each word of the code in question is given by a so-called
+even set of nodes. By definition, a set of nodes P1 , . . . , Pk on a surface X is even
+if and only if the local Z/2Z-quotient structure around the k nodes can be defined
+globally, i.e. when there exists a double cover Y of X branched only at the points
+P1 , . . . , Pk with Y smooth along the branch locus. Once the code is defined, one can
+use coding theory to arrive at bounds on the number of singularities and constraints
+on their configuration. In the papers [14, 15] Barth generalized the above notion to
+surfaces with A2 singularities. In this case one arrives at a ternary code. Barth used
+this generalization to show that a cuspidal quartic surface can carry at most eight
+singularities and every K3-surface with nine A2 points arises as a 3:1 quotient of a
+
+288
+
+T. Bauer et al.
+
+complex torus. This result generalizes the classical and well known construction of
+Kummer surfaces. Furthermore, he classified all tori occurring in the construction
+and gave explicit examples of quartics with eight A2 points. Finally, the papers [26,
+27], joint with S. Rams, contain sharp effective bounds on the minimal weights of
+ternary codes given by low-degree surfaces and the computation of codes for certain
+surfaces.
+It should be pointed out that Barth’s work on divisible sets of singularities played
+an important role in the project of classifying fundamental groups of open Enriques
+and K3 surfaces which has recently been carried out by J.H. Keum and D.Q. Zhang,
+whereas his published and unpublished examples appear in various contexts in algebraic geometry (e.g. Barth’s quintics surface with 75 lines turns out to be the smooth
+quintic with the highest Picard number known so far—see [64]).
+
+3 Wolf Barth—The Teacher
+Over the years, Wolf Barth developed an ever growing interest in teaching mathematics, which became apparent in a number of activities that are non-routine among top
+research mathematicians: for instance, when he found that the mathematics education regularly provided for elementary and middle school teachers was not up to the
+standards that he aimed at, rather than theorizing about this fact, or putting blame on
+others, he volunteered to restructure the courses in question and to teach them himself
+for a number of years to come—an instance of the hands-on approach he employed
+in such situations.
+As far as standard courses such as Analysis, Linear Algebra, Abstract Algebra
+and Complex Analysis are concerned, he developed his unique way of attacking the
+subjects, enriched by written manuscripts for the students which were not just compilations of the known textbook approaches. One such example is his Lineare Algebra
+text, which later became a Springer book coauthored by Peter Knaber [51].
+Also, it was his intention to convey to students his fascination for classical topics
+in geometry. As an example, he developed and taught a course on circles [17]. In
+his motivation one can see parallels with his activities in the environment protection
+movement: Barth knew that classical geometry lost its place at universities because it
+was considered by the majority of academia mathematicians as too elementary. Barth
+himself considered numerous beautiful theorems related to circles as members of a
+rare species which deserved protection from vanishing from mankind’s intellectual
+legacy. His attitude to projective geometry was very similar.
+Over the years Barth had been continuously involved in the training of the next
+generation of algebraic geometers. His first student, Wilfred Hulsbergen, obtained
+his PhD in 1976, the last student of Barth, Thomas Werner, graduated in 2012. Four
+of the authors of this obituary were Barth’s students and the remaining one, Rams,
+obtained his habilitation with Barth in Erlangen.
+The last of the named authors came from Cracow to Erlangen, exactly on the
+day of German reunification, as an exchange student. He encountered Barth and became his graduate student. It was the time of rapid political changes and growing
+hopes throughout Europe. All of a sudden, Eastern Europe became part of the Free
+
+Wolf Barth (1942–2016)
+
+289
+
+Prof. Dr. Wolf Barth and his students at the conference Groups and Algebraic Geometry, Erlangen, April
+2011. (From left to right: T. Szemberg, Th. Bauer, A. Sarti, W. Barth, K. Hulek, S. Rams)
+
+World. Direct scientific exchange of ideas and people was possible and it was generously supported by various organizations including DFG. Barth successfully applied for considerable grants supporting the library of the Institute of Mathematics
+of the Jagiellonian University and for four years he coordinated a staff exchange
+program with Cracow. He visited Cracow himself twice. His visits and the visits of
+Polish young mathematicians, including Sławomir Cynk, Zbigniew Jelonek and Piotr
+Tworzewski resulted in transplanting modern algebraic geometry to Cracow, which
+nowadays is, next to Warsaw, the strongest centre of algebraic geometry in Poland.
+This development would have been hardly possible without Barth’s support and engagement.
+Barth also had important connections to Italy. At the end of the 1990’s, Graziano
+Gentili, who at that time was the Head of the Scuola Matematica Interuniversitaria
+invited Wolf Barth to teach a course in algebraic geometry at the Perugia summer
+school. This is a very famous Italian summer school aiming to prepare young Italian and foreign students to work on a PhD thesis. Barth gave the algebraic geometry
+course both in 1997 and in 2000, and his lectures were highly appreciated. The fourth
+named author met Barth at the school in 1997 and then started a PhD thesis in Erlangen with him. Over the years Barth became a good friend of Gentili, whom he invited
+several times to Erlangen.
+***
+Wolf Barth had a lively personality. He was very much interested in politics, history and contemporary events. He rejected any form of xenophobia and he was actively involved in the protection of the environment. He loved every kind of beauty
+(flowers, art, music, and all geometric shapes). Material things were not important to
+him. He loved his family, his children and he was loved in return. He was a brilliant
+
+290
+
+T. Bauer et al.
+
+mathematician, passionate for algebraic geometry where he obtained fundamental
+results and wrote a foundational book. His famous sextic surface, the Barth surface,
+is one of the icons of algebraic surfaces. To all who came in contact with him he
+communicated his great passion and enthusiasm for mathematics.
+Acknowledgements We warmly thank Matthias Barth, Renate Ararat, Herbert Lange, Laurent Gruson,
+Chris Peters, Ulf Persson, and the administration of Universität Erlangen for their valuable help during the
+preparation of the manuscript.
+Open Access This article is distributed under the terms of the Creative Commons Attribution 4.0 International License (http://creativecommons.org/licenses/by/4.0/), which permits unrestricted use, distribution, and reproduction in any medium, provided you give appropriate credit to the original author(s) and
+the source, provide a link to the Creative Commons license, and indicate if changes were made.
+
+References
+1. Adler, M., van Moerbeke, P.: The algebraic integrability of geodesic flow on SO(4). Invent. Math. 67,
+297–331 (1982)
+2. Angermüller, G., Barth, W.: Elliptic fibers on Enriques surfaces. Compos. Math. 47, 317–332 (1982)
+3. Atiyah, M.F., Hitchin, N.J., Drinfeld, V.G., Manin, Yu.I.: Construction of instantons. Phys. Lett. A 65,
+185–187 (1978)
+4. Atiyah, M.F., Ward, R.S.: Instantons and algebraic geometry. Commun. Math. Phys. 55, 117–124
+(1977)
+5. Barth, W.: Fortsetzung, meromorpher Funktionen in Tori und komplex-projektiven Räumen. Invent.
+Math. 5, 42–62 (1968)
+6. Barth, W.: Transplanting cohomology classes in complex-projective space. Am. J. Math. 92, 951–967
+(1970)
+7. Barth, W.: Some properties of stable rank-2 vector bundles on Pn . Math. Ann. 226, 125–150 (1977)
+8. Barth, W.: Moduli of vector bundles on the projective plane. Invent. Math. 42, 63–91 (1977)
+9. Barth, W.: Kummer surfaces associated with the Horrocks-Mumford bundle. In: Journées de Géometrie Algébrique d’Angers, Juillet 1979/Algebraic Geometry, Angers, 1979, pp. 29–48. Sijthoff & Noordhoff, Alphen aan den Rijn, Germantown (1980)
+10. Barth, W.: Abelian surfaces with (1, 2)-polarization. In: Algebraic Geometry, Sendai, 1985. Adv.
+Stud. Pure Math., vol. 10, pp. 41–84. North-Holland, Amsterdam (1987)
+11. Barth, W.: Affine parts of abelian surfaces as complete intersections of four quadrics. Math. Ann. 278,
+117–131 (1987)
+12. Barth, W.: Quadratic equations for level-3 abelian surfaces. In: Abelian Varieties, Egloffstein, 1993,
+pp. 1–18. de Gruyter, Berlin (1995)
+13. Barth, W.: Two projective surfaces with many nodes, admitting the symmetries of the icosahedron.
+J. Algebraic Geom. 5, 173–186 (1996)
+14. Barth, W.: K3 surfaces with nine cusps. Geom. Dedic. 72, 171–178 (1998)
+15. Barth, W.: On the classification of K3 surfaces with nine cusps. In: Peternell, T., Schreyer, F.-O. (Eds.)
+Complex Analysis and Algebraic Geometry—A Volume in Memory of Michael Schneider, pp. 42–59
+(2000)
+16. Barth, W.: Even sets of eight rational curves on a K3-surface. In: Complex Geometry, Göttingen,
+2000, pp. 1–25. Springer, Berlin (2002)
+17. Barth, W.: Kreise. Skriptum, Erlangen (1997). https://www.studium.math.fau.de/fileadmin/studium/
+skripten/barth/kreiset1.ps
+18. Barth, W., Larsen, M.E.: On the homotopy groups of complex projective algebraic manifolds. Math.
+Scand. 30, 88–94 (1972)
+19. Barth, W., Hulek, K.: Monads and moduli of vector bundles. Manuscr. Math. 25, 323–347 (1978)
+20. Barth, W., Hulek, K., Moore, R.: Degenerations of Horrocks-Mumford surfaces. Math. Ann. 277,
+735–755 (1987)
+21. Barth, W.P., Peters, C.A.M.: Automorphisms of Enriques surfaces. Invent. Math. 73, 383–411 (1983)
+
+Wolf Barth (1942–2016)
+
+291
+
+22. Barth, W.P., Peters, C.A.M., Van de Ven, A.: Compact Complex Surfaces. Ergebnisse der Mathematik
+und ihrer Grenzgebiete. 3, vol. 4. Springer, Berlin (1984)
+23. Barth, W.P., Hulek, K., Peters, C.A.M., Van de Ven, A.: Compact Complex Surfaces, 2nd edn. Ergebnisse der Mathematik und ihrer Grenzgebiete. 3, vol. 4. Springer, Berlin (2004)
+24. Modelle algebraischer Flächen. Kommentare von W. Barth und H. Knörrer. Mathematische Modelle,
+G. Fischer (Ed.), pp. 7–24. Vieweg (1986)
+25. Barth, W., Nieto, I.: Abelian surfaces of type (1, 3) and quartic surfaces with 16 skew lines. J. Algebraic Geom. 3(2), 173–222 (1994)
+26. Barth, W., Rams, S.: Equations of low-degree projective surfaces with three-divisible sets of cusps.
+Math. Z. 249, 283–295 (2005)
+27. Barth, W., Rams, S.: Cusps and codes. Math. Nachr. 280, 50–59 (2007)
+28. Barth, W., Sarti, A.: Polyhedral groups and pencils of K3-surfaces with maximal Picard number.
+Asian J. Math. 7, 519–538 (2003)
+29. Barth, W., Van de Ven, A.: A decomposability criterion for algebraic 2-bundles on projective spaces.
+Invent. Math. 25, 91–106 (1974)
+30. Barth, W., Verra, A.: Torsion on K3-sections. In: Problems in the Theory of Surfaces and Their
+Classification, Cortona, 1988. Sympos. Math., vol. XXXII, pp. 1–24. Academic Press, London (1991)
+31. Bauer, Th., Barth, W.: Smooth quartic surfaces with 352 conics. Manuscr. Math. 85, 409–417 (1994)
+32. Bauer, Th.: Smooth Kummer surfaces in projective three-space. Proc. Am. Math. Soc. 125, 2537–
+2541 (1997)
+33. Beı̆linson, A.A.: The derived category of coherent sheaves on Pn . Sel. Math. Sov. 3, 233–237
+(1983/84)
+34. Catanese, F., Ceresa, G.: Constructing sextic surfaces with a given number d of nodes. J. Pure Appl.
+Algebra 23, 1–12 (1982)
+35. Drezet, J.-M., Le Potier, J.: Conditions d’existence des fibers stables de rang élevé sur P2 . In: Vector
+Bundles on Algebraic Varieties, Bombay, 1984. Tata Inst. Fund. Res. Stud. Math., vol. 11, pp. 133–
+158 (1987)
+36. Ellingsrud, G.: Sur l’irréductibilité du module des fibrés stables sur P2 . Math. Z. 182, 189–192 (1983)
+37. Endrass, S.: A projective surface of degree eight with 168 nodes. J. Algebraic Geom. 6, 325–334
+(1997)
+38. Enriques, F.: Le Superficie Algebriche. Nicola Zanichelli, Bologna (1949)
+39. Forster, O., Hirschowitz, A., Schneider, M.: Type de scindage généralisé pour les fibrés stables. In:
+Vector Bundles and Differential Equations (Proc. Conf.), Nice, 1979. Progr. Math., vol. 7, pp. 65–81
+(1980)
+40. Fulton, W., Hansen, J.: A connectedness theorem for projective varieties, with applications to intersections and singularities of mappings. Ann. Math. (2) 110, 159–166 (1979)
+41. Gieseker, D.: On the moduli of vector bundles on an algebraic surface. Ann. Math. (2) 106, 45–60
+(1977)
+42. Goursat, E.: Etude des surfaces qui admettent tous les plans de symetrie d’un polyedre regulier. Ann.
+Sci. Éc. Norm. Supér. (3) 4, 159–200 (1887)
+43. Grauert, H., Mülich, G.: Vektorbündel vom Rang 2 über dem n-dimensionalen komplex-projektiven
+Raum. Manuscr. Math. 16, 75–100 (1975)
+44. Hartshorne, R.: Varieties of small codimension in projective space. Bull. Am. Math. Soc. 80, 1017–
+1032 (1974)
+45. Hirschowitz, A.: Sur la restriction des faisceaux semi-stables. Ann. Sci. Éc. Norm. Supér. (4) 14,
+199–207 (1981)
+46. Horrocks, G.: Vector bundles on the punctured spectrum of a local ring. Proc. Lond. Math. Soc. (3)
+14, 689–713 (1964)
+47. Horrocks, G., Mumford, D.: A rank 2 vector bundle on P4 with 15,000 symmetries. Topology 12,
+63–81 (1973)
+48. Hulek, K.: Stable rank-2 vector bundles on P2 with c1 odd. Math. Ann. 242, 241–266 (1979)
+49. Jaffe, D.B., Ruberman, D.: A sextic surface cannot have 66 nodes. J. Algebraic Geom. 6, 151–168
+(1997)
+50. Kempf, G.R.: Projective coordinate rings of abelian varieties. In: Algebraic Analysis, Geometry, and
+Number Theory, Baltimore, MD, 1988, pp. 225–235. Johns Hopkins University Press, Baltimore
+(1989)
+51. Knabner, P., Barth, W.: Lineare Algebra. Grundlagen und Anwendungen. Springer, Berlin (2013)
+52. Larsen, M.E.: On the topology of complex projective manifolds. Invent. Math. 19, 251–260 (1973)
+
+292
+
+T. Bauer et al.
+
+53. Le Potier, J.: Fibrés stables de rang 2 sur P2 (C). Math. Ann. 241, 217–256 (1979)
+54. Maruyama, M.: Moduli of stable sheaves. I. J. Math. Kyoto Univ. 3, 557–614 (1978)
+55. Maruyama, M.: Moduli of stable sheaves. II. J. Math. Kyoto Univ. 1, 91–126 (1977)
+56. Maruyama, M.: The rationality of the moduli spaces of vector bundles of rank 2 on P2 . In: Algebraic
+Geometry, Sendai 1985. Adv. Stud. Pure Math., vol. 10, pp. 399–414 (1987)
+57. Miyaoka, Y.: The maximal number of quotient singularities on surfaces with given numerical invariants. Math. Ann. 268, 159–171 (1984)
+58. Mumford, D.: On the equations defining abelian varieties. I. Invent. Math. 1, 287–354 (1966)
+59. Mumford, D.: On the equations defining abelian varieties. II. Invent. Math. 3, 75–135 (1967)
+60. Mumford, D.: On the equations defining abelian varieties. III. Invent. Math. 3, 215–244 (1967)
+61. Nikulin, V.V.: Kummer surfaces. Izv. Akad. Nauk SSSR, Ser. Mat. 39, 278–293 (1975)
+62. Nikulin, V.V.: On Kummer surfaces. Math. USSR, Izv. 9, 261–275 (1975). Transl. to English
+63. Okonek, C., Schneider, M., Spindler, H.: Vector Bundles on Complex Projective Spaces. Springer,
+Berlin (2011). Corrected reprint of the 1988 edition, with an Appendix by S.I. Gelfand
+64. Rams, S., Schütt, M.: The Barth quintic surface has Picard number 41. Ann. Sc. Norm. Super. Pisa,
+Cl. Sci. (5) XIII, 533–549 (2014)
+65. Sarti, A.: Pencils of symmetric surfaces in P3 . J. Algebra 246, 429–452 (2001)
+66. Schwarzenberger, R.L.E.: Vector bundles on the projective plane. Proc. Lond. Math. Soc. (3) 11,
+623–640 (1961)
+67. Strømme, S.A.: Deforming vector bundles on the projective plane. Math. Ann. 263, 385–397 (1983)
+68. Traynard, E.: Sur les fonctions thêta de deux variables et les surfaces hyperelliptiques. Ann. Sci. Éc.
+Norm. Supér. (3) 24, 77–177 (1907)
+69. Xie, J.: More quintic surfaces with 75 lines. Rocky Mt. J. Math. 40, 2063–2089 (2010)
+
+

@@ -1,0 +1,10 @@
+arXiv:alg-geom/9502001v1 1 Feb 1995
+
+The paper is available as a compressed postscript file sextic.Z, which can be ftp’ed from mathlab03.unl.edu,
+in the directory /pub/faculty/jaffe (or initially, /incoming). The paper will print nicely on a 600 dpi
+printer; on lower resolution printers, one picture will be blurred. Hard copy is available from the authors:
+jaffe@cpthree.unl.edu, ruberman@maths.ox.ac.uk.
+
+1
+
+
