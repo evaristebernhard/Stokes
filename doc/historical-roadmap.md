@@ -18,7 +18,7 @@ Endraß octic 不是孤立的漂亮方程，而是三条传统汇合：
 | 3 | 4 | Cayley cubic | 对称三次面，4 个坐标型节点 | 极适合起步 |
 | 4 | 16 | Kummer quartic | Abelian surface / `±1` 商，`16_6` 配置 | 进入经典配置 |
 | 5 | 31 | Togliatti quintic | 五重对称、coding theory、discriminant | 第一个非平凡上界 |
-| 6 | 65 | Barth sextic | 二十面体对称、黄金比、code | 高对称极值构造 |
+| 6 | 65 | Barth sextic | 二十面体对称、黄金比、code | 高对称极值构造；见 `doc/barth-sextic.md` |
 | 7 | 99 <= mu(7) <= 104 | Labs septic 等 | Chmutov/line arrangements | 未封顶区间 |
 | 8 | 168 <= mu(8) <= 174 | Endraß octic | `D_8` 对称、Segre trick、计算机代数 | 当前主目标 |
 
@@ -138,7 +138,7 @@ Varchenko 是另一条 spectrum 半连续性路线。对 `P^3` 中八次 nodal s
 五次、六次则直接进入 Endraß 的技术环境：
 
 - `d=5`: Togliatti/Beauville 展示“构造”和“上界证明”开始分离。
-- `d=6`: Barth/Jaffe-Ruberman 展示高对称构造与 code/拓扑上界的配合。
+- `d=6`: Barth/Jaffe-Ruberman 展示高对称构造与 code/拓扑上界的配合。Barth 方程的 65 个节点按二十面体线配置组织成 A/B/C 三个 orbit，计数为 `15 + 30 + 20`；具体复现路线见 `doc/barth-sextic.md`。
 
 ## 建议阅读顺序
 

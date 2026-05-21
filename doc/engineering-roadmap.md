@@ -11,6 +11,7 @@ crates/
   degree02/
   degree03/
   degree04/
+  degree05/
 ```
 
 设计意图：
@@ -168,6 +169,18 @@ xyz + xyw + xzw + yzw = 0 in P^3
 
 数学解释见 `doc/togliatti-quintic.md`。
 复现经验总结见 `doc/degree05-lessons.md`。
+
+## Degree 6 数学预备状态
+
+`degree06` 暂时不急着开代码，先固定 Barth sextic 的可复现对象。预备文档见 `doc/barth-sextic.md`，当前已经整理：
+
+- Catanese 综述中使用的 Barth sextic 方程，系数域为 `Q(sqrt(5))`。
+- 二十面体 `A5` 对称下的 A/B/C 三类节点 orbit。
+- `65 = 15 + 30 + 20 = 15*3 + 10*2` 的线配置来源：15 条 mid lines 每条 3 个节点，10 条 centre lines 每条 2 个节点。
+- `mu(6)=65` 的上界来源：Jaffe-Ruberman / Wahl / Pignatelli 的 code/topology 路线，本项目短期只引用，不在 Rust 中复现。
+- Rust 证书路线：先 exact 实现方程和 A/B/C 候选点 ordinary-node 验证，再用 support-strata Groebner certificates 证明 saturated projective singular scheme 总 length 为 65。
+
+重要边界：degree06 目前只有数学预备文档，还没有 `crates/degree06`。下一步实现应从表格节点坐标做 regression oracle 开始，再补 `A5` 轨道生成，最后推进 projective 穷尽证书。
 
 ## 下一步
 
