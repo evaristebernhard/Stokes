@@ -166,7 +166,7 @@ v2: axis contact  ->  8
 16 + 8 + 16 + 8 + 8 = 56.
 ```
 
-当前 Rust 代码把这些事件记录成 `EndrassExtraNodeEvent`，包含事件标签、所在反射平面、事件类型、论文给出的 Segre 平面坐标和诱导的曲面 orbit size。它现在是计数 skeleton，还不是平面四次曲线的完整奇点证明。
+Rust 代码把这些事件记录成 `EndrassExtraNodeEvent`，包含事件标签、所在反射平面、事件类型、论文给出的 Segre 平面坐标和诱导的曲面 orbit size。当前实现已经不只是计数 skeleton：它会构造 `E0/E1` 的 Segre quotient quartics，验证 `s3,u5` 是 quotient nodes，验证 `t3,v1,v2` 是坐标轴 contact，并把事件 lift 回三维曲面检查 `F=0`、`grad F=0`、Hessian rank 为 `3`。
 
 因此第一轮结构复现给出：
 
@@ -183,9 +183,12 @@ v2: axis contact  ->  8
 - `F` homogeneous 且 degree 为 `8`。
 - `D8 x Z2` 的三个生成元保持 `F` 不变。
 - 8 个平面和 28 条交线 exact 构造。
-- 每条交线上的 `R` restriction 是非零二元四次式，因此基础结构计数为 `28*4=112`。
+- 每条交线上的 `R` restriction 是二元四次式，给出基础盘 scheme-length skeleton `28*4=112`；有限域 base scorer 进一步检查 degree、squarefree 和三平面坏交点。
 - 4 个 line orbit representatives 的贡献为 `32+32+32+16=112`。
-- `s3,t3,u5,v1,v2` 的 Segre-trick 额外贡献为 `16+8+16+8+8=56`。
+- `s3,t3,u5,v1,v2` 的 Segre-trick 额外贡献为 `16+8+16+8+8=56`，并通过 quotient node/contact 条件和 lift 后 Hessian rank 检查。
+- finite-field scorer 在 `p=31, sqrt(2)=8` 下复现 Endrass reduction：`total_sing=node_like=168`、`bad_sing=0`、`base_like=112`、`extra_like=56`。
+- 基础盘 algebraic-closure length scorer 对 28 条线检查 `R|L` 的 degree、squarefree 和三平面坏交点，并把 scheme length 与 `F_p` 可见点数分开记录。
+- `search_d4` 命令行入口可做 Endrass 多素数校准，也可围绕 Endrass 参数执行 D4 小窗口事件扫描。
 - Miyaoka `d=8` 上界为 `174`，Varchenko/Arnold number 为 `180`。
 
 ## 仍未完成的严格证明
@@ -195,4 +198,35 @@ Endrass 原文中两个关键步骤依赖 Maple/Macaulay：
 1. 候选奇点全部为 ordinary nodes：需要对候选点 exact 验证 `F=0`、`grad F=0`、Hessian rank `3`。
 2. 没有额外奇点：论文在 8 个反射平面上用 Maple 检查，并用一个 `D_n` 对称曲面不能有 `2n` 个 node orbit 的引理排除平面外奇点。
 
-当前 `degree08` 完成的是第一轮结构复现，不应声称已经证明 Endrass octic 恰有 168 个 ordinary nodes。下一步应把两个平面截线的 Segre-trick 事件升级成 exact 平面曲线证书，再决定是走 support-strata Groebner、平面分层证书，还是 Endrass 原 lemma 的形式化路线。
+当前 `degree08` 已经完成结构复现、Segre 事件 exact verifier 和有限域搜索校准，但仍不应声称已经证明 Endrass octic 恰有 168 个 ordinary nodes。缺口是全局无额外奇点的特征零证书：仍需形式化 Endrass 的 Maple 平面检查和 `D_n` 平面外排除引理，或改走 projective Jacobian ideal saturation / support-strata Groebner 证书。
+
+## 搜索方向
+
+突破 `168` 的难点在于 Miyaoka 上界只剩：
+
+```text
+169 <= candidate <= 174.
+```
+
+完整 `D8 x Z2` 对称下，新的反射平面 node 通常贡献长度 `16` 的 orbit，轴接触贡献 `8`，一加就越过 `174`。所以当前搜索主线不是裸随机扫八次曲面，也不是继续强化 D8 对称，而是：
+
+```text
+保住 P-R^2 的 112 基础盘
+-> 用 Segre quotient 平面四次事件做低维搜索
+-> 从 D8 降到 D4/D2，让新增事件以更小 orbit 出现
+```
+
+事件约束优先于随机参数扫的原因是：在反射平面 quotient 上
+
+```text
+G = P_E - r_E^2
+```
+
+若固定候选点 `q` 和 `rho=r_E(q)`，且 `rho^2=P_E(q)`，则一阶奇点条件可写成对 `R` 系数线性的条件：
+
+```text
+r_E(q)  = rho
+dr_E(q) = dP_E(q)/(2*rho)
+```
+
+轴接触的重根条件也有同样线性化形式。当前 `search_d4` 入口已经能在有限域上扫描 D4 的两个代表反射平面事件、记录 quotient node/contact/factor signature，并输出排序候选；后续更强的一步应是枚举事件组合并解这些线性约束。

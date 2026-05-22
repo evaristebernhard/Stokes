@@ -9,6 +9,10 @@ type Q2 = QuadraticRational;
 type PolynomialP3 = SparsePolynomial<Q2, P3_VARIABLE_COUNT>;
 type BinaryPolynomial = SparsePolynomial<Q2, 2>;
 type TernaryPolynomial = SparsePolynomial<Q2, 3>;
+type BinaryPolynomialFp<const P: i64> = SparsePolynomial<Fp<P>, 2>;
+type TernaryPolynomialFp<const P: i64> = SparsePolynomial<Fp<P>, 3>;
+type AxisLiftFp<const P: i64> = fn([Fp<P>; 2]) -> [Fp<P>; 3];
+type AxisRestrictionFp<const P: i64> = (BinaryPolynomialFp<P>, AxisLiftFp<P>);
 
 pub const ENDRASS_DEGREE: usize = 8;
 pub const ENDRASS_PLANE_COUNT: usize = 8;
@@ -347,6 +351,242 @@ impl<const P: i64> FiniteFieldSingularityStats<P> {
 
     pub fn singular_points(&self) -> &[FiniteFieldSingularPoint<P>] {
         &self.singular_points
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum D4ReflectionPlane {
+    AxisY0,
+    DiagonalXEqualsY,
+}
+
+impl D4ReflectionPlane {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::AxisY0 => "axis-y0",
+            Self::DiagonalXEqualsY => "diag-x-eq-y",
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PlaneQuarticEventScan {
+    reflection_label: &'static str,
+    off_axis_nodes: usize,
+    z_axis_contacts: usize,
+    w_axis_contacts: usize,
+    linear_factors: usize,
+    node_orbit_size: usize,
+    contact_orbit_size: usize,
+}
+
+impl PlaneQuarticEventScan {
+    pub fn reflection_label(&self) -> &'static str {
+        self.reflection_label
+    }
+
+    pub fn off_axis_nodes(&self) -> usize {
+        self.off_axis_nodes
+    }
+
+    pub fn z_axis_contacts(&self) -> usize {
+        self.z_axis_contacts
+    }
+
+    pub fn w_axis_contacts(&self) -> usize {
+        self.w_axis_contacts
+    }
+
+    pub fn linear_factors(&self) -> usize {
+        self.linear_factors
+    }
+
+    pub fn predicted_orbit_contribution(&self) -> usize {
+        self.off_axis_nodes * self.node_orbit_size
+            + (self.z_axis_contacts + self.w_axis_contacts) * self.contact_orbit_size
+    }
+
+    pub fn signature(&self) -> String {
+        format!(
+            "{}:nodes={},z_contacts={},w_contacts={},linear_factors={}",
+            self.reflection_label,
+            self.off_axis_nodes,
+            self.z_axis_contacts,
+            self.w_axis_contacts,
+            self.linear_factors
+        )
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct BaseLineLengthCheck {
+    line: (usize, usize),
+    degree: usize,
+    squarefree: bool,
+    visible_roots: usize,
+}
+
+impl BaseLineLengthCheck {
+    pub fn line(&self) -> (usize, usize) {
+        self.line
+    }
+
+    pub fn degree(&self) -> usize {
+        self.degree
+    }
+
+    pub fn squarefree(&self) -> bool {
+        self.squarefree
+    }
+
+    pub fn visible_roots(&self) -> usize {
+        self.visible_roots
+    }
+
+    pub fn algebraic_closure_length(&self) -> usize {
+        if self.degree == ENDRASS_BASIC_LINE_INTERSECTION_LENGTH && self.squarefree {
+            ENDRASS_BASIC_LINE_INTERSECTION_LENGTH
+        } else {
+            0
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct BaseLineLengthStats {
+    line_checks: Vec<BaseLineLengthCheck>,
+    triple_plane_bad_points: usize,
+}
+
+impl BaseLineLengthStats {
+    pub fn line_checks(&self) -> &[BaseLineLengthCheck] {
+        &self.line_checks
+    }
+
+    pub fn triple_plane_bad_points(&self) -> usize {
+        self.triple_plane_bad_points
+    }
+
+    pub fn algebraic_closure_length(&self) -> usize {
+        if self.triple_plane_bad_points == 0 {
+            self.line_checks
+                .iter()
+                .map(BaseLineLengthCheck::algebraic_closure_length)
+                .sum()
+        } else {
+            0
+        }
+    }
+
+    pub fn visible_root_count(&self) -> usize {
+        self.line_checks
+            .iter()
+            .map(BaseLineLengthCheck::visible_roots)
+            .sum()
+    }
+
+    pub fn all_lines_degree_four_squarefree(&self) -> bool {
+        self.line_checks
+            .iter()
+            .all(|line| line.degree == ENDRASS_BASIC_LINE_INTERSECTION_LENGTH && line.squarefree)
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct D4SearchCandidate<const P: i64> {
+    parameters: D4FamilyParameters<P>,
+    singularity_stats: FiniteFieldSingularityStats<P>,
+    base_length_stats: BaseLineLengthStats,
+    event_scans: Vec<PlaneQuarticEventScan>,
+    score: isize,
+}
+
+impl<const P: i64> D4SearchCandidate<P> {
+    pub fn parameters(&self) -> D4FamilyParameters<P> {
+        self.parameters
+    }
+
+    pub fn singularity_stats(&self) -> &FiniteFieldSingularityStats<P> {
+        &self.singularity_stats
+    }
+
+    pub fn base_length_stats(&self) -> &BaseLineLengthStats {
+        &self.base_length_stats
+    }
+
+    pub fn event_scans(&self) -> &[PlaneQuarticEventScan] {
+        &self.event_scans
+    }
+
+    pub fn score(&self) -> isize {
+        self.score
+    }
+
+    pub fn tsv_header() -> &'static str {
+        "prime\tscore\ttotal\tnode\tbad\tbase_fp\textra\tbase_ac\tbase_visible\tevents\tparams"
+    }
+
+    pub fn to_tsv(&self) -> String {
+        let event_signature = self
+            .event_scans
+            .iter()
+            .map(PlaneQuarticEventScan::signature)
+            .collect::<Vec<_>>()
+            .join("|");
+        format!(
+            "{P}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            self.score,
+            self.singularity_stats.total_sing(),
+            self.singularity_stats.node_like(),
+            self.singularity_stats.bad_sing(),
+            self.singularity_stats.base_like(),
+            self.singularity_stats.extra_like(),
+            self.base_length_stats.algebraic_closure_length(),
+            self.base_length_stats.visible_root_count(),
+            event_signature,
+            format_d4_parameters(self.parameters)
+        )
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EndrassPrimeCalibration {
+    prime: i64,
+    sqrt2: i64,
+    global_visible_nodes: usize,
+    global_bad_singularities: usize,
+    base_algebraic_closure_length: usize,
+    base_visible_roots: usize,
+    segre_event_orbit_contribution: usize,
+}
+
+impl EndrassPrimeCalibration {
+    pub fn prime(&self) -> i64 {
+        self.prime
+    }
+
+    pub fn sqrt2(&self) -> i64 {
+        self.sqrt2
+    }
+
+    pub fn global_visible_nodes(&self) -> usize {
+        self.global_visible_nodes
+    }
+
+    pub fn global_bad_singularities(&self) -> usize {
+        self.global_bad_singularities
+    }
+
+    pub fn base_algebraic_closure_length(&self) -> usize {
+        self.base_algebraic_closure_length
+    }
+
+    pub fn base_visible_roots(&self) -> usize {
+        self.base_visible_roots
+    }
+
+    pub fn segre_event_orbit_contribution(&self) -> usize {
+        self.segre_event_orbit_contribution
     }
 }
 
@@ -902,6 +1142,181 @@ pub fn endrass_parameters_mod_p<const P: i64>(sqrt2_value: i64) -> D4FamilyParam
     }
 }
 
+pub fn scan_d4_candidate<const P: i64>(parameters: D4FamilyParameters<P>) -> D4SearchCandidate<P> {
+    let input = FiniteFieldScorerInput::d4_family(parameters);
+    let singularity_stats = score_finite_field_singularities(&input);
+    let base_length_stats = score_basic_line_lengths(&input);
+    let event_scans = scan_d4_segre_events(parameters);
+    let score = candidate_score(&singularity_stats, &base_length_stats, &event_scans);
+
+    D4SearchCandidate {
+        parameters,
+        singularity_stats,
+        base_length_stats,
+        event_scans,
+        score,
+    }
+}
+
+pub fn scan_d4_local_window<const P: i64>(
+    center: D4FamilyParameters<P>,
+    radius: i64,
+    limit: usize,
+) -> Vec<D4SearchCandidate<P>> {
+    let offsets: Vec<i64> = (-radius..=radius).collect();
+    let mut candidates = Vec::new();
+
+    for &h_offset in &offsets {
+        for &g_offset in &offsets {
+            for &i_offset in &offsets {
+                let mut parameters = center;
+                parameters.h = center.h + Fp::new(h_offset);
+                parameters.g = center.g + Fp::new(g_offset);
+                parameters.i = center.i + Fp::new(i_offset);
+                candidates.push(scan_d4_candidate(parameters));
+            }
+        }
+    }
+
+    candidates.sort_by_key(|candidate| std::cmp::Reverse(candidate.score));
+    candidates.truncate(limit);
+    candidates
+}
+
+pub fn score_basic_line_lengths<const P: i64>(
+    input: &FiniteFieldScorerInput<P>,
+) -> BaseLineLengthStats {
+    let line_pairs = plane_line_pairs(input.planes.len());
+    let line_checks = line_pairs
+        .iter()
+        .map(|&line| {
+            let basis = line_basis_mod_p(&input.planes[line.0], &input.planes[line.1]);
+            let restriction = restrict_p3_to_line_fp(&input.quartic_r, basis);
+            BaseLineLengthCheck {
+                line,
+                degree: restriction.degree(),
+                squarefree: homogeneous_binary_is_squarefree(&restriction),
+                visible_roots: count_binary_projective_roots(&restriction),
+            }
+        })
+        .collect();
+
+    BaseLineLengthStats {
+        line_checks,
+        triple_plane_bad_points: count_triple_plane_bad_points(input),
+    }
+}
+
+pub fn scan_d4_segre_events<const P: i64>(
+    parameters: D4FamilyParameters<P>,
+) -> Vec<PlaneQuarticEventScan> {
+    [
+        D4ReflectionPlane::AxisY0,
+        D4ReflectionPlane::DiagonalXEqualsY,
+    ]
+    .into_iter()
+    .map(|plane| {
+        scan_plane_quartic_events(
+            plane.label(),
+            &d4_segre_quotient_mod_p(parameters, plane),
+            8,
+            4,
+        )
+    })
+    .collect()
+}
+
+pub fn d4_segre_quotient_mod_p<const P: i64>(
+    parameters: D4FamilyParameters<P>,
+    plane: D4ReflectionPlane,
+) -> TernaryPolynomialFp<P> {
+    let polynomial = d4_family_polynomial_mod_p(parameters);
+    let [u, z, w] = ternary_variables_fp();
+    let forms = match plane {
+        D4ReflectionPlane::AxisY0 => [u, TernaryPolynomialFp::zero(), z, w],
+        D4ReflectionPlane::DiagonalXEqualsY => [u.clone(), u, z, w],
+    };
+    segre_quotient_from_even_ternary_fp(&substitute_p3_to_ternary_fp(&polynomial, &forms))
+}
+
+pub fn endrass_segre_quotient_mod_p<const P: i64>(
+    plane: EndrassReflectionPlane,
+    sqrt2_value: i64,
+) -> TernaryPolynomialFp<P> {
+    let sqrt2 = Fp::<P>::new(sqrt2_value);
+    let polynomial = reduce_q2_polynomial_mod_p(&endrass_octic_polynomial(), sqrt2);
+    let [u, z, w] = ternary_variables_fp();
+    let forms = match plane {
+        EndrassReflectionPlane::E0 => [u, TernaryPolynomialFp::zero(), z, w],
+        EndrassReflectionPlane::E1 => [u.scale(Fp::one() + sqrt2), u, z, w],
+    };
+    segre_quotient_from_even_ternary_fp(&substitute_p3_to_ternary_fp(&polynomial, &forms))
+}
+
+pub fn scan_endrass_segre_events_mod_p<const P: i64>(
+    sqrt2_value: i64,
+) -> Vec<PlaneQuarticEventScan> {
+    [
+        (EndrassReflectionPlane::E0, "E0"),
+        (EndrassReflectionPlane::E1, "E1"),
+    ]
+    .into_iter()
+    .map(|(plane, label)| {
+        scan_plane_quartic_events(
+            label,
+            &endrass_segre_quotient_mod_p::<P>(plane, sqrt2_value),
+            16,
+            8,
+        )
+    })
+    .collect()
+}
+
+pub fn endrass_multi_prime_calibrations() -> Vec<EndrassPrimeCalibration> {
+    vec![
+        endrass_prime_calibration_31(),
+        endrass_prime_calibration_41(),
+        endrass_prime_calibration_73(),
+        endrass_prime_calibration_89(),
+    ]
+}
+
+pub fn endrass_prime_calibration_31() -> EndrassPrimeCalibration {
+    endrass_prime_calibration::<31>(8)
+}
+
+pub fn endrass_prime_calibration_41() -> EndrassPrimeCalibration {
+    endrass_prime_calibration::<41>(17)
+}
+
+pub fn endrass_prime_calibration_73() -> EndrassPrimeCalibration {
+    endrass_prime_calibration::<73>(32)
+}
+
+pub fn endrass_prime_calibration_89() -> EndrassPrimeCalibration {
+    endrass_prime_calibration::<89>(25)
+}
+
+fn endrass_prime_calibration<const P: i64>(sqrt2_value: i64) -> EndrassPrimeCalibration {
+    let input = FiniteFieldScorerInput::<P>::endrass(sqrt2_value);
+    let global = score_finite_field_singularities(&input);
+    let base = score_basic_line_lengths(&input);
+    let segre_event_orbit_contribution = scan_endrass_segre_events_mod_p::<P>(sqrt2_value)
+        .iter()
+        .map(PlaneQuarticEventScan::predicted_orbit_contribution)
+        .sum();
+
+    EndrassPrimeCalibration {
+        prime: P,
+        sqrt2: sqrt2_value,
+        global_visible_nodes: global.node_like(),
+        global_bad_singularities: global.bad_sing(),
+        base_algebraic_closure_length: base.algebraic_closure_length(),
+        base_visible_roots: base.visible_root_count(),
+        segre_event_orbit_contribution,
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct EndrassParameters {
     a: Q2,
@@ -977,6 +1392,14 @@ fn binary_variables() -> [BinaryPolynomial; 2] {
     std::array::from_fn(BinaryPolynomial::variable)
 }
 
+fn binary_variables_fp<const P: i64>() -> [BinaryPolynomialFp<P>; 2] {
+    std::array::from_fn(BinaryPolynomialFp::<P>::variable)
+}
+
+fn ternary_variables_fp<const P: i64>() -> [TernaryPolynomialFp<P>; 3] {
+    std::array::from_fn(TernaryPolynomialFp::<P>::variable)
+}
+
 fn linear_form(coefficients: [Q2; P3_VARIABLE_COUNT]) -> PolynomialP3 {
     coefficients.into_iter().enumerate().fold(
         PolynomialP3::zero(),
@@ -992,6 +1415,39 @@ fn linear_form_fp<const P: i64>(coefficients: [Fp<P>; P3_VARIABLE_COUNT]) -> Pol
         |sum, (variable, coefficient)| {
             sum.add(&PolynomialP3Fp::<P>::variable(variable).scale(coefficient))
         },
+    )
+}
+
+fn candidate_score<const P: i64>(
+    singularity_stats: &FiniteFieldSingularityStats<P>,
+    base_length_stats: &BaseLineLengthStats,
+    event_scans: &[PlaneQuarticEventScan],
+) -> isize {
+    let event_bonus: usize = event_scans
+        .iter()
+        .map(PlaneQuarticEventScan::predicted_orbit_contribution)
+        .sum();
+    singularity_stats.node_like() as isize + event_bonus as isize
+        - 1000 * singularity_stats.bad_sing() as isize
+        - 25 * (ENDRASS_BASIC_NODE_COUNT as isize
+            - base_length_stats.algebraic_closure_length() as isize)
+            .abs()
+        - 500 * base_length_stats.triple_plane_bad_points() as isize
+}
+
+fn format_d4_parameters<const P: i64>(parameters: D4FamilyParameters<P>) -> String {
+    format!(
+        "axis={},diag={},scale={},a={},h={},b={},d={},e={},g={},i={}",
+        parameters.axis_offset.value(),
+        parameters.diagonal_offset.value(),
+        parameters.plane_scale.value(),
+        parameters.a.value(),
+        parameters.h.value(),
+        parameters.b.value(),
+        parameters.d.value(),
+        parameters.e.value(),
+        parameters.g.value(),
+        parameters.i.value()
     )
 }
 
@@ -1041,6 +1497,229 @@ fn endrass_planes_mod_p<const P: i64>(sqrt2: Fp<P>) -> Vec<[Fp<P>; P3_VARIABLE_C
         .collect()
 }
 
+fn line_basis_mod_p<const P: i64>(
+    first: &[Fp<P>; P3_VARIABLE_COUNT],
+    second: &[Fp<P>; P3_VARIABLE_COUNT],
+) -> [[Fp<P>; P3_VARIABLE_COUNT]; 2] {
+    let nullspace = Matrix::from_rows(vec![first.to_vec(), second.to_vec()]).nullspace();
+    assert_eq!(nullspace.len(), 2, "expected two planes to meet in a line");
+    [
+        vec_to_p3_fp(nullspace[0].clone()),
+        vec_to_p3_fp(nullspace[1].clone()),
+    ]
+}
+
+fn restrict_p3_to_line_fp<const P: i64>(
+    polynomial: &PolynomialP3Fp<P>,
+    basis: [[Fp<P>; P3_VARIABLE_COUNT]; 2],
+) -> BinaryPolynomialFp<P> {
+    let [s, t] = binary_variables_fp();
+    let forms: [BinaryPolynomialFp<P>; P3_VARIABLE_COUNT] = std::array::from_fn(|variable| {
+        s.scale(basis[0][variable])
+            .add(&t.scale(basis[1][variable]))
+    });
+
+    polynomial
+        .terms()
+        .into_iter()
+        .fold(BinaryPolynomialFp::<P>::zero(), |sum, term| {
+            let substituted = term.exponents().into_iter().enumerate().fold(
+                BinaryPolynomialFp::<P>::constant(term.coefficient()),
+                |product, (variable, exponent)| product.mul(&forms[variable].pow_usize(exponent)),
+            );
+            sum.add(&substituted)
+        })
+}
+
+fn count_triple_plane_bad_points<const P: i64>(input: &FiniteFieldScorerInput<P>) -> usize {
+    let mut bad_points = BTreeSet::new();
+    let mut degenerate_triples = 0;
+    for first in 0..input.planes.len() {
+        for second in (first + 1)..input.planes.len() {
+            for third in (second + 1)..input.planes.len() {
+                let nullspace = Matrix::from_rows(vec![
+                    input.planes[first].to_vec(),
+                    input.planes[second].to_vec(),
+                    input.planes[third].to_vec(),
+                ])
+                .nullspace();
+                match nullspace.len() {
+                    0 => {}
+                    1 => {
+                        let point = normalize_point(vec_to_p3_fp(nullspace[0].clone()));
+                        if input.quartic_r.evaluate(&point).is_zero() {
+                            bad_points.insert(point_key(&point));
+                        }
+                    }
+                    _ => degenerate_triples += 1,
+                }
+            }
+        }
+    }
+    bad_points.len() + degenerate_triples
+}
+
+fn homogeneous_binary_is_squarefree<const P: i64>(polynomial: &BinaryPolynomialFp<P>) -> bool {
+    if polynomial.is_zero() || polynomial.degree() != ENDRASS_BASIC_LINE_INTERSECTION_LENGTH {
+        return false;
+    }
+
+    let dehomogenized = binary_dehomogenize_t_one(polynomial);
+    let dehom_degree = univariate_degree(&dehomogenized);
+    if dehom_degree + 1 < polynomial.degree() {
+        return false;
+    }
+
+    let derivative = univariate_derivative(&dehomogenized);
+    univariate_gcd(dehomogenized, derivative).len() == 1
+}
+
+fn binary_dehomogenize_t_one<const P: i64>(polynomial: &BinaryPolynomialFp<P>) -> Vec<Fp<P>> {
+    let degree = polynomial.degree();
+    let mut coefficients = vec![Fp::<P>::zero(); degree + 1];
+    for term in polynomial.terms() {
+        coefficients[term.exponents()[0]] = coefficients[term.exponents()[0]] + term.coefficient();
+    }
+    trim_univariate(coefficients)
+}
+
+fn count_binary_projective_roots<const P: i64>(polynomial: &BinaryPolynomialFp<P>) -> usize {
+    projective_points_p1_mod_p::<P>()
+        .into_iter()
+        .filter(|point| polynomial.evaluate(point).is_zero())
+        .count()
+}
+
+fn scan_plane_quartic_events<const P: i64>(
+    reflection_label: &'static str,
+    quotient: &TernaryPolynomialFp<P>,
+    node_orbit_size: usize,
+    contact_orbit_size: usize,
+) -> PlaneQuarticEventScan {
+    let off_axis_nodes = projective_points_p2_mod_p::<P>()
+        .into_iter()
+        .filter(|point| point.iter().all(|coord| !coord.is_zero()))
+        .filter(|point| quotient_node_at(quotient, point))
+        .count();
+    let z_axis_contacts = quotient_axis_contacts_mod_p(quotient, SegreCoordinateAxis::Z);
+    let w_axis_contacts = quotient_axis_contacts_mod_p(quotient, SegreCoordinateAxis::W);
+    let linear_factors = count_projective_linear_factors(quotient);
+
+    PlaneQuarticEventScan {
+        reflection_label,
+        off_axis_nodes,
+        z_axis_contacts,
+        w_axis_contacts,
+        linear_factors,
+        node_orbit_size,
+        contact_orbit_size,
+    }
+}
+
+fn quotient_node_at<const P: i64>(quotient: &TernaryPolynomialFp<P>, point: &[Fp<P>; 3]) -> bool {
+    quotient.evaluate(point).is_zero()
+        && (0..3).all(|variable| {
+            quotient
+                .partial_derivative(variable)
+                .evaluate(point)
+                .is_zero()
+        })
+        && ternary_hessian_rank_fp(quotient, point) == 2
+}
+
+fn quotient_axis_contacts_mod_p<const P: i64>(
+    quotient: &TernaryPolynomialFp<P>,
+    axis: SegreCoordinateAxis,
+) -> usize {
+    let (restriction, lift) = restrict_quotient_to_axis_fp(quotient, axis);
+    projective_points_p1_mod_p::<P>()
+        .into_iter()
+        .filter(|binary_point| binary_point.iter().all(|coord| !coord.is_zero()))
+        .filter(|binary_point| {
+            restriction.evaluate(binary_point).is_zero()
+                && (0..2).all(|variable| {
+                    restriction
+                        .partial_derivative(variable)
+                        .evaluate(binary_point)
+                        .is_zero()
+                })
+                && {
+                    let point = lift(*binary_point);
+                    !point[0].is_zero()
+                }
+        })
+        .count()
+}
+
+fn restrict_quotient_to_axis_fp<const P: i64>(
+    quotient: &TernaryPolynomialFp<P>,
+    axis: SegreCoordinateAxis,
+) -> AxisRestrictionFp<P> {
+    let [s, t] = binary_variables_fp();
+    let zero = BinaryPolynomialFp::<P>::zero();
+    let (forms, lift): ([BinaryPolynomialFp<P>; 3], AxisLiftFp<P>) = match axis {
+        SegreCoordinateAxis::Z => ([s, zero, t], |point| [point[0], Fp::zero(), point[1]]),
+        SegreCoordinateAxis::W => ([s, t, zero], |point| [point[0], point[1], Fp::zero()]),
+    };
+
+    (
+        quotient
+            .terms()
+            .into_iter()
+            .fold(BinaryPolynomialFp::<P>::zero(), |sum, term| {
+                let substituted = term.exponents().into_iter().enumerate().fold(
+                    BinaryPolynomialFp::<P>::constant(term.coefficient()),
+                    |product, (variable, exponent)| {
+                        product.mul(&forms[variable].pow_usize(exponent))
+                    },
+                );
+                sum.add(&substituted)
+            }),
+        lift,
+    )
+}
+
+fn count_projective_linear_factors<const P: i64>(quotient: &TernaryPolynomialFp<P>) -> usize {
+    let points = projective_points_p2_mod_p::<P>();
+    projective_points_p2_mod_p::<P>()
+        .into_iter()
+        .filter(|line| {
+            let mut point_count = 0;
+            let all_zero = points
+                .iter()
+                .filter(|point| line_eval_p2(line, point).is_zero())
+                .inspect(|_| point_count += 1)
+                .all(|point| quotient.evaluate(point).is_zero());
+            all_zero && point_count == (P + 1) as usize
+        })
+        .count()
+}
+
+fn line_eval_p2<const P: i64>(line: &[Fp<P>; 3], point: &[Fp<P>; 3]) -> Fp<P> {
+    line.iter()
+        .zip(point)
+        .fold(Fp::zero(), |sum, (coefficient, coord)| {
+            sum + *coefficient * *coord
+        })
+}
+
+fn ternary_hessian_rank_fp<const P: i64>(
+    polynomial: &TernaryPolynomialFp<P>,
+    point: &[Fp<P>; 3],
+) -> usize {
+    Matrix::from_rows(
+        (0..3)
+            .map(|row| {
+                let first = polynomial.partial_derivative(row);
+                (0..3)
+                    .map(|col| first.partial_derivative(col).evaluate(point))
+                    .collect()
+            })
+            .collect(),
+    )
+    .rank()
+}
+
 fn reduce_q2_polynomial_mod_p<const P: i64>(
     polynomial: &PolynomialP3,
     sqrt2: Fp<P>,
@@ -1084,6 +1763,35 @@ fn projective_points_mod_p<const P: i64>() -> Vec<[Fp<P>; P3_VARIABLE_COUNT]> {
             }
         }
     }
+    points
+}
+
+fn projective_points_p2_mod_p<const P: i64>() -> Vec<[Fp<P>; 3]> {
+    let mut points = Vec::new();
+    for first_nonzero in 0..3 {
+        let free_count = 3 - first_nonzero - 1;
+        let mut suffix = vec![0; free_count];
+        loop {
+            let mut coords = [Fp::<P>::zero(); 3];
+            coords[first_nonzero] = Fp::one();
+            for (offset, value) in suffix.iter().enumerate() {
+                coords[first_nonzero + 1 + offset] = Fp::new(*value);
+            }
+            points.push(coords);
+
+            if !increment_base_p_digits::<P>(&mut suffix) {
+                break;
+            }
+        }
+    }
+    points
+}
+
+fn projective_points_p1_mod_p<const P: i64>() -> Vec<[Fp<P>; 2]> {
+    let mut points = (0..P)
+        .map(|value| [Fp::one(), Fp::new(value)])
+        .collect::<Vec<_>>();
+    points.push([Fp::zero(), Fp::one()]);
     points
 }
 
@@ -1239,6 +1947,86 @@ fn extended_gcd_i64(lhs: i64, rhs: i64) -> (i64, i64, i64) {
     (gcd, y, x - (lhs / rhs) * y)
 }
 
+fn trim_univariate<const P: i64>(mut polynomial: Vec<Fp<P>>) -> Vec<Fp<P>> {
+    while polynomial.len() > 1 && polynomial.last().is_some_and(FieldElement::is_zero) {
+        polynomial.pop();
+    }
+    if polynomial.is_empty() {
+        polynomial.push(Fp::zero());
+    }
+    polynomial
+}
+
+fn univariate_degree<const P: i64>(polynomial: &[Fp<P>]) -> usize {
+    polynomial
+        .iter()
+        .rposition(|coefficient| !coefficient.is_zero())
+        .unwrap_or(0)
+}
+
+fn univariate_derivative<const P: i64>(polynomial: &[Fp<P>]) -> Vec<Fp<P>> {
+    if polynomial.len() <= 1 {
+        return vec![Fp::zero()];
+    }
+    trim_univariate(
+        polynomial
+            .iter()
+            .enumerate()
+            .skip(1)
+            .map(|(exponent, coefficient)| *coefficient * Fp::new(exponent as i64))
+            .collect(),
+    )
+}
+
+fn univariate_gcd<const P: i64>(mut lhs: Vec<Fp<P>>, mut rhs: Vec<Fp<P>>) -> Vec<Fp<P>> {
+    lhs = trim_univariate(lhs);
+    rhs = trim_univariate(rhs);
+    while !univariate_is_zero(&rhs) {
+        let remainder = univariate_remainder(lhs, rhs.clone());
+        lhs = rhs;
+        rhs = remainder;
+    }
+    univariate_monic(lhs)
+}
+
+fn univariate_remainder<const P: i64>(mut lhs: Vec<Fp<P>>, rhs: Vec<Fp<P>>) -> Vec<Fp<P>> {
+    let rhs = trim_univariate(rhs);
+    assert!(
+        !univariate_is_zero(&rhs),
+        "cannot divide by zero polynomial"
+    );
+    lhs = trim_univariate(lhs);
+
+    while !univariate_is_zero(&lhs) && univariate_degree(&lhs) >= univariate_degree(&rhs) {
+        let lhs_degree = univariate_degree(&lhs);
+        let rhs_degree = univariate_degree(&rhs);
+        let degree_delta = lhs_degree - rhs_degree;
+        let factor = lhs[lhs_degree] / rhs[rhs_degree];
+        for (index, coefficient) in rhs.iter().enumerate() {
+            lhs[index + degree_delta] = lhs[index + degree_delta] - factor * *coefficient;
+        }
+        lhs = trim_univariate(lhs);
+    }
+
+    lhs
+}
+
+fn univariate_monic<const P: i64>(polynomial: Vec<Fp<P>>) -> Vec<Fp<P>> {
+    let polynomial = trim_univariate(polynomial);
+    if univariate_is_zero(&polynomial) {
+        return polynomial;
+    }
+    let leading = polynomial[univariate_degree(&polynomial)];
+    polynomial
+        .into_iter()
+        .map(|coefficient| coefficient / leading)
+        .collect()
+}
+
+fn univariate_is_zero<const P: i64>(polynomial: &[Fp<P>]) -> bool {
+    polynomial.iter().all(FieldElement::is_zero)
+}
+
 fn substitute_p3(
     polynomial: &PolynomialP3,
     forms: &[PolynomialP3; P3_VARIABLE_COUNT],
@@ -1335,6 +2123,22 @@ fn substitute_p3_to_ternary(
         })
 }
 
+fn substitute_p3_to_ternary_fp<const P: i64>(
+    polynomial: &PolynomialP3Fp<P>,
+    forms: &[TernaryPolynomialFp<P>; P3_VARIABLE_COUNT],
+) -> TernaryPolynomialFp<P> {
+    polynomial
+        .terms()
+        .into_iter()
+        .fold(TernaryPolynomialFp::<P>::zero(), |sum, term| {
+            let substituted = term.exponents().into_iter().enumerate().fold(
+                TernaryPolynomialFp::<P>::constant(term.coefficient()),
+                |product, (variable, exponent)| product.mul(&forms[variable].pow_usize(exponent)),
+            );
+            sum.add(&substituted)
+        })
+}
+
 fn segre_quotient_from_even_ternary(polynomial: &TernaryPolynomial) -> TernaryPolynomial {
     TernaryPolynomial::from_terms(
         polynomial
@@ -1345,6 +2149,28 @@ fn segre_quotient_from_even_ternary(polynomial: &TernaryPolynomial) -> TernaryPo
                 assert!(
                     exponents.iter().all(|exponent| exponent % 2 == 0),
                     "Segre quotient expects an even polynomial"
+                );
+                (
+                    term.coefficient(),
+                    std::array::from_fn(|index| exponents[index] / 2),
+                )
+            })
+            .collect(),
+    )
+}
+
+fn segre_quotient_from_even_ternary_fp<const P: i64>(
+    polynomial: &TernaryPolynomialFp<P>,
+) -> TernaryPolynomialFp<P> {
+    TernaryPolynomialFp::<P>::from_terms(
+        polynomial
+            .terms()
+            .into_iter()
+            .map(|term| {
+                let exponents = term.exponents();
+                assert!(
+                    exponents.iter().all(|exponent| exponent % 2 == 0),
+                    "finite-field Segre quotient expects an even polynomial"
                 );
                 (
                     term.coefficient(),
@@ -1481,6 +2307,11 @@ fn ternary_variables() -> [TernaryPolynomial; 3] {
 }
 
 fn vec_to_p3(vector: Vec<Q2>) -> [Q2; P3_VARIABLE_COUNT] {
+    assert_eq!(vector.len(), P3_VARIABLE_COUNT);
+    [vector[0], vector[1], vector[2], vector[3]]
+}
+
+fn vec_to_p3_fp<const P: i64>(vector: Vec<Fp<P>>) -> [Fp<P>; P3_VARIABLE_COUNT] {
     assert_eq!(vector.len(), P3_VARIABLE_COUNT);
     [vector[0], vector[1], vector[2], vector[3]]
 }
@@ -1647,13 +2478,16 @@ mod tests {
 
     #[test]
     fn structural_count_and_bounds_match_endrass_claim() {
-        assert_eq!(endrass_structural_node_count(), ENDRASS_TOTAL_NODE_COUNT);
-        assert_eq!(miyaoka_node_bound(8), ENDRASS_MIYAOKA_UPPER_BOUND);
+        let structural_count = endrass_structural_node_count();
+        let miyaoka_bound = miyaoka_node_bound(8);
+
+        assert_eq!(structural_count, ENDRASS_TOTAL_NODE_COUNT);
+        assert_eq!(miyaoka_bound, ENDRASS_MIYAOKA_UPPER_BOUND);
         assert_eq!(
             varchenko_arnold_number_degree8(),
             ENDRASS_VARCHENKO_DEGREE8_BOUND
         );
-        assert!(ENDRASS_TOTAL_NODE_COUNT < ENDRASS_MIYAOKA_UPPER_BOUND);
+        assert!(structural_count < miyaoka_bound);
     }
 
     #[test]
@@ -1678,6 +2512,140 @@ mod tests {
                 .sum::<usize>(),
             ENDRASS_TOTAL_NODE_COUNT
         );
+    }
+
+    #[test]
+    fn basic_line_length_scorer_tracks_visible_roots_separately() {
+        let mod31 = score_basic_line_lengths(&FiniteFieldScorerInput::<31>::endrass(8));
+        let mod73 = score_basic_line_lengths(&FiniteFieldScorerInput::<73>::endrass(32));
+
+        assert!(mod31.all_lines_degree_four_squarefree());
+        assert_eq!(mod31.triple_plane_bad_points(), 0);
+        assert_eq!(mod31.algebraic_closure_length(), ENDRASS_BASIC_NODE_COUNT);
+        assert_eq!(mod31.visible_root_count(), ENDRASS_BASIC_NODE_COUNT);
+
+        assert!(mod73.all_lines_degree_four_squarefree());
+        assert_eq!(mod73.triple_plane_bad_points(), 0);
+        assert_eq!(mod73.algebraic_closure_length(), ENDRASS_BASIC_NODE_COUNT);
+        assert!(
+            mod73.visible_root_count() < mod73.algebraic_closure_length(),
+            "p=73 keeps the algebraic length but not every line root is F_p-visible"
+        );
+    }
+
+    #[test]
+    fn endrass_multi_prime_calibration_keeps_the_base_scheme_stable() {
+        let calibrations = endrass_multi_prime_calibrations();
+
+        let table = calibrations
+            .iter()
+            .map(|calibration| {
+                (
+                    calibration.prime(),
+                    calibration.sqrt2(),
+                    calibration.global_visible_nodes(),
+                    calibration.global_bad_singularities(),
+                    calibration.base_algebraic_closure_length(),
+                    calibration.base_visible_roots(),
+                    calibration.segre_event_orbit_contribution(),
+                )
+            })
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            table,
+            vec![
+                (31, 8, 168, 0, 112, 112, 168),
+                (41, 17, 168, 0, 112, 112, 168),
+                (73, 32, 144, 0, 112, 104, 168),
+                (89, 25, 144, 0, 112, 104, 168),
+            ]
+        );
+        assert!(
+            calibrations
+                .iter()
+                .all(
+                    |calibration| calibration.sqrt2() * calibration.sqrt2() % calibration.prime()
+                        == 2
+                )
+        );
+        assert_eq!(
+            calibrations
+                .iter()
+                .map(EndrassPrimeCalibration::prime)
+                .collect::<Vec<_>>(),
+            vec![31, 41, 73, 89]
+        );
+        assert_eq!(
+            calibrations
+                .iter()
+                .map(EndrassPrimeCalibration::sqrt2)
+                .collect::<Vec<_>>(),
+            vec![8, 17, 32, 25]
+        );
+        assert!(
+            calibrations
+                .iter()
+                .all(|calibration| calibration.base_algebraic_closure_length()
+                    == ENDRASS_BASIC_NODE_COUNT)
+        );
+        assert_eq!(
+            calibrations[0].global_visible_nodes(),
+            ENDRASS_TOTAL_NODE_COUNT
+        );
+        assert_eq!(
+            calibrations[1].global_visible_nodes(),
+            ENDRASS_TOTAL_NODE_COUNT
+        );
+        assert!(
+            calibrations[2].global_visible_nodes() < ENDRASS_TOTAL_NODE_COUNT,
+            "larger primes need not make every Endrass node F_p-visible"
+        );
+        assert!(
+            calibrations
+                .iter()
+                .all(|calibration| calibration.global_bad_singularities() == 0)
+        );
+    }
+
+    #[test]
+    fn d4_reflection_event_orbit_sizes_match_the_scanner_weights() {
+        let input = FiniteFieldScorerInput::<31>::d4_family(endrass_parameters_mod_p(8));
+        let generic_reflection_event = [Fp::<31>::new(1), Fp::zero(), Fp::new(2), Fp::new(3)];
+        let z_axis_contact = [Fp::<31>::new(1), Fp::zero(), Fp::zero(), Fp::new(3)];
+        let w_axis_contact = [Fp::<31>::new(1), Fp::zero(), Fp::new(2), Fp::zero()];
+
+        assert_eq!(symmetry_orbit(&input, generic_reflection_event).len(), 8);
+        assert_eq!(symmetry_orbit(&input, z_axis_contact).len(), 4);
+        assert_eq!(symmetry_orbit(&input, w_axis_contact).len(), 4);
+    }
+
+    #[test]
+    fn d4_event_scanner_and_candidate_records_are_sortable() {
+        let parameters = endrass_parameters_mod_p::<31>(8);
+        let candidate = scan_d4_candidate(parameters);
+
+        assert_eq!(
+            candidate.singularity_stats().node_like(),
+            ENDRASS_TOTAL_NODE_COUNT
+        );
+        assert_eq!(
+            candidate.base_length_stats().algebraic_closure_length(),
+            ENDRASS_BASIC_NODE_COUNT
+        );
+        assert_eq!(candidate.event_scans().len(), 2);
+        assert!(
+            candidate
+                .event_scans()
+                .iter()
+                .all(|scan| scan.predicted_orbit_contribution() > 0)
+        );
+
+        let local = scan_d4_local_window(parameters, 0, 1);
+        assert_eq!(local.len(), 1);
+        assert_eq!(local[0].parameters(), parameters);
+        assert!(D4SearchCandidate::<31>::tsv_header().contains("prime"));
+        assert!(local[0].to_tsv().contains("axis-y0"));
     }
 
     #[test]

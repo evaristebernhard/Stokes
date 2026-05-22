@@ -14,3 +14,7 @@ path = "src/lib.rs"
 [[bin]]
 name = "degree08"
 path = "src/main.rs"
+
+[[bin]]
+name = "search_d4"
+path = "src/bin/search_d4.rs"
