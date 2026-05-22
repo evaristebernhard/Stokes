@@ -247,7 +247,17 @@ r(t0)  = rho
 r'(t0) = p'(t0)/(2*rho)
 ```
 
-来线性化。当前 Rust 还没有实现“由事件约束反解参数”的线性系统求解器；已经完成的是把给定参数投影到这些低维 quotient 事件上做计数、签名和排序。后续应优先枚举事件组合，再解线性约束，而不是盲目随机扫全参数。
+来线性化。当前 Rust 已经实现第一版“由事件约束反解参数”的有限域求解器：
+
+```text
+固定 D4 的 P 盘参数 axis_offset, diagonal_offset, plane_scale
+-> 枚举反射平面 quotient 上的 q 与 rho, rho^2=P_E(q)
+-> 对 R 的 7 个系数 a,h,b,d,e,g,i 建线性方程
+-> 解 affine solution space
+-> 枚举低自由维解并生成 D4FamilyParameters
+```
+
+这一步仍是第一阶段：它只固定 `P` 后反解 `R`，还没有同时搜索 `A,B,plane_scale`；并且 `rho=0` 的分支/切触事件不能使用 `dP/(2*rho)`，需要后续单独处理。当前实现支持非零 `rho` 的 off-axis quotient node、`z`-axis contact、`w`-axis contact。
 
 ## 扫描顺序
 
@@ -260,7 +270,7 @@ Stage 0:
 
 Stage 1:
   固定 A=1, B=2
-  在 Endraß 参数附近扫 h 和 R 的小扰动
+  枚举 quotient 事件并线性反解 R 的 7 个系数
 
 Stage 2:
   固定 A=1
@@ -289,6 +299,8 @@ score =
 ```text
 cargo run -p degree08 --bin search_d4
 cargo run -p degree08 --bin search_d4 -- d4-window --prime 31 --radius 1 --limit 10
+cargo run -p degree08 --bin search_d4 -- d4-events --prime 31 --solution-limit 40 --limit 5
+cargo run -p degree08 --bin search_d4 -- d4-events --prime 31 --solution-limit 40 --limit 5 --format json
 ```
 
 第一个命令输出 Endraß 多素数校准，其中 `segre_event_weight` 是 quotient 事件的加权预测信号：
@@ -303,6 +315,25 @@ prime, sqrt2, global_visible_nodes, global_bad, base_ac, base_visible, segre_eve
 prime, score, total, node, bad, base_fp, extra,
 base_ac, base_visible, events, params
 ```
+
+`d4-events` 则执行真正的事件约束生成路线。默认过滤条件是：
+
+```text
+base_ac = 112
+triple_plane_bad_points = 0
+bad_sing = 0
+quotient linear_factors = 0
+```
+
+并输出带 seed events 的 TSV 或 JSONL。TSV 字段为：
+
+```text
+seed_event_count, free_dim, seed_events,
+prime, score, total, node, bad, base_fp, extra,
+base_ac, base_visible, events, params
+```
+
+其中 `solution-limit` 控制实际枚举并进入过滤器的线性解数量；增大它会触发更多全局 `P^3(F_p)` singularity scorer，运行时间会明显增加。
 
 校准素数当前固定为：
 
@@ -328,4 +359,4 @@ finite-field candidate
 -> quotient length / reducedness / no extra singularity certificate
 ```
 
-当前第二阶段完成的是事件驱动搜索的第一版：有限域 scorer 可以识别 Endraß reduction，Segre verifier 可以解释额外 56 个节点的五个事件，D4 event scanner 可以输出 quotient event signature 和排序候选。完整的 `mu(8)` 突破仍需要新的候选、跨素数稳定性、特征零 lift 和 saturation 证书。
+当前第三阶段的第一步完成了事件驱动搜索的生成器：有限域 scorer 可以识别 Endraß reduction，Segre verifier 可以解释额外 56 个节点的五个事件，D4 event scanner 可以输出 quotient event signature 和排序候选，`d4-events` 可以从非零 `rho` 事件约束反解 `R` 并筛选候选。完整的 `mu(8)` 突破仍需要更大搜索预算、`rho=0` 分支事件、D2/更低对称、跨素数稳定性、特征零 lift 和 saturation 证书。

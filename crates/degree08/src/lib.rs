@@ -25,6 +25,7 @@ pub const ENDRASS_MIYAOKA_UPPER_BOUND: usize = 174;
 pub const ENDRASS_VARCHENKO_DEGREE8_BOUND: usize = 180;
 
 type PolynomialP3Fp<const P: i64> = SparsePolynomial<Fp<P>, P3_VARIABLE_COUNT>;
+const D4_R_PARAMETER_COUNT: usize = 7;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Fp<const P: i64> {
@@ -369,6 +370,81 @@ impl D4ReflectionPlane {
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum D4EventKind {
+    OffAxisNode,
+    ZAxisContact,
+    WAxisContact,
+}
+
+impl D4EventKind {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::OffAxisNode => "off-axis-node",
+            Self::ZAxisContact => "z-axis-contact",
+            Self::WAxisContact => "w-axis-contact",
+        }
+    }
+
+    fn derivative_variables(self) -> &'static [usize] {
+        match self {
+            Self::OffAxisNode => &[0, 1, 2],
+            Self::ZAxisContact => &[0, 2],
+            Self::WAxisContact => &[0, 1],
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct D4LinearEvent<const P: i64> {
+    reflection_plane: D4ReflectionPlane,
+    kind: D4EventKind,
+    point: [Fp<P>; 3],
+    rho: Fp<P>,
+}
+
+impl<const P: i64> D4LinearEvent<P> {
+    pub fn reflection_plane(&self) -> D4ReflectionPlane {
+        self.reflection_plane
+    }
+
+    pub fn kind(&self) -> D4EventKind {
+        self.kind
+    }
+
+    pub fn point(&self) -> [Fp<P>; 3] {
+        self.point
+    }
+
+    pub fn rho(&self) -> Fp<P> {
+        self.rho
+    }
+
+    pub fn signature(&self) -> String {
+        format!(
+            "{}:{}:[{},{},{}]:rho={}",
+            self.reflection_plane.label(),
+            self.kind.label(),
+            self.point[0].value(),
+            self.point[1].value(),
+            self.point[2].value(),
+            self.rho.value()
+        )
+    }
+
+    pub fn json_fragment(&self) -> String {
+        format!(
+            "{{\"plane\":\"{}\",\"kind\":\"{}\",\"point\":[{},{},{}],\"rho\":{}}}",
+            self.reflection_plane.label(),
+            self.kind.label(),
+            self.point[0].value(),
+            self.point[1].value(),
+            self.point[2].value(),
+            self.rho.value()
+        )
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PlaneQuarticEventScan {
     reflection_label: &'static str,
@@ -545,6 +621,116 @@ impl<const P: i64> D4SearchCandidate<P> {
             self.base_length_stats.visible_root_count(),
             event_signature,
             format_d4_parameters(self.parameters)
+        )
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct D4EventSearchOptions {
+    pub max_event_set_size: usize,
+    pub max_free_dimension: usize,
+    pub solution_scan_limit: usize,
+    pub candidate_limit: usize,
+    pub require_base_112: bool,
+    pub require_no_bad_singularities: bool,
+    pub require_no_linear_factors: bool,
+}
+
+impl Default for D4EventSearchOptions {
+    fn default() -> Self {
+        Self {
+            max_event_set_size: 2,
+            max_free_dimension: 1,
+            solution_scan_limit: 200,
+            candidate_limit: 20,
+            require_base_112: true,
+            require_no_bad_singularities: true,
+            require_no_linear_factors: true,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct D4GeneratedCandidate<const P: i64> {
+    seed_events: Vec<D4LinearEvent<P>>,
+    free_dimension: usize,
+    candidate: D4SearchCandidate<P>,
+}
+
+impl<const P: i64> D4GeneratedCandidate<P> {
+    pub fn seed_events(&self) -> &[D4LinearEvent<P>] {
+        &self.seed_events
+    }
+
+    pub fn free_dimension(&self) -> usize {
+        self.free_dimension
+    }
+
+    pub fn candidate(&self) -> &D4SearchCandidate<P> {
+        &self.candidate
+    }
+
+    pub fn tsv_header() -> &'static str {
+        "seed_event_count\tfree_dim\tseed_events\tprime\tscore\ttotal\tnode\tbad\tbase_fp\textra\tbase_ac\tbase_visible\tevents\tparams"
+    }
+
+    pub fn to_tsv(&self) -> String {
+        let seed_events = self
+            .seed_events
+            .iter()
+            .map(D4LinearEvent::signature)
+            .collect::<Vec<_>>()
+            .join("|");
+        format!(
+            "{}\t{}\t{}\t{}",
+            self.seed_events.len(),
+            self.free_dimension,
+            seed_events,
+            self.candidate.to_tsv()
+        )
+    }
+
+    pub fn to_json_line(&self) -> String {
+        let seed_events = self
+            .seed_events
+            .iter()
+            .map(D4LinearEvent::json_fragment)
+            .collect::<Vec<_>>()
+            .join(",");
+        let event_scans = self
+            .candidate
+            .event_scans()
+            .iter()
+            .map(|scan| {
+                format!(
+                    "{{\"plane\":\"{}\",\"off_axis_nodes\":{},\"z_axis_contacts\":{},\"w_axis_contacts\":{},\"linear_factors\":{},\"predicted_orbit_contribution\":{}}}",
+                    scan.reflection_label(),
+                    scan.off_axis_nodes(),
+                    scan.z_axis_contacts(),
+                    scan.w_axis_contacts(),
+                    scan.linear_factors(),
+                    scan.predicted_orbit_contribution()
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(",");
+        format!(
+            "{{\"prime\":{P},\"seed_event_count\":{},\"free_dimension\":{},\"seed_events\":[{}],\"score\":{},\"total\":{},\"node\":{},\"bad\":{},\"base_fp\":{},\"extra\":{},\"base_ac\":{},\"base_visible\":{},\"event_scans\":[{}],\"parameters\":{}}}",
+            self.seed_events.len(),
+            self.free_dimension,
+            seed_events,
+            self.candidate.score(),
+            self.candidate.singularity_stats().total_sing(),
+            self.candidate.singularity_stats().node_like(),
+            self.candidate.singularity_stats().bad_sing(),
+            self.candidate.singularity_stats().base_like(),
+            self.candidate.singularity_stats().extra_like(),
+            self.candidate
+                .base_length_stats()
+                .algebraic_closure_length(),
+            self.candidate.base_length_stats().visible_root_count(),
+            event_scans,
+            format_d4_parameters_json(self.candidate.parameters())
         )
     }
 }
@@ -1105,23 +1291,36 @@ pub fn d4_family_plane_product_mod_p<const P: i64>(
 pub fn d4_family_quartic_r_mod_p<const P: i64>(
     parameters: D4FamilyParameters<P>,
 ) -> PolynomialP3Fp<P> {
+    let basis = d4_quartic_r_basis_mod_p::<P>();
+    [
+        parameters.a,
+        parameters.h,
+        parameters.b,
+        parameters.d,
+        parameters.e,
+        parameters.g,
+        parameters.i,
+    ]
+    .into_iter()
+    .zip(basis)
+    .fold(PolynomialP3Fp::<P>::zero(), |sum, (coefficient, basis)| {
+        sum.add(&basis.scale(coefficient))
+    })
+}
+
+fn d4_quartic_r_basis_mod_p<const P: i64>() -> Vec<PolynomialP3Fp<P>> {
     let [x, y, z, w] = variables_fp();
     let radius_squared = x.pow_usize(2).add(&y.pow_usize(2));
 
-    radius_squared
-        .pow_usize(2)
-        .scale(parameters.a)
-        .add(&x.pow_usize(2).mul(&y.pow_usize(2)).scale(parameters.h))
-        .add(
-            &radius_squared.mul(
-                &z.pow_usize(2)
-                    .scale(parameters.b)
-                    .add(&w.pow_usize(2).scale(parameters.d)),
-            ),
-        )
-        .add(&z.pow_usize(4).scale(parameters.e))
-        .add(&z.pow_usize(2).mul(&w.pow_usize(2)).scale(parameters.g))
-        .add(&w.pow_usize(4).scale(parameters.i))
+    vec![
+        radius_squared.pow_usize(2),
+        x.pow_usize(2).mul(&y.pow_usize(2)),
+        radius_squared.mul(&z.pow_usize(2)),
+        radius_squared.mul(&w.pow_usize(2)),
+        z.pow_usize(4),
+        z.pow_usize(2).mul(&w.pow_usize(2)),
+        w.pow_usize(4),
+    ]
 }
 
 pub fn endrass_parameters_mod_p<const P: i64>(sqrt2_value: i64) -> D4FamilyParameters<P> {
@@ -1183,6 +1382,84 @@ pub fn scan_d4_local_window<const P: i64>(
     candidates
 }
 
+pub fn enumerate_d4_linear_events<const P: i64>(
+    fixed_plane_parameters: D4FamilyParameters<P>,
+) -> Vec<D4LinearEvent<P>> {
+    assert!(P != 2, "event linearization requires odd characteristic");
+    [
+        D4ReflectionPlane::AxisY0,
+        D4ReflectionPlane::DiagonalXEqualsY,
+    ]
+    .into_iter()
+    .flat_map(|reflection_plane| {
+        enumerate_d4_linear_events_on_plane(fixed_plane_parameters, reflection_plane)
+    })
+    .collect()
+}
+
+pub fn generate_d4_event_candidates<const P: i64>(
+    fixed_plane_parameters: D4FamilyParameters<P>,
+    options: D4EventSearchOptions,
+) -> Vec<D4GeneratedCandidate<P>> {
+    let events = enumerate_d4_linear_events(fixed_plane_parameters);
+    let max_event_set_size = options.max_event_set_size.max(1).min(events.len());
+    let mut generated = Vec::new();
+    let mut seen_parameters = BTreeSet::new();
+    let mut scanned_solutions = 0usize;
+
+    'event_size: for event_set_size in 1..=max_event_set_size {
+        let mut event_indices = Vec::with_capacity(event_set_size);
+        let keep_searching = visit_index_combinations(
+            events.len(),
+            event_set_size,
+            0,
+            &mut event_indices,
+            &mut |indices| {
+                let seed_events = indices
+                    .iter()
+                    .map(|&index| events[index])
+                    .collect::<Vec<_>>();
+                let rows = d4_linear_event_rows(fixed_plane_parameters, &seed_events);
+                let Some(solution) = solve_d4_affine_linear_system(&rows) else {
+                    return true;
+                };
+                if solution.free_dimension() > options.max_free_dimension {
+                    return true;
+                }
+
+                visit_affine_solutions(&solution, &mut |coefficients| {
+                    scanned_solutions += 1;
+                    if scanned_solutions > options.solution_scan_limit {
+                        return false;
+                    }
+
+                    let parameters =
+                        d4_parameters_from_r_coefficients(fixed_plane_parameters, coefficients);
+                    if !seen_parameters.insert(d4_parameter_key(parameters)) {
+                        return true;
+                    }
+                    let Some(candidate) = build_filtered_d4_candidate(parameters, options) else {
+                        return true;
+                    };
+                    generated.push(D4GeneratedCandidate {
+                        seed_events: seed_events.clone(),
+                        free_dimension: solution.free_dimension(),
+                        candidate,
+                    });
+                    true
+                })
+            },
+        );
+        if !keep_searching || scanned_solutions > options.solution_scan_limit {
+            break 'event_size;
+        }
+    }
+
+    generated.sort_by_key(|candidate| std::cmp::Reverse(candidate.candidate().score()));
+    generated.truncate(options.candidate_limit);
+    generated
+}
+
 pub fn score_basic_line_lengths<const P: i64>(
     input: &FiniteFieldScorerInput<P>,
 ) -> BaseLineLengthStats {
@@ -1231,12 +1508,39 @@ pub fn d4_segre_quotient_mod_p<const P: i64>(
     plane: D4ReflectionPlane,
 ) -> TernaryPolynomialFp<P> {
     let polynomial = d4_family_polynomial_mod_p(parameters);
+    let forms = d4_reflection_plane_forms_fp(plane);
+    segre_quotient_from_even_ternary_fp(&substitute_p3_to_ternary_fp(&polynomial, &forms))
+}
+
+fn d4_plane_product_quotient_mod_p<const P: i64>(
+    parameters: D4FamilyParameters<P>,
+    plane: D4ReflectionPlane,
+) -> TernaryPolynomialFp<P> {
+    let polynomial = d4_family_plane_product_mod_p(parameters);
+    let forms = d4_reflection_plane_forms_fp(plane);
+    segre_quotient_from_even_ternary_fp(&substitute_p3_to_ternary_fp(&polynomial, &forms))
+}
+
+fn d4_r_quotient_basis_mod_p<const P: i64>(
+    plane: D4ReflectionPlane,
+) -> Vec<TernaryPolynomialFp<P>> {
+    let forms = d4_reflection_plane_forms_fp(plane);
+    d4_quartic_r_basis_mod_p::<P>()
+        .into_iter()
+        .map(|basis| {
+            segre_quotient_from_even_ternary_fp(&substitute_p3_to_ternary_fp(&basis, &forms))
+        })
+        .collect()
+}
+
+fn d4_reflection_plane_forms_fp<const P: i64>(
+    plane: D4ReflectionPlane,
+) -> [TernaryPolynomialFp<P>; P3_VARIABLE_COUNT] {
     let [u, z, w] = ternary_variables_fp();
-    let forms = match plane {
+    match plane {
         D4ReflectionPlane::AxisY0 => [u, TernaryPolynomialFp::zero(), z, w],
         D4ReflectionPlane::DiagonalXEqualsY => [u.clone(), u, z, w],
-    };
-    segre_quotient_from_even_ternary_fp(&substitute_p3_to_ternary_fp(&polynomial, &forms))
+    }
 }
 
 pub fn endrass_segre_quotient_mod_p<const P: i64>(
@@ -1435,6 +1739,196 @@ fn candidate_score<const P: i64>(
         - 500 * base_length_stats.triple_plane_bad_points() as isize
 }
 
+fn enumerate_d4_linear_events_on_plane<const P: i64>(
+    fixed_plane_parameters: D4FamilyParameters<P>,
+    reflection_plane: D4ReflectionPlane,
+) -> Vec<D4LinearEvent<P>> {
+    let plane_product = d4_plane_product_quotient_mod_p(fixed_plane_parameters, reflection_plane);
+    let mut events = Vec::new();
+
+    for point in projective_points_p2_mod_p::<P>()
+        .into_iter()
+        .filter(|point| point.iter().all(|coord| !coord.is_zero()))
+    {
+        events.extend(d4_linear_events_at_point(
+            reflection_plane,
+            D4EventKind::OffAxisNode,
+            point,
+            &plane_product,
+        ));
+    }
+
+    for binary_point in projective_points_p1_mod_p::<P>()
+        .into_iter()
+        .filter(|point| point.iter().all(|coord| !coord.is_zero()))
+    {
+        events.extend(d4_linear_events_at_point(
+            reflection_plane,
+            D4EventKind::ZAxisContact,
+            [binary_point[0], Fp::zero(), binary_point[1]],
+            &plane_product,
+        ));
+        events.extend(d4_linear_events_at_point(
+            reflection_plane,
+            D4EventKind::WAxisContact,
+            [binary_point[0], binary_point[1], Fp::zero()],
+            &plane_product,
+        ));
+    }
+
+    events
+}
+
+fn d4_linear_events_at_point<const P: i64>(
+    reflection_plane: D4ReflectionPlane,
+    kind: D4EventKind,
+    point: [Fp<P>; 3],
+    plane_product: &TernaryPolynomialFp<P>,
+) -> Vec<D4LinearEvent<P>> {
+    square_roots_fp(plane_product.evaluate(&point))
+        .into_iter()
+        .filter(|rho| !rho.is_zero())
+        .map(|rho| D4LinearEvent {
+            reflection_plane,
+            kind,
+            point,
+            rho,
+        })
+        .collect()
+}
+
+fn d4_linear_event_rows<const P: i64>(
+    fixed_plane_parameters: D4FamilyParameters<P>,
+    events: &[D4LinearEvent<P>],
+) -> Vec<[Fp<P>; D4_R_PARAMETER_COUNT + 1]> {
+    events
+        .iter()
+        .flat_map(|event| d4_single_linear_event_rows(fixed_plane_parameters, *event))
+        .collect()
+}
+
+fn d4_single_linear_event_rows<const P: i64>(
+    fixed_plane_parameters: D4FamilyParameters<P>,
+    event: D4LinearEvent<P>,
+) -> Vec<[Fp<P>; D4_R_PARAMETER_COUNT + 1]> {
+    let basis = d4_r_quotient_basis_mod_p(event.reflection_plane);
+    let plane_product =
+        d4_plane_product_quotient_mod_p(fixed_plane_parameters, event.reflection_plane);
+    let mut rows = Vec::with_capacity(1 + event.kind.derivative_variables().len());
+
+    rows.push(linear_event_row(&basis, event.point, event.rho, None));
+    let denominator = Fp::<P>::new(2) * event.rho;
+    for &variable in event.kind.derivative_variables() {
+        let rhs = plane_product
+            .partial_derivative(variable)
+            .evaluate(&event.point)
+            / denominator;
+        rows.push(linear_event_row(&basis, event.point, rhs, Some(variable)));
+    }
+
+    rows
+}
+
+fn linear_event_row<const P: i64>(
+    basis: &[TernaryPolynomialFp<P>],
+    point: [Fp<P>; 3],
+    rhs: Fp<P>,
+    derivative_variable: Option<usize>,
+) -> [Fp<P>; D4_R_PARAMETER_COUNT + 1] {
+    assert_eq!(basis.len(), D4_R_PARAMETER_COUNT);
+    std::array::from_fn(|index| {
+        if index == D4_R_PARAMETER_COUNT {
+            return rhs;
+        }
+        match derivative_variable {
+            Some(variable) => basis[index].partial_derivative(variable).evaluate(&point),
+            None => basis[index].evaluate(&point),
+        }
+    })
+}
+
+fn build_filtered_d4_candidate<const P: i64>(
+    parameters: D4FamilyParameters<P>,
+    options: D4EventSearchOptions,
+) -> Option<D4SearchCandidate<P>> {
+    let input = FiniteFieldScorerInput::d4_family(parameters);
+    let base_length_stats = score_basic_line_lengths(&input);
+    if options.require_base_112
+        && (base_length_stats.algebraic_closure_length() != ENDRASS_BASIC_NODE_COUNT
+            || base_length_stats.triple_plane_bad_points() != 0)
+    {
+        return None;
+    }
+
+    let event_scans = scan_d4_segre_events(parameters);
+    if options.require_no_linear_factors && event_scans.iter().any(|scan| scan.linear_factors() > 0)
+    {
+        return None;
+    }
+
+    let singularity_stats = score_finite_field_singularities(&input);
+    if options.require_no_bad_singularities && singularity_stats.bad_sing() > 0 {
+        return None;
+    }
+
+    let score = candidate_score(&singularity_stats, &base_length_stats, &event_scans);
+    Some(D4SearchCandidate {
+        parameters,
+        singularity_stats,
+        base_length_stats,
+        event_scans,
+        score,
+    })
+}
+
+fn d4_parameters_from_r_coefficients<const P: i64>(
+    fixed_plane_parameters: D4FamilyParameters<P>,
+    coefficients: [Fp<P>; D4_R_PARAMETER_COUNT],
+) -> D4FamilyParameters<P> {
+    D4FamilyParameters {
+        axis_offset: fixed_plane_parameters.axis_offset,
+        diagonal_offset: fixed_plane_parameters.diagonal_offset,
+        plane_scale: fixed_plane_parameters.plane_scale,
+        a: coefficients[0],
+        h: coefficients[1],
+        b: coefficients[2],
+        d: coefficients[3],
+        e: coefficients[4],
+        g: coefficients[5],
+        i: coefficients[6],
+    }
+}
+
+#[cfg(test)]
+fn d4_r_coefficients<const P: i64>(
+    parameters: D4FamilyParameters<P>,
+) -> [Fp<P>; D4_R_PARAMETER_COUNT] {
+    [
+        parameters.a,
+        parameters.h,
+        parameters.b,
+        parameters.d,
+        parameters.e,
+        parameters.g,
+        parameters.i,
+    ]
+}
+
+fn d4_parameter_key<const P: i64>(parameters: D4FamilyParameters<P>) -> [i64; 10] {
+    [
+        parameters.axis_offset.value(),
+        parameters.diagonal_offset.value(),
+        parameters.plane_scale.value(),
+        parameters.a.value(),
+        parameters.h.value(),
+        parameters.b.value(),
+        parameters.d.value(),
+        parameters.e.value(),
+        parameters.g.value(),
+        parameters.i.value(),
+    ]
+}
+
 fn format_d4_parameters<const P: i64>(parameters: D4FamilyParameters<P>) -> String {
     format!(
         "axis={},diag={},scale={},a={},h={},b={},d={},e={},g={},i={}",
@@ -1449,6 +1943,209 @@ fn format_d4_parameters<const P: i64>(parameters: D4FamilyParameters<P>) -> Stri
         parameters.g.value(),
         parameters.i.value()
     )
+}
+
+fn format_d4_parameters_json<const P: i64>(parameters: D4FamilyParameters<P>) -> String {
+    format!(
+        "{{\"axis\":{},\"diag\":{},\"scale\":{},\"a\":{},\"h\":{},\"b\":{},\"d\":{},\"e\":{},\"g\":{},\"i\":{}}}",
+        parameters.axis_offset.value(),
+        parameters.diagonal_offset.value(),
+        parameters.plane_scale.value(),
+        parameters.a.value(),
+        parameters.h.value(),
+        parameters.b.value(),
+        parameters.d.value(),
+        parameters.e.value(),
+        parameters.g.value(),
+        parameters.i.value()
+    )
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct AffineLinearSolution<const P: i64, const N: usize> {
+    particular: [Fp<P>; N],
+    basis: Vec<[Fp<P>; N]>,
+}
+
+impl<const P: i64, const N: usize> AffineLinearSolution<P, N> {
+    fn free_dimension(&self) -> usize {
+        self.basis.len()
+    }
+}
+
+fn solve_d4_affine_linear_system<const P: i64>(
+    rows: &[[Fp<P>; D4_R_PARAMETER_COUNT + 1]],
+) -> Option<AffineLinearSolution<P, D4_R_PARAMETER_COUNT>> {
+    const N: usize = D4_R_PARAMETER_COUNT;
+    if rows.is_empty() {
+        return Some(AffineLinearSolution {
+            particular: [Fp::zero(); N],
+            basis: (0..N)
+                .map(|free_col| {
+                    std::array::from_fn(|index| {
+                        if index == free_col {
+                            Fp::one()
+                        } else {
+                            Fp::zero()
+                        }
+                    })
+                })
+                .collect(),
+        });
+    }
+
+    let mut matrix = rows.iter().map(|row| row.to_vec()).collect::<Vec<_>>();
+    let mut pivots = Vec::new();
+    let mut pivot_row = 0usize;
+
+    for col in 0..N {
+        let Some(row_with_pivot) =
+            (pivot_row..matrix.len()).find(|&row| !matrix[row][col].is_zero())
+        else {
+            continue;
+        };
+
+        matrix.swap(pivot_row, row_with_pivot);
+        let pivot = matrix[pivot_row][col];
+        for entry in &mut matrix[pivot_row] {
+            *entry = *entry / pivot;
+        }
+
+        let pivot_values = matrix[pivot_row].clone();
+        for (row, matrix_row) in matrix.iter_mut().enumerate() {
+            if row == pivot_row {
+                continue;
+            }
+            let factor = matrix_row[col];
+            if factor.is_zero() {
+                continue;
+            }
+            for (entry, pivot_entry) in matrix_row.iter_mut().zip(&pivot_values) {
+                *entry = *entry - factor * *pivot_entry;
+            }
+        }
+
+        pivots.push(col);
+        pivot_row += 1;
+        if pivot_row == matrix.len() {
+            break;
+        }
+    }
+
+    for row in &matrix {
+        if row[..N].iter().all(FieldElement::is_zero) && !row[N].is_zero() {
+            return None;
+        }
+    }
+
+    let mut is_pivot_col = [false; N];
+    for &pivot in &pivots {
+        is_pivot_col[pivot] = true;
+    }
+    let free_cols = (0..N).filter(|&col| !is_pivot_col[col]).collect::<Vec<_>>();
+
+    let mut particular = [Fp::<P>::zero(); N];
+    for (row, &pivot_col) in pivots.iter().enumerate() {
+        particular[pivot_col] = matrix[row][N];
+    }
+
+    let basis = free_cols
+        .into_iter()
+        .map(|free_col| {
+            let mut vector = [Fp::<P>::zero(); N];
+            vector[free_col] = Fp::one();
+            for (row, &pivot_col) in pivots.iter().enumerate() {
+                vector[pivot_col] = -matrix[row][free_col];
+            }
+            vector
+        })
+        .collect();
+
+    Some(AffineLinearSolution { particular, basis })
+}
+
+#[cfg(test)]
+fn enumerate_affine_solutions<const P: i64, const N: usize>(
+    solution: &AffineLinearSolution<P, N>,
+) -> Vec<[Fp<P>; N]> {
+    let mut results = Vec::new();
+    visit_affine_solutions(solution, &mut |point| {
+        results.push(point);
+        true
+    });
+    results
+}
+
+fn visit_affine_solutions<const P: i64, const N: usize>(
+    solution: &AffineLinearSolution<P, N>,
+    visit: &mut impl FnMut([Fp<P>; N]) -> bool,
+) -> bool {
+    let mut digits = vec![0; solution.basis.len()];
+    loop {
+        let mut point = solution.particular;
+        for (digit, basis_vector) in digits.iter().zip(&solution.basis) {
+            let scale = Fp::<P>::new(*digit);
+            for (entry, basis_entry) in point.iter_mut().zip(basis_vector) {
+                *entry = *entry + scale * *basis_entry;
+            }
+        }
+        if !visit(point) {
+            return false;
+        }
+
+        if !increment_base_p_digits::<P>(&mut digits) {
+            break;
+        }
+    }
+    true
+}
+
+fn visit_index_combinations(
+    len: usize,
+    size: usize,
+    start: usize,
+    current: &mut Vec<usize>,
+    visit: &mut impl FnMut(&[usize]) -> bool,
+) -> bool {
+    if current.len() == size {
+        return visit(current);
+    }
+
+    let remaining = size - current.len();
+    for index in start..=len - remaining {
+        current.push(index);
+        if !visit_index_combinations(len, size, index + 1, current, visit) {
+            return false;
+        }
+        current.pop();
+    }
+    true
+}
+
+fn square_roots_fp<const P: i64>(value: Fp<P>) -> Vec<Fp<P>> {
+    (0..P)
+        .map(Fp::<P>::new)
+        .filter(|root| *root * *root == value)
+        .collect()
+}
+
+#[cfg(test)]
+fn d4_event_constraints_hold<const P: i64>(
+    parameters: D4FamilyParameters<P>,
+    event: D4LinearEvent<P>,
+) -> bool {
+    let coefficients = d4_r_coefficients(parameters);
+    d4_single_linear_event_rows(parameters, event)
+        .into_iter()
+        .all(|row| {
+            let lhs = row[..D4_R_PARAMETER_COUNT]
+                .iter()
+                .zip(coefficients)
+                .fold(Fp::<P>::zero(), |sum, (coefficient, parameter)| {
+                    sum + *coefficient * parameter
+                });
+            lhs == row[D4_R_PARAMETER_COUNT]
+        })
 }
 
 fn octagon_cos_sin(index: usize) -> (Q2, Q2) {
@@ -2646,6 +3343,81 @@ mod tests {
         assert_eq!(local[0].parameters(), parameters);
         assert!(D4SearchCandidate::<31>::tsv_header().contains("prime"));
         assert!(local[0].to_tsv().contains("axis-y0"));
+    }
+
+    #[test]
+    fn d4_linear_event_enumerator_finds_endrass_satisfied_events() {
+        let parameters = endrass_parameters_mod_p::<31>(8);
+        let events = enumerate_d4_linear_events(parameters);
+        assert!(
+            events
+                .iter()
+                .any(|event| event.kind() == D4EventKind::ZAxisContact)
+        );
+        let satisfied = events
+            .into_iter()
+            .filter(|&event| d4_event_constraints_hold(parameters, event))
+            .collect::<Vec<_>>();
+
+        assert!(
+            satisfied
+                .iter()
+                .any(|event| event.kind() == D4EventKind::OffAxisNode)
+        );
+        assert!(
+            satisfied
+                .iter()
+                .any(|event| event.kind() == D4EventKind::ZAxisContact)
+        );
+        assert!(satisfied.len() >= 4);
+    }
+
+    #[test]
+    fn d4_linear_event_solver_recovers_endrass_from_seed_events() {
+        let parameters = endrass_parameters_mod_p::<31>(8);
+        let events = enumerate_d4_linear_events(parameters)
+            .into_iter()
+            .filter(|&event| d4_event_constraints_hold(parameters, event))
+            .collect::<Vec<_>>();
+        let expected = d4_r_coefficients(parameters);
+
+        let rows = d4_linear_event_rows(parameters, &events);
+        let solution = solve_d4_affine_linear_system(&rows)
+            .expect("Endrass-satisfied event equations should be consistent");
+        let recovered = enumerate_affine_solutions(&solution)
+            .into_iter()
+            .any(|coefficients| coefficients == expected);
+
+        assert!(
+            recovered,
+            "the Endrass R coefficients should lie in the nonzero-rho event solution space"
+        );
+    }
+
+    #[test]
+    fn d4_event_candidate_records_include_seed_events_and_json() {
+        let parameters = endrass_parameters_mod_p::<31>(8);
+        let seed_event = enumerate_d4_linear_events(parameters)
+            .into_iter()
+            .find(|&event| d4_event_constraints_hold(parameters, event))
+            .expect("Endrass reduction should satisfy at least one nonzero-rho event");
+        let generated = D4GeneratedCandidate {
+            seed_events: vec![seed_event],
+            free_dimension: 1,
+            candidate: scan_d4_candidate(parameters),
+        };
+
+        assert!(D4GeneratedCandidate::<31>::tsv_header().contains("seed_events"));
+        assert!(!generated.seed_events().is_empty());
+        assert_eq!(
+            generated
+                .candidate()
+                .base_length_stats()
+                .algebraic_closure_length(),
+            ENDRASS_BASIC_NODE_COUNT
+        );
+        assert!(generated.to_tsv().contains("axis"));
+        assert!(generated.to_json_line().contains("\"seed_events\""));
     }
 
     #[test]
