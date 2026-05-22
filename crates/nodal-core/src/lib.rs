@@ -2174,9 +2174,12 @@ where
 
     for (zero_based_line, raw_line) in input.lines().enumerate() {
         let line_number = zero_based_line + 1;
-        let line = raw_line
+        let without_hash_comment = raw_line
             .split_once('#')
-            .map_or(raw_line, |(before_comment, _)| before_comment)
+            .map_or(raw_line, |(before_comment, _)| before_comment);
+        let line = without_hash_comment
+            .split_once("//")
+            .map_or(without_hash_comment, |(before_comment, _)| before_comment)
             .trim();
         if line.is_empty() {
             continue;
@@ -2526,6 +2529,30 @@ mod tests {
         assert!(verification.basis_is_groebner());
         assert!(verification.generators_reduce_to_zero());
         assert!(verification.verified());
+    }
+
+    #[test]
+    fn groebner_certificate_ignores_slash_comments() {
+        let certificate = r#"
+            order lex // Singular may emit warning comments into output streams.
+
+            generators
+            // a unit generator
+            poly
+              1 0
+            end
+
+            basis
+            // the same unit basis
+            poly
+              1 0
+            end
+        "#
+        .parse::<GroebnerCertificate<1>>()
+        .expect("certificate with slash comments parses");
+
+        assert_eq!(certificate.quotient_dimension(), Some(0));
+        assert!(certificate.verify().verified());
     }
 
     #[test]

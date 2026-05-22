@@ -13,6 +13,8 @@ crates/
   degree04/
   degree05/
   degree06/
+  degree07/
+  degree08/
 ```
 
 设计意图：
@@ -23,7 +25,9 @@ crates/
 - `degree04`: Kummer quartic 的完整奇异集穷尽、16 个 ordinary double points、以及经典 `16_6` tropes 配置的 exact 验证。
 - `degree05`: Togliatti quintic 的 determinant 方程和基础 exact 验证外壳。
 - `degree06`: Barth sextic 的 65 个 ordinary double points、A/B/C 线配置和 support-strata Groebner/lift 穷尽证书。
-- 后续可增加 `degree07`, `degree08`，每个次数独立实现该次数的经典例子，同时复用 `nodal-core`。
+- `degree07`: Labs septic 的 99-real-nodal 构造、三次数域原型和七次方程 exact 外壳。
+- `degree08`: Endrass octic 的 `D8 x Z2` 对称结构、`F=P-R^2` 方程和 `112+56=168` 第一轮结构复现。
+- 后续每个次数独立实现该次数的经典例子，同时复用 `nodal-core`。
 
 `nodal-core` 当前已从只支持 `Q` 推进到支持一个二次扩张域 `Q(sqrt(d))`。这一步是为了 Kummer quartic 的节点坐标，它们自然落在 `Q(sqrt(2))` 中。
 
@@ -195,6 +199,65 @@ F = 4*(tau^2*x^2-y^2)*(tau^2*y^2-z^2)*(tau^2*z^2-x^2)
 - `degree05` 与 `degree06` 现在共享 `nodal-core` 的 support/lift 语义；各 degree crate 只保留方程、stratum 生成元和期望长度这些数学特例。
 
 因此当前 Barth 方程的 saturated projective singular scheme length 为 `65`；结合显式 65 个 ordinary nodes，得到该方程恰有 `65` 个 reduced ordinary nodes，没有第 `66` 个奇点。`mu(6)<=65` 的全局上界仍引用 Jaffe-Ruberman / Wahl / Pignatelli，不在本项目中复现。
+
+## Degree 7 当前状态
+
+`degree07` 已开始 Labs septic 的严格复现。数学解释见 `doc/labs-septic.md`。当前代码固定坐标顺序 `[w:x:y:z]`，实现 Labs 的：
+
+```text
+S_alpha = P - U_alpha,
+7*alpha^3 + 7*alpha + 1 = 0.
+```
+
+已验证：
+
+- `CubicAlphaRational` 具体实现 `Q[alpha]/(7*alpha^3+7*alpha+1)`，并 exact 验证 `alpha^3=-alpha-1/7`。
+- `labs_septic_polynomial()` 给出 `Q(alpha)` 上的齐次七次式。
+- 基础求值、gradient 和 affine singular generator 接口可用。
+- 文档记录 Labs 的 `y=0` 平面截面机制：15 个 plane nodes，其中 1 个在 `D7` 轴上，14 个生成长度 7 的 orbit，因此 `1+14*7=99`。
+- `w=1` affine chart 的 grevlex Groebner certificate 已导入；默认测试检查 generators 与 Rust 模型一致，quotient length 为 `99`。
+- `w=1` affine Hessian-bad certificate 已导入；Rust exact verifier 验证该 ideal 为 unit ideal，因此 affine singular locus 中没有 Hessian rank 退化点。
+- projective support `1..14` 的 grevlex certificates 已导入；support length 分布的已完成边界部分为 `support 09 = 1`、`support 11 = 14`，其余 `1..14` 为 `0`。
+- support length 全规格记录为 `[0,0,0,0,0,0,0,0,1,0,14,0,0,0,84]`，其中最后的 `84` 是 `w,x,y,z` 全非零主开集。
+- `w=0` infinity cover 已拆成 7 个 support strata，Rust 可导入这些空 strata 证书；full lift 重放保留为 ignored heavy check。
+- support `15` 的经济路线已经走通：在 `w=1` chart 中对 `g=x*y*z` 做 saturation，Singular 给出 `sat_exp=1`、quotient length `84`，Rust 已导入 `labs-affine-chart0-support15-saturation-grevlex.cert` 作为 all-nonzero open-stratum 长度证据。
+
+重要边界：当前 degree07 还不能声称 full projective support/lift 闭环已经完成。直接计算 support `15` 的 localized Groebner basis：
+
+```text
+<F,Fx,Fy,Fz, x*y*z*tau-1>
+```
+
+明显比 degree06 的最大 support 更重；`std` 与非 reduced `std` 都没有在可接受时间内完成。现在采用的工程主线是 `w=1` affine length `99` 加 `w=0` infinity 空证书，并用 support15 saturation 解释 `84` 的来源。后续若要达到 degree05 special 分支的严格度，还要补 compact reverse-containment witness：对 saturation basis `H[j]` 证明 `g*H[j] in <f,fx,fy,fz>`，同时避免朴素 `lift` 生成上百 MB 文件。`mu(7)<=104` 仍作为 Varchenko/Givental 上界背景引用，不在本项目中复现。
+
+## Degree 8 当前状态
+
+`degree08` 已开始 Endrass octic 的第一轮结构复现。数学解释见 `doc/endrass-octic.md`。当前代码固定坐标顺序 `[x:y:z:w]`，在 `Q(sqrt(2))` 上实现：
+
+```text
+F = P - R^2
+```
+
+其中 `P` 是 8 个平面
+
+```text
+H_j = { cos(j*pi/4)*x + sin(j*pi/4)*y = w }
+```
+
+的乘积，`R` 是 Endrass 最终参数给出的四次式。已验证：
+
+- `P` 的 8 平面乘积形式 exact 等于 `1/4*(x^2-w^2)*(y^2-w^2)*((x+y)^2-2w^2)*((x-y)^2-2w^2)`。
+- `F` 为 homogeneous degree `8`。
+- `D8 x Z2` 的生成元 exact 保持 `F` 不变：`pi/4` 旋转、`y -> -y`、`z -> -z`。
+- 8 个平面给出 `C(8,2)=28` 条交线；对每条交线用 exact nullspace 参数化，并检查 `R` 的限制是非零二元四次式。因此基础节点结构计数为 `28*4=112`。
+- 28 条线按 `D8` 分成 separation `1,2,3,4` 四类，line orbit sizes 为 `8,8,8,4`，贡献 `32+32+32+16=112`。
+- 记录 Endrass 的 Segre-trick 额外事件 `s3,t3,u5,v1,v2`，贡献 `16+8+16+8+8=56`。
+- finite-field scorer 已接入 `degree08`：在 `p=31`、`sqrt(2)=8` 下复现 Endrass reduction 的 `total_sing=node_like=168`、`bad_sing=0`、`base_like=112`、`extra_like=56`，并记录 `line_profile` 与 `orbit_profile`。
+- Segre quotient verifier 已构造 `E0/E1` 的平面四次 quotient，并 exact 验证 `s3,t3,u5,v1,v2` 的 quotient node/contact 条件和 lift 后 Hessian rank `3`；`s3` 的 lift 使用 `Q(sqrt(2))(sqrt(8(sqrt(2)-1)))` 的本地 nested quadratic 表示。
+- 因此当前机器可检查 skeleton 给出 `112+56=168`。
+- Miyaoka 上界在 `d=8` 给出 `174`；Varchenko/Arnold number 给出 `180`，已在代码和文档中区分。
+
+重要边界：当前 degree08 还不是完整奇异集证明。它已经把额外 Segre 事件从计数 skeleton 升级为 exact event verifier，并用有限域 scorer 校准 Endrass reduction；但仍未给出特征零中 168 个点的全局 saturation 证书，也尚未形式化 Endrass 的 Maple 平面检查和 `D_n` 平面外排除引理。下一阶段若找到新候选，应走 projective Jacobian ideal saturation、reducedness 和 no-extra-singularity 证书。
 
 ## 下一步
 

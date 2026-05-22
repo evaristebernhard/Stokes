@@ -77,7 +77,7 @@ means:
 ```
 
 Coefficients are rational numbers in either integer or `numerator/denominator`
-form. Comments begin with `#`. Blank lines are ignored.
+form. Comments begin with `#` or `//`. Blank lines are ignored.
 
 ## Current Status And Limits
 
@@ -217,3 +217,65 @@ The Barth implementation also keeps Table 1 as a regression oracle while adding
 the Catanese Proposition 205 `A5` orbit route: `sigma=(123)` and `tau=(14)(25)`
 generate the three node orbits of sizes `15,30,20`, and the same digit
 permutation is checked against the mid-line and centre-line labels.
+
+## Degree07 Role
+
+The Labs septic uses the same coefficient-field-generic parser over the cubic
+field:
+
+```text
+Q[alpha] / (7*alpha^3 + 7*alpha + 1).
+```
+
+Singular prints cubic-field coefficients both as `a2` and as `a^2` depending on
+the emitting context; `degree07::BigCubicAlphaRational` accepts both forms.
+
+The current imported certificates are:
+
+```text
+crates/degree07/certificates/labs-affine-chart0-grevlex.cert
+crates/degree07/certificates/labs-affine-chart0-hessian-bad-grevlex.cert
+crates/degree07/certificates/labs-affine-chart0-support15-saturation-grevlex.cert
+crates/degree07/certificates/labs-support-01-grevlex.cert
+...
+crates/degree07/certificates/labs-support-14-grevlex.cert
+```
+
+The affine chart certificate proves quotient length `99` in the `w=1` chart.
+The Hessian-bad certificate proves that the affine Hessian determinant does not
+vanish at any affine singular point. The completed support certificates cover
+the projective boundary strata outside the all-nonzero support; their nonzero
+lengths are:
+
+```text
+support 09: 1
+support 11: 14
+```
+
+This matches the Labs plane-section mechanism: one node on the `D7` axis and
+fourteen off-axis plane nodes. The remaining support `15` should contribute
+`84`, giving total length `99`. Its direct localized certificate
+
+```text
+<F,Fx,Fy,Fz,u0*u1*u2*tau-1>
+```
+
+is the current degree07 bottleneck. The economical replacement is the affine
+saturation
+
+```text
+H = <f,fx,fy,fz> : (u0*u1*u2)^infty,
+```
+
+where Singular reports saturation exponent `1` and quotient length `84`. Rust
+imports the resulting basis as
+`LabsAffineChart0Support15SaturationGroebnerCertificate`. This gives a compact
+open-stratum length witness, but not yet the full lift-style reverse inclusion:
+the missing compact certificate is `u0*u1*u2*H[j] in <f,fx,fy,fz>` for every
+generator/basis element that needs to be justified.
+
+For that reason, default `cargo test` currently imports the degree07
+certificates, checks model/generator consistency and quotient lengths, and keeps
+full Buchberger/lift replay for large degree07 certificates behind explicit
+ignored tests. This keeps the ordinary workspace gate fast while preserving a
+named entry point for heavyweight certificate replay.

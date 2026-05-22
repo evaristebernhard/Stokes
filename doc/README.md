@@ -34,6 +34,9 @@
 - `togliatti-quintic.md`: `degree05` Togliatti quintic 的两个模型、special 分支 31 节点证书链和 determinant 分支 blocker。
 - `degree05-lessons.md`: `degree05` 复现后的数学/工程经验总结，解释 length、saturation、Hessian 和 lift 证书的作用。
 - `barth-sextic.md`: `degree06` Barth sextic 的数学复现文档，整理方程归一化、A/B/C 节点 orbit、`65=15+30+20` 的几何来源、support-strata/lift 证书和 `mu(6)=65` 上界来源。
+- `labs-septic.md`: `degree07` Labs septic 的数学复现文档，整理 99-real-nodal septic 方程、三次数域、`D7` 对称、`1+14*7=99` 的节点来源、`w=1` affine 证书、`w=0` infinity cover、support15 saturation 证据和剩余 lift witness 缺口。
+- `endrass-octic.md`: `degree08` Endrass octic 的数学复现文档，整理 `F=P-R^2`、`D8 x Z2` 对称、`28*4=112` 基础节点结构、Segre-trick 额外 `56` 节点和 `168<=mu(8)<=174` 的边界。
+- `degree08-search.md`: `degree08` 的搜索主线说明，记录 finite-field scorer、`p=31` Endraß 校准、Segre quotient event verifier、`D8->D4` 破对称族和后续 saturation 证明路线。
 - `surfer-web-reuse-audit.md`: 对已有 `surfer-web` 项目中公式、gallery、parser、渲染资产的复用判断。
 
 ## 暂定原则
