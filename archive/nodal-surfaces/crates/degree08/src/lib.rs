@@ -2,15 +2,18 @@ use nodal_core::{
     FieldElement, HomogeneousPolynomialP3, Matrix, P3_VARIABLE_COUNT, QuadraticRational, Rational,
     SparsePolynomial,
 };
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet};
 use std::ops::{Add, Div, Mul, Neg, Sub};
+
+pub mod critical_profile;
+pub mod search_core;
 
 type Q2 = QuadraticRational;
 type PolynomialP3 = SparsePolynomial<Q2, P3_VARIABLE_COUNT>;
 type BinaryPolynomial = SparsePolynomial<Q2, 2>;
 type TernaryPolynomial = SparsePolynomial<Q2, 3>;
-type BinaryPolynomialFp<const P: i64> = SparsePolynomial<Fp<P>, 2>;
-type TernaryPolynomialFp<const P: i64> = SparsePolynomial<Fp<P>, 3>;
+pub type BinaryPolynomialFp<const P: i64> = SparsePolynomial<Fp<P>, 2>;
+pub type TernaryPolynomialFp<const P: i64> = SparsePolynomial<Fp<P>, 3>;
 type AxisLiftFp<const P: i64> = fn([Fp<P>; 2]) -> [Fp<P>; 3];
 type AxisRestrictionFp<const P: i64> = (BinaryPolynomialFp<P>, AxisLiftFp<P>);
 
@@ -24,7 +27,7 @@ pub const ENDRASS_TOTAL_NODE_COUNT: usize = 168;
 pub const ENDRASS_MIYAOKA_UPPER_BOUND: usize = 174;
 pub const ENDRASS_VARCHENKO_DEGREE8_BOUND: usize = 180;
 
-type PolynomialP3Fp<const P: i64> = SparsePolynomial<Fp<P>, P3_VARIABLE_COUNT>;
+pub type PolynomialP3Fp<const P: i64> = SparsePolynomial<Fp<P>, P3_VARIABLE_COUNT>;
 const D4_R_PARAMETER_COUNT: usize = 7;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -1204,65 +1207,13 @@ pub fn z_reflection_pullback(polynomial: &PolynomialP3) -> PolynomialP3 {
 pub fn score_finite_field_singularities<const P: i64>(
     input: &FiniteFieldScorerInput<P>,
 ) -> FiniteFieldSingularityStats<P> {
-    let surface = FiniteFieldSurface::new(input.polynomial.clone());
-    let line_pairs = plane_line_pairs(input.planes.len());
-    let mut line_profile = vec![0; line_pairs.len()];
-    let mut singular_points = Vec::new();
-
-    for coords in projective_points_mod_p::<P>() {
-        if !surface.is_singular_at(&coords) {
-            continue;
-        }
-
-        let hessian_rank = surface.hessian_rank_at(&coords);
-        let incident_planes = incident_planes(&input.planes, &coords);
-        let incident_lines = incident_line_pairs(&incident_planes);
-        let base_like = hessian_rank == 3
-            && !incident_lines.is_empty()
-            && input.quartic_r.evaluate(&coords).is_zero();
-
-        if base_like {
-            for line in &incident_lines {
-                let line_index = line_pairs
-                    .iter()
-                    .position(|candidate| candidate == line)
-                    .expect("incident line should be a known plane pair");
-                line_profile[line_index] += 1;
-            }
-        }
-
-        singular_points.push(FiniteFieldSingularPoint {
-            coords,
-            hessian_rank,
-            plane_multiplicity: incident_planes.len(),
-            incident_lines,
-            base_like,
-        });
-    }
-
-    let total_sing = singular_points.len();
-    let node_like_points: Vec<_> = singular_points
-        .iter()
-        .filter(|point| point.hessian_rank == 3)
-        .map(|point| point.coords)
-        .collect();
-    let node_like = node_like_points.len();
-    let base_like = singular_points
-        .iter()
-        .filter(|point| point.hessian_rank == 3 && point.base_like)
-        .count();
-    let orbit_profile = orbit_profile(input, &node_like_points);
-
-    FiniteFieldSingularityStats {
-        total_sing,
-        node_like,
-        bad_sing: total_sing - node_like,
-        base_like,
-        extra_like: node_like - base_like,
-        line_profile,
-        orbit_profile,
-        singular_points,
-    }
+    search_core::score_projective_surface(&search_core::legacy_surface_input(
+        input.polynomial.clone(),
+        input.quartic_r.clone(),
+        input.planes.clone(),
+        input.symmetry,
+        input.sqrt2,
+    ))
 }
 
 pub fn endrass_finite_field_stats_mod_31() -> FiniteFieldSingularityStats<31> {
@@ -1463,25 +1414,8 @@ pub fn generate_d4_event_candidates<const P: i64>(
 pub fn score_basic_line_lengths<const P: i64>(
     input: &FiniteFieldScorerInput<P>,
 ) -> BaseLineLengthStats {
-    let line_pairs = plane_line_pairs(input.planes.len());
-    let line_checks = line_pairs
-        .iter()
-        .map(|&line| {
-            let basis = line_basis_mod_p(&input.planes[line.0], &input.planes[line.1]);
-            let restriction = restrict_p3_to_line_fp(&input.quartic_r, basis);
-            BaseLineLengthCheck {
-                line,
-                degree: restriction.degree(),
-                squarefree: homogeneous_binary_is_squarefree(&restriction),
-                visible_roots: count_binary_projective_roots(&restriction),
-            }
-        })
-        .collect();
-
-    BaseLineLengthStats {
-        line_checks,
-        triple_plane_bad_points: count_triple_plane_bad_points(input),
-    }
+    search_core::PlaneProductSkeleton::new(input.planes.clone(), input.quartic_r.clone())
+        .base_line_length_stats()
 }
 
 pub fn scan_d4_segre_events<const P: i64>(
@@ -1641,46 +1575,6 @@ impl EndrassParameters {
             g: qr(1, 2) * (q(1) - q(2) * sqrt2()),
             i: -qr(1, 16) * (q(1) + q(12) * sqrt2()),
         }
-    }
-}
-
-struct FiniteFieldSurface<const P: i64> {
-    polynomial: PolynomialP3Fp<P>,
-    gradient: [PolynomialP3Fp<P>; P3_VARIABLE_COUNT],
-    hessian: [[PolynomialP3Fp<P>; P3_VARIABLE_COUNT]; P3_VARIABLE_COUNT],
-}
-
-impl<const P: i64> FiniteFieldSurface<P> {
-    fn new(polynomial: PolynomialP3Fp<P>) -> Self {
-        let gradient: [PolynomialP3Fp<P>; P3_VARIABLE_COUNT] =
-            std::array::from_fn(|variable| polynomial.partial_derivative(variable));
-        let hessian = std::array::from_fn(|row| {
-            std::array::from_fn(|col| gradient[row].partial_derivative(col))
-        });
-
-        Self {
-            polynomial,
-            gradient,
-            hessian,
-        }
-    }
-
-    fn is_singular_at(&self, coords: &[Fp<P>; P3_VARIABLE_COUNT]) -> bool {
-        self.polynomial.evaluate(coords).is_zero()
-            && self
-                .gradient
-                .iter()
-                .all(|partial| partial.evaluate(coords).is_zero())
-    }
-
-    fn hessian_rank_at(&self, coords: &[Fp<P>; P3_VARIABLE_COUNT]) -> usize {
-        Matrix::from_rows(
-            self.hessian
-                .iter()
-                .map(|row| row.iter().map(|entry| entry.evaluate(coords)).collect())
-                .collect(),
-        )
-        .rank()
     }
 }
 
@@ -2194,68 +2088,6 @@ fn endrass_planes_mod_p<const P: i64>(sqrt2: Fp<P>) -> Vec<[Fp<P>; P3_VARIABLE_C
         .collect()
 }
 
-fn line_basis_mod_p<const P: i64>(
-    first: &[Fp<P>; P3_VARIABLE_COUNT],
-    second: &[Fp<P>; P3_VARIABLE_COUNT],
-) -> [[Fp<P>; P3_VARIABLE_COUNT]; 2] {
-    let nullspace = Matrix::from_rows(vec![first.to_vec(), second.to_vec()]).nullspace();
-    assert_eq!(nullspace.len(), 2, "expected two planes to meet in a line");
-    [
-        vec_to_p3_fp(nullspace[0].clone()),
-        vec_to_p3_fp(nullspace[1].clone()),
-    ]
-}
-
-fn restrict_p3_to_line_fp<const P: i64>(
-    polynomial: &PolynomialP3Fp<P>,
-    basis: [[Fp<P>; P3_VARIABLE_COUNT]; 2],
-) -> BinaryPolynomialFp<P> {
-    let [s, t] = binary_variables_fp();
-    let forms: [BinaryPolynomialFp<P>; P3_VARIABLE_COUNT] = std::array::from_fn(|variable| {
-        s.scale(basis[0][variable])
-            .add(&t.scale(basis[1][variable]))
-    });
-
-    polynomial
-        .terms()
-        .into_iter()
-        .fold(BinaryPolynomialFp::<P>::zero(), |sum, term| {
-            let substituted = term.exponents().into_iter().enumerate().fold(
-                BinaryPolynomialFp::<P>::constant(term.coefficient()),
-                |product, (variable, exponent)| product.mul(&forms[variable].pow_usize(exponent)),
-            );
-            sum.add(&substituted)
-        })
-}
-
-fn count_triple_plane_bad_points<const P: i64>(input: &FiniteFieldScorerInput<P>) -> usize {
-    let mut bad_points = BTreeSet::new();
-    let mut degenerate_triples = 0;
-    for first in 0..input.planes.len() {
-        for second in (first + 1)..input.planes.len() {
-            for third in (second + 1)..input.planes.len() {
-                let nullspace = Matrix::from_rows(vec![
-                    input.planes[first].to_vec(),
-                    input.planes[second].to_vec(),
-                    input.planes[third].to_vec(),
-                ])
-                .nullspace();
-                match nullspace.len() {
-                    0 => {}
-                    1 => {
-                        let point = normalize_point(vec_to_p3_fp(nullspace[0].clone()));
-                        if input.quartic_r.evaluate(&point).is_zero() {
-                            bad_points.insert(point_key(&point));
-                        }
-                    }
-                    _ => degenerate_triples += 1,
-                }
-            }
-        }
-    }
-    bad_points.len() + degenerate_triples
-}
-
 fn homogeneous_binary_is_squarefree<const P: i64>(polynomial: &BinaryPolynomialFp<P>) -> bool {
     if polynomial.is_zero() || polynomial.degree() != ENDRASS_BASIC_LINE_INTERSECTION_LENGTH {
         return false;
@@ -2442,27 +2274,6 @@ fn fp_i128_mod_p<const P: i64>(value: i128) -> Fp<P> {
     Fp::new(value.rem_euclid(P.into()) as i64)
 }
 
-fn projective_points_mod_p<const P: i64>() -> Vec<[Fp<P>; P3_VARIABLE_COUNT]> {
-    let mut points = Vec::new();
-    for first_nonzero in 0..P3_VARIABLE_COUNT {
-        let free_count = P3_VARIABLE_COUNT - first_nonzero - 1;
-        let mut suffix = vec![0; free_count];
-        loop {
-            let mut coords = [Fp::<P>::zero(); P3_VARIABLE_COUNT];
-            coords[first_nonzero] = Fp::one();
-            for (offset, value) in suffix.iter().enumerate() {
-                coords[first_nonzero + 1 + offset] = Fp::new(*value);
-            }
-            points.push(coords);
-
-            if !increment_base_p_digits::<P>(&mut suffix) {
-                break;
-            }
-        }
-    }
-    points
-}
-
 fn projective_points_p2_mod_p<const P: i64>() -> Vec<[Fp<P>; 3]> {
     let mut points = Vec::new();
     for first_nonzero in 0..3 {
@@ -2505,135 +2316,6 @@ fn increment_base_p_digits<const P: i64>(digits: &mut [i64]) -> bool {
         *digit = 0;
     }
     false
-}
-
-fn incident_planes<const P: i64>(
-    planes: &[[Fp<P>; P3_VARIABLE_COUNT]],
-    coords: &[Fp<P>; P3_VARIABLE_COUNT],
-) -> Vec<usize> {
-    planes
-        .iter()
-        .enumerate()
-        .filter_map(|(index, plane)| plane_eval_mod_p(plane, coords).is_zero().then_some(index))
-        .collect()
-}
-
-fn plane_eval_mod_p<const P: i64>(
-    plane: &[Fp<P>; P3_VARIABLE_COUNT],
-    coords: &[Fp<P>; P3_VARIABLE_COUNT],
-) -> Fp<P> {
-    plane
-        .iter()
-        .zip(coords)
-        .fold(Fp::zero(), |sum, (coefficient, coord)| {
-            sum + *coefficient * *coord
-        })
-}
-
-fn plane_line_pairs(plane_count: usize) -> Vec<(usize, usize)> {
-    let mut pairs = Vec::new();
-    for first in 0..plane_count {
-        for second in (first + 1)..plane_count {
-            pairs.push((first, second));
-        }
-    }
-    pairs
-}
-
-fn incident_line_pairs(incident_planes: &[usize]) -> Vec<(usize, usize)> {
-    let mut pairs = Vec::new();
-    for (position, &first) in incident_planes.iter().enumerate() {
-        for &second in &incident_planes[(position + 1)..] {
-            pairs.push((first, second));
-        }
-    }
-    pairs
-}
-
-fn orbit_profile<const P: i64>(
-    input: &FiniteFieldScorerInput<P>,
-    node_like_points: &[[Fp<P>; P3_VARIABLE_COUNT]],
-) -> BTreeMap<usize, usize> {
-    let node_keys: BTreeSet<_> = node_like_points.iter().map(point_key).collect();
-    let mut unseen = node_keys.clone();
-    let mut profile = BTreeMap::new();
-
-    while let Some(seed) = unseen.iter().next().copied() {
-        let seed_point = key_to_point(seed);
-        let orbit = symmetry_orbit(input, seed_point);
-        let node_orbit: BTreeSet<_> = orbit
-            .into_iter()
-            .map(|point| point_key(&point))
-            .filter(|key| node_keys.contains(key))
-            .collect();
-        let orbit_size = node_orbit.len();
-        *profile.entry(orbit_size).or_insert(0) += 1;
-        for key in node_orbit {
-            unseen.remove(&key);
-        }
-    }
-
-    profile
-}
-
-fn symmetry_orbit<const P: i64>(
-    input: &FiniteFieldScorerInput<P>,
-    seed: [Fp<P>; P3_VARIABLE_COUNT],
-) -> Vec<[Fp<P>; P3_VARIABLE_COUNT]> {
-    let mut seen = BTreeSet::new();
-    let mut queue = VecDeque::from([normalize_point(seed)]);
-
-    while let Some(point) = queue.pop_front() {
-        if !seen.insert(point_key(&point)) {
-            continue;
-        }
-
-        for transformed in symmetry_generators(input, &point) {
-            let normalized = normalize_point(transformed);
-            if !seen.contains(&point_key(&normalized)) {
-                queue.push_back(normalized);
-            }
-        }
-    }
-
-    seen.into_iter().map(key_to_point).collect()
-}
-
-fn symmetry_generators<const P: i64>(
-    input: &FiniteFieldScorerInput<P>,
-    point: &[Fp<P>; P3_VARIABLE_COUNT],
-) -> Vec<[Fp<P>; P3_VARIABLE_COUNT]> {
-    let [x, y, z, w] = *point;
-    let z_reflection = [x, y, -z, w];
-    match input.symmetry {
-        FiniteFieldSymmetry::D4TimesZ2 => vec![[-y, x, z, w], [x, -y, z, w], z_reflection],
-        FiniteFieldSymmetry::D8TimesZ2 => {
-            let sqrt2 = input.sqrt2.expect("D8 finite-field symmetry needs sqrt(2)");
-            let half_sqrt2 = sqrt2 / Fp::new(2);
-            vec![
-                [(x - y) * half_sqrt2, (x + y) * half_sqrt2, z, w],
-                [x, -y, z, w],
-                z_reflection,
-            ]
-        }
-    }
-}
-
-fn normalize_point<const P: i64>(coords: [Fp<P>; P3_VARIABLE_COUNT]) -> [Fp<P>; P3_VARIABLE_COUNT] {
-    let pivot = coords
-        .iter()
-        .find(|coord| !coord.is_zero())
-        .copied()
-        .expect("projective point cannot be zero");
-    coords.map(|coord| coord / pivot)
-}
-
-fn point_key<const P: i64>(coords: &[Fp<P>; P3_VARIABLE_COUNT]) -> [i64; P3_VARIABLE_COUNT] {
-    coords.map(Fp::value)
-}
-
-fn key_to_point<const P: i64>(key: [i64; P3_VARIABLE_COUNT]) -> [Fp<P>; P3_VARIABLE_COUNT] {
-    key.map(Fp::new)
 }
 
 fn extended_gcd_i64(lhs: i64, rhs: i64) -> (i64, i64, i64) {
@@ -3008,11 +2690,6 @@ fn vec_to_p3(vector: Vec<Q2>) -> [Q2; P3_VARIABLE_COUNT] {
     [vector[0], vector[1], vector[2], vector[3]]
 }
 
-fn vec_to_p3_fp<const P: i64>(vector: Vec<Fp<P>>) -> [Fp<P>; P3_VARIABLE_COUNT] {
-    assert_eq!(vector.len(), P3_VARIABLE_COUNT);
-    [vector[0], vector[1], vector[2], vector[3]]
-}
-
 pub fn plane_evaluates_on_vector(plane: EndrassPlane, vector: &[Q2; P3_VARIABLE_COUNT]) -> Q2 {
     plane
         .coefficients()
@@ -3307,14 +2984,23 @@ mod tests {
 
     #[test]
     fn d4_reflection_event_orbit_sizes_match_the_scanner_weights() {
-        let input = FiniteFieldScorerInput::<31>::d4_family(endrass_parameters_mod_p(8));
+        let symmetry = search_core::SurfaceSymmetry::<31>::D4TimesZ2;
         let generic_reflection_event = [Fp::<31>::new(1), Fp::zero(), Fp::new(2), Fp::new(3)];
         let z_axis_contact = [Fp::<31>::new(1), Fp::zero(), Fp::zero(), Fp::new(3)];
         let w_axis_contact = [Fp::<31>::new(1), Fp::zero(), Fp::new(2), Fp::zero()];
 
-        assert_eq!(symmetry_orbit(&input, generic_reflection_event).len(), 8);
-        assert_eq!(symmetry_orbit(&input, z_axis_contact).len(), 4);
-        assert_eq!(symmetry_orbit(&input, w_axis_contact).len(), 4);
+        assert_eq!(
+            search_core::symmetry_orbit_points(&symmetry, generic_reflection_event).len(),
+            8
+        );
+        assert_eq!(
+            search_core::symmetry_orbit_points(&symmetry, z_axis_contact).len(),
+            4
+        );
+        assert_eq!(
+            search_core::symmetry_orbit_points(&symmetry, w_axis_contact).len(),
+            4
+        );
     }
 
     #[test]

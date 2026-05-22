@@ -253,9 +253,11 @@ H_j = { cos(j*pi/4)*x + sin(j*pi/4)*y = w }
 - 28 条线按 `D8` 分成 separation `1,2,3,4` 四类，line orbit sizes 为 `8,8,8,4`，贡献 `32+32+32+16=112`。
 - 记录 Endrass 的 Segre-trick 额外事件 `s3,t3,u5,v1,v2`，贡献 `16+8+16+8+8=56`。
 - finite-field scorer 已接入 `degree08`：在 `p=31`、`sqrt(2)=8` 下复现 Endrass reduction 的 `total_sing=node_like=168`、`bad_sing=0`、`base_like=112`、`extra_like=56`，并记录 `line_profile` 与 `orbit_profile`。
+- 有限域搜索语义已从 D4 专用路径抽成 `degree08::search_core`：共享 `ProjectiveSurfaceScorerInput`、`PlaneProductSkeleton`、projective point enumeration、Hessian rank、orbit profile 与 `ExperimentRecord`，使一般八平面、Chmutov/folding、determinantal/discriminant 三类实验可以输出同一格式的 TSV/JSONL 记录。
 - Segre quotient verifier 已构造 `E0/E1` 的平面四次 quotient，并 exact 验证 `s3,t3,u5,v1,v2` 的 quotient node/contact 条件和 lift 后 Hessian rank `3`；`s3` 的 lift 使用 `Q(sqrt(2))(sqrt(8(sqrt(2)-1)))` 的本地 nested quadratic 表示。
 - 因此当前机器可检查 skeleton 给出 `112+56=168`。
 - Miyaoka 上界在 `d=8` 给出 `174`；Varchenko/Arnold number 给出 `180`，已在代码和文档中区分。
+- degree08 搜索后的负结论已整理成文档：八线 critical-profile 的 Plucker no-go 给出 `delta<=16`，splitting/conductor 路线被降级为审计规则，rigid double-octic 路线需要满足 `H^0(I_Sigma(8))=J_F,8` 的 adjoint firewall。
 
 重要边界：当前 degree08 还不是完整奇异集证明。它已经把额外 Segre 事件从计数 skeleton 升级为 exact event verifier，并用有限域 scorer 校准 Endrass reduction；但仍未给出特征零中 168 个点的全局 saturation 证书，也尚未形式化 Endrass 的 Maple 平面检查和 `D_n` 平面外排除引理。下一阶段若找到新候选，应走 projective Jacobian ideal saturation、reducedness 和 no-extra-singularity 证书。
 

@@ -16,6 +16,127 @@
 
 其中 `112` 是八平面乘积的基础盘，`56` 是 Segre trick 在反射平面上制造的额外事件。只有这个校准过了，后续 `D8 -> D4/D2` 破对称搜索才有意义。
 
+## 统一搜索核心
+
+当前代码已经把 D4 专用搜索器下沉到一个共享层：
+
+```text
+degree08::search_core
+```
+
+这个模块的语义是有限域上的“射影曲面实验平台”，不是某个具体构造族。它提供：
+
+```text
+Fp<P>
+P^3(F_p), P^2(F_p), P^1(F_p) 的规范化枚举
+齐次 P3 多项式的求值、梯度、Hessian rank
+projective point normalize/key
+symmetry orbit profile
+ProjectiveSurfaceScorerInput
+PlaneProductSkeleton for P8 - R4^2
+ExperimentRecord for TSV/JSONL comparison
+```
+
+通用 scorer 输入是一张有限域齐次曲面：
+
+```text
+F(x0,x1,x2,x3) = 0 over F_p
+```
+
+它枚举 `P^3(F_p)`，记录所有满足
+
+```text
+F = Fx0 = Fx1 = Fx2 = Fx3 = 0
+```
+
+的点，并用 Hessian rank 区分：
+
+```text
+rank Hessian(F) = 3  -> node_like
+rank Hessian(F) < 3  -> bad_sing
+```
+
+如果输入还带有 `PlaneProductSkeleton`，即
+
+```text
+P = H1*...*H8
+F = P - R^2
+```
+
+scorer 会额外记录 `base_like`：点位于至少两张 `H_i` 上，且 `R(point)=0`，Hessian rank 仍为 `3`。这正是 Endraß `112` 底盘的有限域影子。`PlaneProductSkeleton` 也负责检查每条 `H_i cap H_j` 上的 `R|L` 是否是 squarefree degree 4，以及是否出现三平面交点落在 `R=0` 上的坏退化。
+
+这层抽象的价值是：后续不再把所有搜索都硬塞进 `search_d4`。不同范式只需要生成一个 `F`，必要时附上 symmetry 和 skeleton，就能得到可比较的：
+
+```text
+total_sing, node_like, bad_sing, base_like, extra_like,
+line_profile, orbit_profile, TSV/JSONL experiment record
+```
+
+因此三条路线可以共用同一把尺子：
+
+```text
+一般八平面 P8 - R4^2:
+  继续保留或放宽 112 skeleton，研究 plane arrangement 与 R 的耦合。
+
+Chmutov / folding / line-arrangement:
+  不要求保留 112，把 node count、bad_sing、orbit profile 当作横向对照信号。
+
+determinantal / discriminant:
+  把 degree05 Togliatti 的经验迁移到 octic，先在有限域上寻找高奇点 discriminant-like 曲面。
+```
+
+## Critical-Value Profile 支线
+
+八线乘积 `Q=prod l_i(x,y)` 的二维 profile 搜索已经单独记录在：
+
+```text
+doc/degree08-critical-profile-search.md
+```
+
+这条支线使用
+
+```text
+F = alpha*Q_h(x,y,w) + T8_h(z,w) + lambda*w^8
+```
+
+目标是利用 `T8` 的 `4/3` 临界值层，把二维 profile `(a,b)` 转成曲面节点数：
+
+```text
+N = 4a + 3b
+```
+
+八线 arrangement 的特殊意义是 `Q=0` 自动给出 28 个线交点 Morse 临界点，理论剩余预算为 `49-28=21`。因此最小突破目标是：
+
+```text
+(28,19) -> 169
+```
+
+当前 `slope-poly` 六参数有限域 smoke 没有发现 near hit：`p=31,47,97` 的 best visible profile 只达到 `28+3` 或 `28+2`。随后升级的 `normal10` 规范形覆盖一个 10 维 line-arrangement chart：
+
+```text
+L0=x, L1=y, L2=1-x-y,
+Li=1+s_i(r_i*x+y), i=3,...,7
+```
+
+并加入 determinant 退化过滤、八线专用 fast profile、direction/intercept 分层采样、top-k heap、coordinate climb、pair sweep，以及 Singular off-line critical algebra 中筛。`p=31` 宽搜最好的 visible profile 仍是 `28+3`；同一整数参数在 `p=47/97` 降为 `28+1`。对
+
+```text
+K=<Qx,Qy,uQ-1>
+```
+
+计算 `m_Q` 的 charpoly/factorization 后，`off_best_bucket` 为 `3,1,1`，远低于继续信号阈值 `12`。这说明八线乘积支线的当前范式没有看到 off-line 21 点的强聚集；基础设施保留，但搜索重心应转向结构不同的 Chmutov/folding 或 Endraß 112 底盘改造，而不是继续同质放量。
+
+后续几何复审进一步把这条支线降级：`Q_h - t w^8` 的非零平面八次 fiber 在八个无穷远方向上有 total-contact flex，Plucker 预算给出 `delta<=16`，因此 `(28,19)` 在特征零 clean model 中被排除。详细见 `doc/degree08-plane-octic-plucker.md`。
+
+有限域信号必须小心解释。`F_p` 上的高 `node_like` 不等于特征零有同样多节点；小素数也可能制造伪奇点、合并点、或丢失不可见点。搜索层只负责“找值得 lift 的结构”，严格结论仍必须回到：
+
+```text
+exact F=grad=0
+Hessian rank = 3
+projective Jacobian ideal saturation
+quotient length / reducedness / no extra singularity certificate
+```
+
 ## 112 底盘
 
 Endraß 使用
@@ -359,4 +480,6 @@ finite-field candidate
 -> quotient length / reducedness / no extra singularity certificate
 ```
 
-当前第三阶段的第一步完成了事件驱动搜索的生成器：有限域 scorer 可以识别 Endraß reduction，Segre verifier 可以解释额外 56 个节点的五个事件，D4 event scanner 可以输出 quotient event signature 和排序候选，`d4-events` 可以从非零 `rho` 事件约束反解 `R` 并筛选候选。完整的 `mu(8)` 突破仍需要更大搜索预算、`rho=0` 分支事件、D2/更低对称、跨素数稳定性、特征零 lift 和 saturation 证书。
+当前第三阶段的第一步完成了事件驱动搜索的生成器，并把通用有限域搜索语义抽到了 `degree08::search_core`：有限域 scorer 可以识别 Endraß reduction，Segre verifier 可以解释额外 56 个节点的五个事件，D4 event scanner 可以输出 quotient event signature 和排序候选，`d4-events` 可以从非零 `rho` 事件约束反解 `R` 并筛选候选。完整的 `mu(8)` 突破仍需要更大搜索预算、`rho=0` 分支事件、D2/更低对称、跨素数稳定性、特征零 lift 和 saturation 证书；如果 112 路线停滞，下一轮应并行尝试一般八平面、Chmutov/folding、determinantal/discriminant 三种范式，并用同一个 `search_core` record 横向比较。
+
+负结论整理见 `doc/degree08-no-go-summary.md`、`doc/degree08-splitting-conductor-no-go.md` 和 `doc/degree08-defect-rigidity-firewall.md`。这些文档的作用是把已经失败的结构路线变成候选审计规则，避免继续把启发式容量误当成节点构造。

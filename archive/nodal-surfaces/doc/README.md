@@ -37,6 +37,11 @@
 - `labs-septic.md`: `degree07` Labs septic 的数学复现文档，整理 99-real-nodal septic 方程、三次数域、`D7` 对称、`1+14*7=99` 的节点来源、`w=1` affine 证书、`w=0` infinity cover、support15 saturation 证据和剩余 lift witness 缺口。
 - `endrass-octic.md`: `degree08` Endrass octic 的数学复现文档，整理 `F=P-R^2`、`D8 x Z2` 对称、`28*4=112` 基础节点结构、Segre-trick 额外 `56` 节点和 `168<=mu(8)<=174` 的边界。
 - `degree08-search.md`: `degree08` 的搜索主线说明，记录 finite-field scorer、`p=31` Endraß 校准、Segre quotient event verifier、`D8->D4` 破对称族和后续 saturation 证明路线。
+- `degree08-critical-profile-search.md`: `degree08` 八线乘积 critical-value profile 搜索说明，记录 `49=28+21` 机制、`(28,19)->169` 目标、`slope-poly` 与 `normal10` 十维 line-moduli 搜索、Singular off-line critical algebra 中筛结果和当前降级结论。
+- `degree08-no-go-summary.md`: `degree08` 负结论总览，整理八线 profile、splitting conductor、rigid double-octic firewall 等路线的失败机制和可迁移经验。
+- `degree08-plane-octic-plucker.md`: 八线乘积 profile 的 Plucker no-go，解释为什么 `Q_h-tw^8` 的非零平面八次 fiber 满足 `delta<=16`，从而排除 `(28,19)`。
+- `degree08-splitting-conductor-no-go.md`: splitting divisor、sign cocycle、conductor web、two-cubic residual、Steiner/double-six 等路线的审计规则和负结论。
+- `degree08-defect-rigidity-firewall.md`: nodal double octic 的 defect/rigidity 公式，说明 `169..174` 节点候选必须满足 `H^0(I_Sigma(8))=J_F,8`。
 - `surfer-web-reuse-audit.md`: 对已有 `surfer-web` 项目中公式、gallery、parser、渲染资产的复用判断。
 
 ## 暂定原则
