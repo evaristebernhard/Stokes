@@ -1,6 +1,8 @@
 target/
 external/
 .lake/
+tmp/
+Scratch.lean
 blueprint/web/
 blueprint/print/
 blueprint/src/*.aux
