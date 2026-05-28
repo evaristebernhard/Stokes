@@ -1,0 +1,912 @@
+import Stokes.BoundaryChart.OrientationToCOVFacade
+import Stokes.BoundaryChart.OrientationMembershipAuto
+import Stokes.BoundaryChart.SelectedBoxCOVFromOrientationAuto
+import Stokes.BoundaryChart.BoundarySourceUnifiedNaturalMegaAuto
+import Stokes.Global.BoundaryOrientationMembershipToCOVAuto
+import Stokes.Global.BoundaryPartitionTermFromResolvedTarget
+
+/-!
+# End-to-end boundary orientation COV facade
+
+This file is a glue layer for the boundary-chart change-of-variables route.
+It keeps the analytic content in the existing files:
+
+* `SelectedBoxCOVFromOrientationAuto` proves selected-box COV from target-image
+  data and orientation data.
+* `OrientationMembershipAuto` packages the two atlas-membership proofs consumed
+  by selected-box COV.
+* `OrientationToCOVFacade` keeps the mathlib-facing orientation records honest:
+  they remain fields in wrapper inputs instead of being replaced by a claimed
+  upstream oriented-manifold theorem.
+* `BoundarySourceUnifiedNaturalMegaAuto` exposes the natural source-unified
+  route used by compact-support Stokes endpoints.
+
+The declarations below only reduce plumbing.  In particular, the
+`BoundaryChartMathlibOrientation...` fields are still explicit data: this file
+does not assert that mathlib already supplies the full oriented
+manifold-with-boundary bridge.
+-/
+
+noncomputable section
+
+set_option linter.style.longLine false
+set_option linter.unusedVariables false
+set_option linter.unusedSectionVars false
+set_option linter.unusedFintypeInType false
+
+open Set MeasureTheory Filter
+open scoped BigOperators Manifold Topology
+
+namespace Stokes
+
+section OrientationBoundaryCOVEndToEndMegaAuto
+
+universe u v w c p b
+
+variable {H : Type u} [TopologicalSpace H]
+variable {M : Type w} [TopologicalSpace M] [ChartedSpace H M]
+variable {Chart : Type c} {Piece : Type p} {BoundaryPiece : Type b}
+variable {n : Nat}
+variable {I : ModelWithCorners Real (Fin (n + 1) -> Real) H}
+variable {omega : ManifoldForm I M n}
+
+/-! ## Pointwise selected-box orientation/COV input -/
+
+/--
+Natural pointwise input for boundary chart COV on one selected source box.
+
+The record stores the project-local oriented atlas, the two chart-membership
+proofs bundled as `BoundaryChartOrientationMembership`, and the selected target
+box/image data.  It is the clean theorem-facing shape for callers that already
+picked an oriented boundary atlas.
+-/
+structure BoundaryChartSelectedBoxCOVNaturalInput
+    (I : ModelWithCorners Real (Fin (n + 1) -> Real) H)
+    (x0 x1 : M) (omega : ManifoldForm I M n)
+    (a b : Fin (n + 1) -> Real) where
+  /-- The oriented boundary atlas used for chart-change orientation. -/
+  orientedBoundaryAtlas : BoundaryChartOrientedAtlas I M
+  /-- Source and boundary-source chart membership in the oriented atlas. -/
+  orientationMembership :
+    BoundaryChartOrientationMembership orientedBoundaryAtlas.charts x0 x1
+  /-- Selected source box plus target image/local-inverse data. -/
+  selectedTarget :
+    BoundaryChartSelectedBoxTargetImageAutoData I x0 x1 omega a b
+
+namespace BoundaryChartSelectedBoxCOVNaturalInput
+
+variable {x0 x1 : M}
+variable {a b : Fin (n + 1) -> Real}
+variable
+    (D : BoundaryChartSelectedBoxCOVNaturalInput I x0 x1 omega a b)
+
+/-- Source chart membership projected from the bundled membership record. -/
+theorem source_mem : x0 ∈ D.orientedBoundaryAtlas.charts :=
+  D.orientationMembership.source_mem
+
+/-- Boundary-source chart membership projected from the bundled membership record. -/
+theorem boundarySource_mem : x1 ∈ D.orientedBoundaryAtlas.charts :=
+  D.orientationMembership.boundarySource_mem
+
+/-- The selected source boundary box. -/
+def selectedBox :
+    boundaryChartSelectedBox I x0 x1 omega a b :=
+  D.selectedTarget.selectedBox
+
+/-- The selected target-box package. -/
+def targetBox :
+    BoundaryChartTargetBoxSelection I x0 x1 a b :=
+  D.selectedTarget.targetBox
+
+/-- Lower corner of the COV target box. -/
+def targetLowerCorner : Fin (n + 1) -> Real :=
+  D.selectedTarget.targetLowerCorner
+
+/-- Upper corner of the COV target box. -/
+def targetUpperCorner : Fin (n + 1) -> Real :=
+  D.selectedTarget.targetUpperCorner
+
+/-- Target-box image data in the exact form consumed by boundary COV. -/
+theorem imageData :
+    boundaryChartSelectedBoxImageData I x0 x1 a b
+      D.targetLowerCorner D.targetUpperCorner :=
+  D.selectedTarget.imageData
+
+/-- Maps-to projection from the selected target-image data. -/
+theorem mapsTo :
+    MapsTo (boundaryChartTransition I x0 x1)
+      (lowerZeroFaceDomain a b)
+      (lowerZeroFaceDomain D.targetLowerCorner D.targetUpperCorner) :=
+  D.selectedTarget.mapsTo
+
+/-- Surjectivity projection from the selected target-image data. -/
+theorem surjOn :
+    SurjOn (boundaryChartTransition I x0 x1)
+      (lowerZeroFaceDomain a b)
+      (lowerZeroFaceDomain D.targetLowerCorner D.targetUpperCorner) :=
+  D.selectedTarget.surjOn
+
+/-- Selected-box COV generated by the oriented atlas and bundled membership. -/
+theorem changeOfVariables [IsManifold I 1 M] :
+    boundaryChartOrientedChangeOfVariables I x0 x1 omega a b
+      D.targetLowerCorner D.targetUpperCorner :=
+  D.selectedTarget.orientedChangeOfVariablesOfOrientationMembership
+    D.orientedBoundaryAtlas D.orientationMembership
+
+/--
+One selected chart-change piece obtained from the pointwise selected-box COV
+input and a selected target chart for the transported boundary term.
+-/
+def toBoundaryChartChangeSelectedPieceData [IsManifold I 1 M]
+    (boundaryTargetChart : M)
+    (targetSelectedBox :
+      boundaryChartSelectedBox I x1 boundaryTargetChart omega
+        D.targetLowerCorner D.targetUpperCorner) :
+    BoundaryChartChangeSelectedPieceData I omega x0 x1 a b where
+  boundaryTargetChart := boundaryTargetChart
+  targetLowerCorner := D.targetLowerCorner
+  targetUpperCorner := D.targetUpperCorner
+  changeOfVariables := D.changeOfVariables
+  targetBox := targetSelectedBox
+
+@[simp]
+theorem selectedBox_eq :
+    D.selectedBox = D.selectedTarget.selectedBox := by
+  rfl
+
+@[simp]
+theorem targetBox_eq :
+    D.targetBox = D.selectedTarget.targetBox := by
+  rfl
+
+@[simp]
+theorem targetLowerCorner_eq :
+    D.targetLowerCorner = D.selectedTarget.targetLowerCorner := by
+  rfl
+
+@[simp]
+theorem targetUpperCorner_eq :
+    D.targetUpperCorner = D.selectedTarget.targetUpperCorner := by
+  rfl
+
+@[simp]
+theorem toBoundaryChartChangeSelectedPieceData_boundaryTargetChart
+    [IsManifold I 1 M]
+    (boundaryTargetChart : M)
+    (targetSelectedBox :
+      boundaryChartSelectedBox I x1 boundaryTargetChart omega
+        D.targetLowerCorner D.targetUpperCorner) :
+    (D.toBoundaryChartChangeSelectedPieceData boundaryTargetChart
+      targetSelectedBox).boundaryTargetChart = boundaryTargetChart := by
+  rfl
+
+@[simp]
+theorem toBoundaryChartChangeSelectedPieceData_targetLowerCorner
+    [IsManifold I 1 M]
+    (boundaryTargetChart : M)
+    (targetSelectedBox :
+      boundaryChartSelectedBox I x1 boundaryTargetChart omega
+        D.targetLowerCorner D.targetUpperCorner) :
+    (D.toBoundaryChartChangeSelectedPieceData boundaryTargetChart
+      targetSelectedBox).targetLowerCorner = D.targetLowerCorner := by
+  rfl
+
+@[simp]
+theorem toBoundaryChartChangeSelectedPieceData_targetUpperCorner
+    [IsManifold I 1 M]
+    (boundaryTargetChart : M)
+    (targetSelectedBox :
+      boundaryChartSelectedBox I x1 boundaryTargetChart omega
+        D.targetLowerCorner D.targetUpperCorner) :
+    (D.toBoundaryChartChangeSelectedPieceData boundaryTargetChart
+      targetSelectedBox).targetUpperCorner = D.targetUpperCorner := by
+  rfl
+
+end BoundaryChartSelectedBoxCOVNaturalInput
+
+/-! ## Mathlib-facing pointwise orientation wrappers -/
+
+/--
+Pointwise selected-box COV input backed by mathlib-orientation atlas data.
+
+The `mathlibOrientation` field is deliberately retained.  A future upstream
+mathlib orientation API should construct this field; this file only projects it
+to the current boundary-chart COV layer.
+-/
+structure BoundaryChartSelectedBoxCOVMathlibOrientationAtlasInput
+    (I : ModelWithCorners Real (Fin (n + 1) -> Real) H)
+    (Orient : Type v) (x0 x1 : M) (omega : ManifoldForm I M n)
+    (a b : Fin (n + 1) -> Real) where
+  /-- Honest mathlib-orientation-map atlas bridge input. -/
+  mathlibOrientation : BoundaryChartMathlibOrientationAtlasData I M Orient
+  /-- Membership in the chart set carried by `mathlibOrientation`. -/
+  orientationMembership :
+    BoundaryChartOrientationMembership mathlibOrientation.charts x0 x1
+  /-- Selected source box plus target image/local-inverse data. -/
+  selectedTarget :
+    BoundaryChartSelectedBoxTargetImageAutoData I x0 x1 omega a b
+
+namespace BoundaryChartSelectedBoxCOVMathlibOrientationAtlasInput
+
+variable {Orient : Type v} {x0 x1 : M}
+variable {a b : Fin (n + 1) -> Real}
+variable
+    (D :
+      BoundaryChartSelectedBoxCOVMathlibOrientationAtlasInput
+        I Orient x0 x1 omega a b)
+
+/-- Project the mathlib-facing atlas data to the natural local COV input. -/
+def toNaturalInput :
+    BoundaryChartSelectedBoxCOVNaturalInput I x0 x1 omega a b where
+  orientedBoundaryAtlas := D.mathlibOrientation.toBoundaryChartOrientedAtlas
+  orientationMembership :=
+    { source_mem := by
+        simpa using D.orientationMembership.source_mem
+      boundarySource_mem := by
+        simpa using D.orientationMembership.boundarySource_mem }
+  selectedTarget := D.selectedTarget
+
+/-- Direct selected-box COV theorem from the mathlib-orientation atlas package. -/
+theorem changeOfVariables [IsManifold I 1 M] :
+    boundaryChartOrientedChangeOfVariables I x0 x1 omega a b
+      D.selectedTarget.targetLowerCorner D.selectedTarget.targetUpperCorner :=
+  D.selectedTarget.orientedChangeOfVariablesOfMathlibOrientationAtlasMembership
+    D.mathlibOrientation D.orientationMembership
+
+@[simp]
+theorem toNaturalInput_orientedBoundaryAtlas :
+    D.toNaturalInput.orientedBoundaryAtlas =
+      D.mathlibOrientation.toBoundaryChartOrientedAtlas := by
+  rfl
+
+@[simp]
+theorem toNaturalInput_selectedTarget :
+    D.toNaturalInput.selectedTarget = D.selectedTarget := by
+  rfl
+
+@[simp]
+theorem toNaturalInput_source_mem :
+    D.toNaturalInput.orientationMembership.source_mem =
+      (by simpa using D.orientationMembership.source_mem) := by
+  rfl
+
+end BoundaryChartSelectedBoxCOVMathlibOrientationAtlasInput
+
+/--
+Pointwise selected-box COV input backed by the older mathlib-facing oriented
+atlas bridge.
+-/
+structure BoundaryChartSelectedBoxCOVMathlibOrientedAtlasBridgeInput
+    (I : ModelWithCorners Real (Fin (n + 1) -> Real) H)
+    (Orient : Type v) (x0 x1 : M) (omega : ManifoldForm I M n)
+    (a b : Fin (n + 1) -> Real) where
+  /-- Honest mathlib-facing oriented-atlas bridge. -/
+  mathlibOrientation : BoundaryChartMathlibOrientedAtlasBridge I M Orient
+  /-- Membership in the chart set carried by `mathlibOrientation`. -/
+  orientationMembership :
+    BoundaryChartOrientationMembership mathlibOrientation.charts x0 x1
+  /-- Selected source box plus target image/local-inverse data. -/
+  selectedTarget :
+    BoundaryChartSelectedBoxTargetImageAutoData I x0 x1 omega a b
+
+namespace BoundaryChartSelectedBoxCOVMathlibOrientedAtlasBridgeInput
+
+variable {Orient : Type v} {x0 x1 : M}
+variable {a b : Fin (n + 1) -> Real}
+variable
+    (D :
+      BoundaryChartSelectedBoxCOVMathlibOrientedAtlasBridgeInput
+        I Orient x0 x1 omega a b)
+
+/-- Project the older bridge to the natural local COV input. -/
+def toNaturalInput :
+    BoundaryChartSelectedBoxCOVNaturalInput I x0 x1 omega a b where
+  orientedBoundaryAtlas := D.mathlibOrientation.toBoundaryChartOrientedAtlas
+  orientationMembership :=
+    { source_mem := by
+        simpa using D.orientationMembership.source_mem
+      boundarySource_mem := by
+        simpa using D.orientationMembership.boundarySource_mem }
+  selectedTarget := D.selectedTarget
+
+/-- Direct selected-box COV theorem from the older mathlib-facing atlas bridge. -/
+theorem changeOfVariables [IsManifold I 1 M] :
+    boundaryChartOrientedChangeOfVariables I x0 x1 omega a b
+      D.selectedTarget.targetLowerCorner D.selectedTarget.targetUpperCorner :=
+  D.selectedTarget.orientedChangeOfVariablesOfMathlibOrientedAtlasMembership
+    D.mathlibOrientation D.orientationMembership
+
+@[simp]
+theorem toNaturalInput_orientedBoundaryAtlas :
+    D.toNaturalInput.orientedBoundaryAtlas =
+      D.mathlibOrientation.toBoundaryChartOrientedAtlas := by
+  rfl
+
+@[simp]
+theorem toNaturalInput_selectedTarget :
+    D.toNaturalInput.selectedTarget = D.selectedTarget := by
+  rfl
+
+end BoundaryChartSelectedBoxCOVMathlibOrientedAtlasBridgeInput
+
+/--
+All-chart mathlib-orientation-map input for a pointwise selected-box COV
+statement.  The mathlib-facing field is explicit; projection to the local
+boundary-chart structures is a wrapper only.
+-/
+structure BoundaryChartSelectedBoxCOVMathlibOrientationManifoldInput
+    (I : ModelWithCorners Real (Fin (n + 1) -> Real) H)
+    (Orient : Type v) (x0 x1 : M) (omega : ManifoldForm I M n)
+    (a b : Fin (n + 1) -> Real) where
+  /-- Honest all-chart mathlib-orientation-map bridge input. -/
+  mathlibOrientation : BoundaryChartMathlibOrientationManifoldData I M Orient
+  /-- Selected source box plus target image/local-inverse data. -/
+  selectedTarget :
+    BoundaryChartSelectedBoxTargetImageAutoData I x0 x1 omega a b
+
+namespace BoundaryChartSelectedBoxCOVMathlibOrientationManifoldInput
+
+variable {Orient : Type v} {x0 x1 : M}
+variable {a b : Fin (n + 1) -> Real}
+variable
+    (D :
+      BoundaryChartSelectedBoxCOVMathlibOrientationManifoldInput
+        I Orient x0 x1 omega a b)
+
+/-- Project all-chart mathlib-orientation data to the natural local COV input. -/
+def toNaturalInput :
+    BoundaryChartSelectedBoxCOVNaturalInput I x0 x1 omega a b where
+  orientedBoundaryAtlas := D.mathlibOrientation.toBoundaryChartOrientedAtlas
+  orientationMembership := D.mathlibOrientation.orientationMembership x0 x1
+  selectedTarget := D.selectedTarget
+
+/-- Direct selected-box COV theorem from all-chart mathlib-orientation data. -/
+theorem changeOfVariables [IsManifold I 1 M] :
+    boundaryChartOrientedChangeOfVariables I x0 x1 omega a b
+      D.selectedTarget.targetLowerCorner D.selectedTarget.targetUpperCorner :=
+  D.selectedTarget.orientedChangeOfVariablesOfMathlibOrientationManifoldData
+    D.mathlibOrientation
+
+@[simp]
+theorem toNaturalInput_selectedTarget :
+    D.toNaturalInput.selectedTarget = D.selectedTarget := by
+  rfl
+
+end BoundaryChartSelectedBoxCOVMathlibOrientationManifoldInput
+
+/--
+All-chart input backed by the older mathlib-facing oriented-manifold bridge.
+-/
+structure BoundaryChartSelectedBoxCOVMathlibOrientedManifoldBridgeInput
+    (I : ModelWithCorners Real (Fin (n + 1) -> Real) H)
+    (Orient : Type v) (x0 x1 : M) (omega : ManifoldForm I M n)
+    (a b : Fin (n + 1) -> Real) where
+  /-- Honest all-chart mathlib-facing oriented-manifold bridge. -/
+  mathlibOrientation : BoundaryChartMathlibOrientedManifoldBridge I M Orient
+  /-- Selected source box plus target image/local-inverse data. -/
+  selectedTarget :
+    BoundaryChartSelectedBoxTargetImageAutoData I x0 x1 omega a b
+
+namespace BoundaryChartSelectedBoxCOVMathlibOrientedManifoldBridgeInput
+
+variable {Orient : Type v} {x0 x1 : M}
+variable {a b : Fin (n + 1) -> Real}
+variable
+    (D :
+      BoundaryChartSelectedBoxCOVMathlibOrientedManifoldBridgeInput
+        I Orient x0 x1 omega a b)
+
+/-- View the all-chart bridge as an atlas-level pointwise input. -/
+def toAtlasBridgeInput :
+    BoundaryChartSelectedBoxCOVMathlibOrientedAtlasBridgeInput
+      I Orient x0 x1 omega a b where
+  mathlibOrientation := D.mathlibOrientation.toMathlibOrientedAtlasBridge
+  orientationMembership := D.mathlibOrientation.orientationMembership x0 x1
+  selectedTarget := D.selectedTarget
+
+/-- Project the all-chart bridge to the natural local COV input. -/
+def toNaturalInput :
+    BoundaryChartSelectedBoxCOVNaturalInput I x0 x1 omega a b :=
+  D.toAtlasBridgeInput.toNaturalInput
+
+/-- Direct selected-box COV theorem from the all-chart bridge. -/
+theorem changeOfVariables [IsManifold I 1 M] :
+    boundaryChartOrientedChangeOfVariables I x0 x1 omega a b
+      D.selectedTarget.targetLowerCorner D.selectedTarget.targetUpperCorner :=
+  D.selectedTarget.orientedChangeOfVariablesOfMathlibOrientedManifoldBridge
+    D.mathlibOrientation
+
+@[simp]
+theorem toAtlasBridgeInput_selectedTarget :
+    D.toAtlasBridgeInput.selectedTarget = D.selectedTarget := by
+  rfl
+
+end BoundaryChartSelectedBoxCOVMathlibOrientedManifoldBridgeInput
+
+/-! ## Resolved-family orientation/COV input -/
+
+/--
+Natural family-level input that turns resolved target-image data plus oriented
+atlas membership into selected chart-change data.
+
+This is the family analogue of `BoundaryChartSelectedBoxCOVNaturalInput`.
+The analytic selected-box COV is reconstructed from `targetFamily`; the global
+project-local fields are aligned through `projectLocalCompatibility`.
+-/
+structure BoundaryChartResolvedFamilyCOVNaturalInput
+    (F : BoundaryChartTargetImageResolvedFamily I omega Chart Piece)
+    (A : BoundaryChartOrientedAtlas I M)
+    (P : ProjectLocalGlobalStokesData I omega Chart Piece) where
+  /-- Atlas-membership facts for the resolved source and boundary-source charts. -/
+  atlasMembership : F.BoundaryAtlasMembership A
+  /-- Alignment between the resolved target-image family and project-local data. -/
+  projectLocalCompatibility : F.ProjectLocalCompatibility P
+
+namespace BoundaryChartResolvedFamilyCOVNaturalInput
+
+variable {F : BoundaryChartTargetImageResolvedFamily I omega Chart Piece}
+variable {A : BoundaryChartOrientedAtlas I M}
+variable {P : ProjectLocalGlobalStokesData I omega Chart Piece}
+variable (D : BoundaryChartResolvedFamilyCOVNaturalInput F A P)
+
+/-- Bundled pointwise membership for a resolved-family active piece. -/
+def orientationMembership
+    (x : Chart) (hx : x ∈ F.activeCharts)
+    (q : Piece) (hq : q ∈ F.localPieces x) :
+    BoundaryChartOrientationMembership A.charts
+      (F.sourceChart x q) (F.boundarySourceChart x q) :=
+  D.atlasMembership.orientationMembership x hx q hq
+
+/-- Pointwise COV for a resolved-family active selected box. -/
+theorem pointwiseChangeOfVariables [IsManifold I 1 M]
+    (D : BoundaryChartResolvedFamilyCOVNaturalInput F A P)
+    (x : Chart) (hx : x ∈ F.activeCharts)
+    (q : Piece) (hq : q ∈ F.localPieces x) :
+    boundaryChartOrientedChangeOfVariables I
+      (F.sourceChart x q) (F.boundarySourceChart x q) omega
+      (F.sourceLowerCorner x q) (F.sourceUpperCorner x q)
+      (F.targetLowerCorner x q) (F.targetUpperCorner x q) :=
+  BoundaryChartTargetImageResolvedFamily.orientedChangeOfVariablesOfOrientationMembership
+    F A D.atlasMembership
+    x hx q hq
+
+/-- Selected chart-change family consumed by the project-local boundary route. -/
+def toBoundaryChartChangeSelectedFamilyData [IsManifold I 1 M] :
+    BoundaryChartChangeSelectedFamilyData P :=
+  BoundaryChartTargetImageResolvedFamily.toBoundaryChartChangeSelectedFamilyDataOfOrientationMembership
+    F A D.atlasMembership D.projectLocalCompatibility
+
+@[simp]
+theorem orientationMembership_source_mem
+    (x : Chart) (hx : x ∈ F.activeCharts)
+    (q : Piece) (hq : q ∈ F.localPieces x) :
+    (D.orientationMembership x hx q hq).source_mem =
+      D.atlasMembership.sourceChart_mem x hx q hq := by
+  rfl
+
+@[simp]
+theorem orientationMembership_boundarySource_mem
+    (x : Chart) (hx : x ∈ F.activeCharts)
+    (q : Piece) (hq : q ∈ F.localPieces x) :
+    (D.orientationMembership x hx q hq).boundarySource_mem =
+      D.atlasMembership.boundarySourceChart_mem x hx q hq := by
+  rfl
+
+theorem chartChangeCancellation [IsManifold I 1 M]
+    (D : BoundaryChartResolvedFamilyCOVNaturalInput F A P) :
+    (Finset.sum P.activeCharts fun x =>
+        Finset.sum (P.localPieces x) fun q =>
+          projectLocalBoundaryIntegral I (P.sourceChart x q) (P.targetChart x q) omega
+            (P.lowerCorner x q) (P.upperCorner x q)) =
+      Finset.sum P.activeCharts fun x =>
+        Finset.sum (P.localPieces x) fun q => P.boundaryPartitionTerm x q :=
+  (D.toBoundaryChartChangeSelectedFamilyData).chartChangeCancellation_selected
+
+end BoundaryChartResolvedFamilyCOVNaturalInput
+
+/-! ## M8 target-image orientation membership projections -/
+
+namespace M8TargetImageInput
+
+variable {selectedPartition : SelectedBoxPartitionOfUnity I omega}
+variable {orientedBoundaryAtlas : BoundaryChartOrientedAtlas I M}
+variable
+    (T :
+      M8TargetImageInput I omega selectedPartition orientedBoundaryAtlas
+        BoundaryPiece)
+
+/-- Source-to-boundary-source membership bundled for a target-image input. -/
+def sourceOrientationMembership
+    (x : M) (hx : x ∈ T.targetImages.activeCharts)
+    (q : BoundaryPiece) (hq : q ∈ T.targetImages.boundaryPieces x) :
+    BoundaryChartOrientationMembership orientedBoundaryAtlas.charts
+      (T.targetImages.sourceChart x q) (T.targetImages.boundarySourceChart x q) :=
+  BoundaryChartOrientationMembership.of_mem
+    (T.targetImages_source_mem x hx q hq)
+    (T.targetImages_boundarySource_mem x hx q hq)
+
+/-- Boundary-source-to-boundary-target membership bundled for assembly COV. -/
+def boundaryPartitionOrientationMembership
+    (x : M) (hx : x ∈ T.assembly.activeCharts)
+    (q : BoundaryPiece) (hq : q ∈ T.assembly.boundaryPieces x) :
+    BoundaryChartOrientationMembership orientedBoundaryAtlas.charts
+      (T.assembly.boundarySourceChart x q) (T.assembly.boundaryTargetChart x q) :=
+  BoundaryChartOrientationMembership.of_mem
+    (T.boundarySource_mem x hx q hq)
+    (T.boundaryTarget_mem x hx q hq)
+
+/--
+Selected boundary assembly data built through the bundled membership facade.
+This is definitionally parallel to the older oriented-atlas constructor, but
+the chart-pair membership is now first-class.
+-/
+def selectedBoundaryAssemblyDataOfOrientationMembership
+    [IsManifold I 1 M] :
+    SelectedBoundaryAssemblyData I omega M BoundaryPiece :=
+  T.assembly.toSelectedBoundaryAssemblyData_of_orientationMembership
+    orientedBoundaryAtlas
+    (fun x hx q hq =>
+      T.boundaryPartitionOrientationMembership x hx q hq)
+
+@[simp]
+theorem sourceOrientationMembership_source_mem
+    (x : M) (hx : x ∈ T.targetImages.activeCharts)
+    (q : BoundaryPiece) (hq : q ∈ T.targetImages.boundaryPieces x) :
+    (T.sourceOrientationMembership x hx q hq).source_mem =
+      T.targetImages_source_mem x hx q hq := by
+  rfl
+
+@[simp]
+theorem sourceOrientationMembership_boundarySource_mem
+    (x : M) (hx : x ∈ T.targetImages.activeCharts)
+    (q : BoundaryPiece) (hq : q ∈ T.targetImages.boundaryPieces x) :
+    (T.sourceOrientationMembership x hx q hq).boundarySource_mem =
+      T.targetImages_boundarySource_mem x hx q hq := by
+  rfl
+
+@[simp]
+theorem boundaryPartitionOrientationMembership_source_mem
+    (x : M) (hx : x ∈ T.assembly.activeCharts)
+    (q : BoundaryPiece) (hq : q ∈ T.assembly.boundaryPieces x) :
+    (T.boundaryPartitionOrientationMembership x hx q hq).source_mem =
+      T.boundarySource_mem x hx q hq := by
+  rfl
+
+@[simp]
+theorem boundaryPartitionOrientationMembership_boundarySource_mem
+    (x : M) (hx : x ∈ T.assembly.activeCharts)
+    (q : BoundaryPiece) (hq : q ∈ T.assembly.boundaryPieces x) :
+    (T.boundaryPartitionOrientationMembership x hx q hq).boundarySource_mem =
+      T.boundaryTarget_mem x hx q hq := by
+  rfl
+
+end M8TargetImageInput
+
+/-! ## Boundary-source unified route through orientation/COV -/
+
+namespace BoundarySourceAlignmentUnifiedData
+
+variable {selectedPartition : SelectedBoxPartitionOfUnity I omega}
+variable {orientedBoundaryAtlas : BoundaryChartOrientedAtlas I M}
+variable
+    (U :
+      BoundarySourceAlignmentUnifiedData
+        (I := I) (omega := omega)
+        (selectedPartition := selectedPartition)
+        (orientedBoundaryAtlas := orientedBoundaryAtlas)
+        (BoundaryPiece := BoundaryPiece))
+
+/-- Resolved-family COV input generated from unified source data. -/
+def toResolvedFamilyCOVNaturalInput [IsManifold I 1 M] :
+    BoundaryChartResolvedFamilyCOVNaturalInput
+      U.family.toTargetImageResolvedFamily orientedBoundaryAtlas
+      U.toProjectLocalGlobalStokesData where
+  atlasMembership := U.m8Fields.toM8ResolvedInput.boundaryAtlasMembership
+  projectLocalCompatibility := U.toResolvedProjectLocalCompatibilityOfOrientedAtlas
+
+/--
+Selected chart-change family reconstructed from unified source data and the
+orientation membership already carried by its M8 target-image fields.
+-/
+def toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+    [IsManifold I 1 M] :
+    BoundaryChartChangeSelectedFamilyData U.toProjectLocalGlobalStokesData :=
+  U.toResolvedFamilyCOVNaturalInput.toBoundaryChartChangeSelectedFamilyData
+
+/-- Chart-change cancellation supplied by the orientation/COV route. -/
+theorem chartChangeCancellation_of_orientationCOV [IsManifold I 1 M] :
+    (Finset.sum U.toProjectLocalGlobalStokesData.activeCharts fun x =>
+        Finset.sum (U.toProjectLocalGlobalStokesData.localPieces x) fun q =>
+          projectLocalBoundaryIntegral I
+            (U.toProjectLocalGlobalStokesData.sourceChart x q)
+            (U.toProjectLocalGlobalStokesData.targetChart x q) omega
+            (U.toProjectLocalGlobalStokesData.lowerCorner x q)
+            (U.toProjectLocalGlobalStokesData.upperCorner x q)) =
+      Finset.sum U.toProjectLocalGlobalStokesData.activeCharts fun x =>
+        Finset.sum (U.toProjectLocalGlobalStokesData.localPieces x) fun q =>
+          U.toProjectLocalGlobalStokesData.boundaryPartitionTerm x q :=
+  (U.toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV).chartChangeCancellation_selected
+
+@[simp]
+theorem toResolvedFamilyCOVNaturalInput_atlasMembership
+    [IsManifold I 1 M] :
+    U.toResolvedFamilyCOVNaturalInput.atlasMembership =
+      U.m8Fields.toM8ResolvedInput.boundaryAtlasMembership := by
+  rfl
+
+@[simp]
+theorem toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV_cancel
+    [IsManifold I 1 M] :
+    (U.toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV).chartChangeCancellation_selected =
+      U.chartChangeCancellation_of_orientationCOV := by
+  rfl
+
+end BoundarySourceAlignmentUnifiedData
+
+namespace BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+
+variable {selectedPartition : SelectedBoxPartitionOfUnity I omega}
+variable {orientedBoundaryAtlas : BoundaryChartOrientedAtlas I M}
+variable {F : BoundaryChartLocalOpennessTargetCoverMegaFamily I omega M BoundaryPiece}
+variable
+    (D :
+      BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+        F selectedPartition orientedBoundaryAtlas)
+
+/-- Target-image orientation membership projected from the natural source route. -/
+def sourceOrientationMembership
+    (x : M) (hx : x ∈ D.toM8TargetImageInput.targetImages.activeCharts)
+    (q : BoundaryPiece)
+    (hq : q ∈ D.toM8TargetImageInput.targetImages.boundaryPieces x) :
+    BoundaryChartOrientationMembership orientedBoundaryAtlas.charts
+      (D.toM8TargetImageInput.targetImages.sourceChart x q)
+      (D.toM8TargetImageInput.targetImages.boundarySourceChart x q) :=
+  D.toM8TargetImageInput.sourceOrientationMembership x hx q hq
+
+/-- Assembly boundary-source/target membership projected from the natural source route. -/
+def boundaryPartitionOrientationMembership
+    (x : M) (hx : x ∈ D.toM8TargetImageInput.assembly.activeCharts)
+    (q : BoundaryPiece)
+    (hq : q ∈ D.toM8TargetImageInput.assembly.boundaryPieces x) :
+    BoundaryChartOrientationMembership orientedBoundaryAtlas.charts
+      (D.toM8TargetImageInput.assembly.boundarySourceChart x q)
+      (D.toM8TargetImageInput.assembly.boundaryTargetChart x q) :=
+  D.toM8TargetImageInput.boundaryPartitionOrientationMembership x hx q hq
+
+/-- Selected chart-change data generated by orientation/COV from the unified source. -/
+def toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+    [IsManifold I 1 M] :
+    BoundaryChartChangeSelectedFamilyData
+      D.boundaryUnified.toProjectLocalGlobalStokesData :=
+  D.boundaryUnified.toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+
+/--
+Natural endpoint input with the boundary chart-change field filled by the
+orientation/COV route.
+-/
+def toNaturalBulkEndpointUnifiedInputOfOrientationCOV
+    {rho : SmoothPartitionOfUnity M I M univ}
+    {mu : Measure (Fin (n + 1) -> Real)}
+    [IsFiniteMeasureOnCompacts mu] [IsManifold I 1 M]
+    {chartBoxes : NaturalFiniteActiveChartBoxSelectionData I omega rho}
+    (D :
+      BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+        F chartBoxes.selectedPartition orientedBoundaryAtlas)
+    (localized : LocalizedInteriorM8Fields I omega chartBoxes.selectedPartition)
+    (measure_eq_volume : mu = volume)
+    (boundaryFaceContinuity :
+      ProjectLocalBoundaryCanonicalFaceContinuityData
+        D.boundaryUnified.toProjectLocalGlobalStokesData) :
+    NaturalBulkEndpointUnifiedInput
+      (I := I) (omega := omega) (rho := rho)
+      chartBoxes BoundaryPiece mu :=
+  D.toNaturalBulkEndpointUnifiedInput localized measure_eq_volume
+    boundaryFaceContinuity
+    D.toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+
+/-- Common natural endpoint data with chart-change generated from orientation/COV. -/
+def toNaturalBulkEndpointCommonDataOfOrientationCOV
+    {rho : SmoothPartitionOfUnity M I M univ}
+    {mu : Measure (Fin (n + 1) -> Real)}
+    [IsFiniteMeasureOnCompacts mu] [IsManifold I 1 M]
+    {chartBoxes : NaturalFiniteActiveChartBoxSelectionData I omega rho}
+    (D :
+      BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+        F chartBoxes.selectedPartition orientedBoundaryAtlas)
+    (localized : LocalizedInteriorM8Fields I omega chartBoxes.selectedPartition)
+    (measure_eq_volume : mu = volume)
+    (boundaryFaceContinuity :
+      ProjectLocalBoundaryCanonicalFaceContinuityData
+        D.boundaryUnified.toProjectLocalGlobalStokesData) :
+    NaturalBulkEndpointCommonData
+      (I := I) (omega := omega) (rho := rho)
+      chartBoxes BoundaryPiece mu :=
+  (D.toNaturalBulkEndpointUnifiedInputOfOrientationCOV localized
+    measure_eq_volume boundaryFaceContinuity).toCommonData
+
+@[simp]
+theorem toNaturalBulkEndpointUnifiedInputOfOrientationCOV_boundaryUnified
+    {rho : SmoothPartitionOfUnity M I M univ}
+    {mu : Measure (Fin (n + 1) -> Real)}
+    [IsFiniteMeasureOnCompacts mu] [IsManifold I 1 M]
+    {chartBoxes : NaturalFiniteActiveChartBoxSelectionData I omega rho}
+    (D :
+      BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+        F chartBoxes.selectedPartition orientedBoundaryAtlas)
+    (localized : LocalizedInteriorM8Fields I omega chartBoxes.selectedPartition)
+    (measure_eq_volume : mu = volume)
+    (boundaryFaceContinuity :
+      ProjectLocalBoundaryCanonicalFaceContinuityData
+        D.boundaryUnified.toProjectLocalGlobalStokesData) :
+    (D.toNaturalBulkEndpointUnifiedInputOfOrientationCOV localized
+      measure_eq_volume boundaryFaceContinuity).boundaryUnified =
+      D.boundaryUnified := by
+  rfl
+
+@[simp]
+theorem toNaturalBulkEndpointCommonDataOfOrientationCOV_boundaryUnified
+    {rho : SmoothPartitionOfUnity M I M univ}
+    {mu : Measure (Fin (n + 1) -> Real)}
+    [IsFiniteMeasureOnCompacts mu] [IsManifold I 1 M]
+    {chartBoxes : NaturalFiniteActiveChartBoxSelectionData I omega rho}
+    (D :
+      BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+        F chartBoxes.selectedPartition orientedBoundaryAtlas)
+    (localized : LocalizedInteriorM8Fields I omega chartBoxes.selectedPartition)
+    (measure_eq_volume : mu = volume)
+    (boundaryFaceContinuity :
+      ProjectLocalBoundaryCanonicalFaceContinuityData
+        D.boundaryUnified.toProjectLocalGlobalStokesData) :
+    (D.toNaturalBulkEndpointCommonDataOfOrientationCOV localized
+      measure_eq_volume boundaryFaceContinuity).boundaryUnified =
+      D.boundaryUnified := by
+  rfl
+
+end BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+
+namespace BoundaryChartLocalOpennessTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+
+variable {selectedPartition : SelectedBoxPartitionOfUnity I omega}
+variable {orientedBoundaryAtlas : BoundaryChartOrientedAtlas I M}
+variable {F : BoundaryChartLocalOpennessTargetCoverMegaFamily I omega M BoundaryPiece}
+variable
+    (D :
+      BoundaryChartLocalOpennessTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+        F selectedPartition orientedBoundaryAtlas)
+
+/-- Selected chart-change data generated by orientation/COV from controlled source data. -/
+def toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+    [IsManifold I 1 M] :
+    BoundaryChartChangeSelectedFamilyData
+      D.boundaryUnified.toProjectLocalGlobalStokesData :=
+  D.boundaryUnified.toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+
+/-- Controlled natural endpoint input with chart-change filled by orientation/COV. -/
+def toNaturalBulkEndpointUnifiedInputOfOrientationCOV
+    {rho : SmoothPartitionOfUnity M I M univ}
+    {mu : Measure (Fin (n + 1) -> Real)}
+    [IsFiniteMeasureOnCompacts mu] [IsManifold I 1 M]
+    {chartBoxes : NaturalFiniteActiveChartBoxSelectionData I omega rho}
+    (D :
+      BoundaryChartLocalOpennessTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+        F chartBoxes.selectedPartition orientedBoundaryAtlas)
+    (localized : LocalizedInteriorM8Fields I omega chartBoxes.selectedPartition)
+    (measure_eq_volume : mu = volume)
+    (boundaryFaceContinuity :
+      ProjectLocalBoundaryCanonicalFaceContinuityData
+        D.boundaryUnified.toProjectLocalGlobalStokesData) :
+    NaturalBulkEndpointUnifiedInput
+      (I := I) (omega := omega) (rho := rho)
+      chartBoxes BoundaryPiece mu :=
+  D.toNaturalBulkEndpointUnifiedInput localized measure_eq_volume
+    boundaryFaceContinuity
+    D.toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+
+@[simp]
+theorem toNaturalBulkEndpointUnifiedInputOfOrientationCOV_boundaryUnified
+    {rho : SmoothPartitionOfUnity M I M univ}
+    {mu : Measure (Fin (n + 1) -> Real)}
+    [IsFiniteMeasureOnCompacts mu] [IsManifold I 1 M]
+    {chartBoxes : NaturalFiniteActiveChartBoxSelectionData I omega rho}
+    (D :
+      BoundaryChartLocalOpennessTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+        F chartBoxes.selectedPartition orientedBoundaryAtlas)
+    (localized : LocalizedInteriorM8Fields I omega chartBoxes.selectedPartition)
+    (measure_eq_volume : mu = volume)
+    (boundaryFaceContinuity :
+      ProjectLocalBoundaryCanonicalFaceContinuityData
+        D.boundaryUnified.toProjectLocalGlobalStokesData) :
+    (D.toNaturalBulkEndpointUnifiedInputOfOrientationCOV localized
+      measure_eq_volume boundaryFaceContinuity).boundaryUnified =
+      D.boundaryUnified := by
+  rfl
+
+end BoundaryChartLocalOpennessTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+
+/-! ## IFT cover aliases through the local-openness route -/
+
+namespace BoundaryChartIFTTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+
+variable {selectedPartition : SelectedBoxPartitionOfUnity I omega}
+variable {orientedBoundaryAtlas : BoundaryChartOrientedAtlas I M}
+variable {F : BoundaryChartIFTTargetCoverMegaFamily I omega M BoundaryPiece}
+variable
+    (D :
+      BoundaryChartIFTTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+        F selectedPartition orientedBoundaryAtlas)
+
+/-- IFT natural route: selected chart-change data generated by orientation/COV. -/
+def toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+    [IsManifold I 1 M] :
+    BoundaryChartChangeSelectedFamilyData
+      D.boundaryUnified.toProjectLocalGlobalStokesData :=
+  BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput.toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+    D
+
+/-- IFT natural endpoint input with chart-change filled by orientation/COV. -/
+def toNaturalBulkEndpointUnifiedInputOfOrientationCOV
+    {rho : SmoothPartitionOfUnity M I M univ}
+    {mu : Measure (Fin (n + 1) -> Real)}
+    [IsFiniteMeasureOnCompacts mu] [IsManifold I 1 M]
+    {chartBoxes : NaturalFiniteActiveChartBoxSelectionData I omega rho}
+    (D :
+      BoundaryChartIFTTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+        F chartBoxes.selectedPartition orientedBoundaryAtlas)
+    (localized : LocalizedInteriorM8Fields I omega chartBoxes.selectedPartition)
+    (measure_eq_volume : mu = volume)
+    (boundaryFaceContinuity :
+      ProjectLocalBoundaryCanonicalFaceContinuityData
+        D.boundaryUnified.toProjectLocalGlobalStokesData) :
+    NaturalBulkEndpointUnifiedInput
+      (I := I) (omega := omega) (rho := rho)
+      chartBoxes BoundaryPiece mu :=
+  BoundaryChartLocalOpennessTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput.toNaturalBulkEndpointUnifiedInputOfOrientationCOV
+    D localized measure_eq_volume boundaryFaceContinuity
+
+end BoundaryChartIFTTargetCoverMegaFamily.BoundarySourceUnifiedNaturalInput
+
+namespace BoundaryChartIFTTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+
+variable {selectedPartition : SelectedBoxPartitionOfUnity I omega}
+variable {orientedBoundaryAtlas : BoundaryChartOrientedAtlas I M}
+variable {F : BoundaryChartIFTTargetCoverMegaFamily I omega M BoundaryPiece}
+variable
+    (D :
+      BoundaryChartIFTTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+        F selectedPartition orientedBoundaryAtlas)
+
+/-- IFT controlled route: selected chart-change data generated by orientation/COV. -/
+def toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+    [IsManifold I 1 M] :
+    BoundaryChartChangeSelectedFamilyData
+      D.boundaryUnified.toProjectLocalGlobalStokesData :=
+  BoundaryChartLocalOpennessTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput.toBoundaryChartChangeSelectedFamilyDataOfOrientationCOV
+    D
+
+/-- IFT controlled endpoint input with chart-change filled by orientation/COV. -/
+def toNaturalBulkEndpointUnifiedInputOfOrientationCOV
+    {rho : SmoothPartitionOfUnity M I M univ}
+    {mu : Measure (Fin (n + 1) -> Real)}
+    [IsFiniteMeasureOnCompacts mu] [IsManifold I 1 M]
+    {chartBoxes : NaturalFiniteActiveChartBoxSelectionData I omega rho}
+    (D :
+      BoundaryChartIFTTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+        F chartBoxes.selectedPartition orientedBoundaryAtlas)
+    (localized : LocalizedInteriorM8Fields I omega chartBoxes.selectedPartition)
+    (measure_eq_volume : mu = volume)
+    (boundaryFaceContinuity :
+      ProjectLocalBoundaryCanonicalFaceContinuityData
+        D.boundaryUnified.toProjectLocalGlobalStokesData) :
+    NaturalBulkEndpointUnifiedInput
+      (I := I) (omega := omega) (rho := rho)
+      chartBoxes BoundaryPiece mu :=
+  BoundaryChartLocalOpennessTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput.toNaturalBulkEndpointUnifiedInputOfOrientationCOV
+    D localized measure_eq_volume boundaryFaceContinuity
+
+end BoundaryChartIFTTargetCoverMegaFamily.ControlledBoundarySourceUnifiedNaturalInput
+
+end OrientationBoundaryCOVEndToEndMegaAuto
+
+end Stokes
+
+end

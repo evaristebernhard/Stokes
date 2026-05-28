@@ -1,0 +1,265 @@
+import Stokes.Global.CoverIndexedOpenSupportControlledPartition
+import Stokes.Global.CoverIndexedSelectedBoundaryBoxFiniteCover
+import Stokes.Global.CoverIndexedLocalizedRefinedPartition
+import Stokes.Global.CoverIndexedLocalizedRefinedLocalStokes
+import Stokes.Global.CoverIndexedZeroLocalizedIntrinsicCertificate
+
+/-!
+# Intrinsic compact-support represented Stokes route
+
+This file is the theorem-facing intrinsic wrapper for the zero compact-support
+represented route.  Its public input has only the natural pointwise and
+analytic fields:
+
+* pointwise chart-box data,
+* compactness of the carrier,
+* chartwise smoothness of the form, and
+* support containment in the carrier.
+
+All selected cover, partition, and finite half-space cover data are generated
+internally from the open-shrink constructors.  The endpoint is the minimal
+`CoverIndexedBoundaryLocalizedRefinedPartition`, paired with zero-localized
+`ZeroLocalStokesData`.
+
+The final theorem is currently conditional on the remaining localized endpoint,
+zero-support, and local-field certificate: this is the honest obstruction until
+those constructors can be generated directly from the canonical selected
+boundary finite cover.
+-/
+
+noncomputable section
+
+set_option linter.unusedSectionVars false
+set_option linter.style.longLine false
+
+open Set MeasureTheory Filter
+open scoped BigOperators Manifold Topology
+
+namespace Stokes
+
+section IntrinsicRepresentedStokes
+
+universe uH uM
+
+variable {H : Type uH} [TopologicalSpace H]
+variable {M : Type uM} [TopologicalSpace M] [ChartedSpace H M]
+variable {n : Nat}
+variable {I : ModelWithCorners Real (Fin (n + 1) → Real) H}
+variable {K : Set M}
+variable {ω : ManifoldForm I M n}
+variable [FiniteDimensional Real (Fin (n + 1) → Real)]
+variable [IsManifold I ⊤ M] [T2Space M] [SigmaCompactSpace M]
+
+/--
+Intrinsic input for compact-support represented Stokes.
+
+No selected finite cover, partition, boundary ambient region, collar data, or
+endpoint geometry is public here.  Those are generated, or conditionally
+certified, in the namespace below.
+-/
+structure CoverIndexedZeroCompactRepresentedStokesIntrinsicInput
+    (K : Set M) where
+  pointwise : PointwiseCompactSupportChartBoxData I K
+  hK : IsCompact K
+  chartwiseSmooth : ManifoldForm.ChartwiseSmooth I ω
+  support_subset_K : ManifoldForm.support I ω ⊆ K
+
+namespace CoverIndexedZeroCompactRepresentedStokesIntrinsicInput
+
+variable
+    (X :
+      CoverIndexedZeroCompactRepresentedStokesIntrinsicInput
+        (I := I) (ω := ω) K)
+
+/-- The canonical open-shrink selected cover extracted from pointwise data. -/
+def openSelectedCover :
+    PointwiseCompactSupportChartBoxData.OpenSelectedCover
+      (I := I) (K := K) X.pointwise :=
+  X.pointwise.selectedOpenCoverOfPointwise (I := I) X.hK
+
+/-- The canonical finite selected chart-box cover used by the intrinsic route. -/
+def selectedCover : CompactSupportChartCoverSelection I K :=
+  X.pointwise.selectedCoverOfOpenPointwise (I := I) X.hK
+
+/-- The canonical support-controlled partition retaining open-shrink support. -/
+def openSelectedPartition :
+    PointwiseCompactSupportChartBoxData.OpenSupportControlledSelectedPartition
+      (I := I) (K := K) (X.openSelectedCover (I := I) (K := K) (ω := ω)) :=
+  (X.openSelectedCover (I := I) (K := K) (ω := ω))
+    |>.openSupportControlledSelectedPartition (I := I) X.hK
+
+/-- The canonical support-controlled partition built from open shrinks. -/
+def selectedPartition :
+    SupportControlledSelectedPartition
+      (X.selectedCover (I := I) (K := K) (ω := ω)) :=
+  (X.openSelectedPartition (I := I) (K := K) (ω := ω))
+    |>.toSupportControlledSelectedPartition
+
+/-- The selected partition's support on `K` lands in the auxiliary open shrink. -/
+theorem selectedPartition_tsupport_inter_subset_openCoverSet
+    (j : (X.selectedCover (I := I) (K := K) (ω := ω)).CoverIndex) :
+    tsupport
+        ((X.selectedPartition (I := I) (K := K) (ω := ω)).partition j) ∩ K ⊆
+      (X.openSelectedCover (I := I) (K := K) (ω := ω)).openCoverSet j :=
+  (X.openSelectedPartition
+    (I := I) (K := K) (ω := ω)).tsupport_inter_subset_openCoverSet j
+
+/--
+The canonical finite half-space cover of boundary active coordinate carriers.
+
+This uses the selected boundary boxes themselves as the coordinate ambient
+sets, so no public `boundaryAmbient` or `collar_prisms` field is needed.
+-/
+def selectedBoundaryFiniteCover :
+    CoverIndexedFiniteHalfSpaceBoxCover
+      (I := I) (K := K)
+      (X.selectedCover (I := I) (K := K) (ω := ω))
+      ((X.selectedPartition
+        (I := I) (K := K) (ω := ω)).boundaryActiveCoordCarrier (I := I))
+      ((X.selectedPartition
+        (I := I) (K := K) (ω := ω)).boundaryAssignedIccAmbient (I := I))
+      (fun _ : CoverIndexedBoundaryIndex
+          (I := I) (X.selectedCover (I := I) (K := K) (ω := ω)) =>
+        Fin (n + 1) → Real) :=
+  (X.selectedPartition (I := I) (K := K) (ω := ω))
+    |>.finiteHalfSpaceCoverOfSelectedBoundaryBoxes (I := I) X.hK
+
+/-- Boundary piece labels generated by the canonical selected finite cover. -/
+abbrev selectedBoundaryPiece : Type uM :=
+  SigmaBoundaryPiece
+    (I := I) (K := K)
+    (X.selectedCover (I := I) (K := K) (ω := ω))
+    (fun _ : CoverIndexedBoundaryIndex
+        (I := I) (X.selectedCover (I := I) (K := K) (ω := ω)) =>
+      Fin (n + 1) → Real)
+
+/--
+Conditional certificate for the remaining intrinsic route constructors.
+
+The fields deliberately live outside the public input.  They record the exact
+handoff still needed from the canonical selected boundary finite cover to the
+localized endpoint, zero-support local-Stokes data, and analytic fields.
+-/
+structure IntrinsicCertificate where
+  endpoint :
+    CoverIndexedBoundaryLocalizedRefinedPartition
+      (I := I) (K := K)
+      (X.selectedCover (I := I) (K := K) (ω := ω))
+      (X.selectedPartition (I := I) (K := K) (ω := ω)) ω
+      (X.selectedBoundaryPiece (I := I) (K := K) (ω := ω))
+  boundaryPieces_eq_selectedFiniteCover :
+    ∀ i : CoverIndexedBoundaryIndex
+        (I := I) (X.selectedCover (I := I) (K := K) (ω := ω)),
+      endpoint.boundaryPieces i =
+        (X.selectedBoundaryFiniteCover
+          (I := I) (K := K) (ω := ω)).sigmaBoundaryPieces i
+  localData :
+    endpoint.ZeroLocalStokesData (I := I) (K := K)
+  sourceChart_eq_selected :
+    ∀ i q, q ∈ endpoint.boundaryPieces i →
+      localData.sourceChart i q =
+        (X.selectedCover (I := I) (K := K) (ω := ω)).boundaryChart i.1
+  lower_eq_selectedFiniteCover :
+    ∀ i q, q ∈ endpoint.boundaryPieces i →
+      localData.lower i q =
+        (X.selectedBoundaryFiniteCover
+          (I := I) (K := K) (ω := ω)).lowerCorner q.1 q.2
+  upper_eq_selectedFiniteCover :
+    ∀ i q, q ∈ endpoint.boundaryPieces i →
+      localData.upper i q =
+        (X.selectedBoundaryFiniteCover
+          (I := I) (K := K) (ω := ω)).upperCorner q.1 q.2
+  interiorFields :
+    ∀ i,
+      i ∈ (Finset.univ :
+        Finset (CoverIndexedBoundaryIndex
+          (I := I) (X.selectedCover (I := I) (K := K) (ω := ω)))) →
+        ∀ q, q ∈ endpoint.boundaryPieces i →
+          HalfSpaceBoxInteriorStokesFields
+            (ManifoldForm.transitionPullbackInChart I
+              (localData.sourceChart i q)
+              (localData.targetChart i q)
+              (localData.localizedForm i q))
+            (localData.lower i q) (localData.upper i q)
+
+namespace IntrinsicCertificate
+
+variable
+    (R : X.IntrinsicCertificate (I := I) (K := K) (ω := ω))
+
+/-- The represented bulk integral supplied by the refined endpoint adapter. -/
+def representedBulkIntegral : Real :=
+  R.endpoint.generatedRepresentedBulkIntegral (I := I) (K := K)
+
+/-- The represented boundary integral supplied by the refined endpoint adapter. -/
+def representedBoundaryIntegral : Real :=
+  R.endpoint.generatedRepresentedBoundaryIntegral (I := I) (K := K)
+
+/-- The local refined Stokes equality generated from the stored smoothness data. -/
+theorem localizedRefinedLocalStokes :
+    (Finset.sum
+        (Finset.univ : Finset
+          (CoverIndexedBoundaryIndex
+            (I := I) (X.selectedCover (I := I) (K := K) (ω := ω)))) fun i =>
+        Finset.sum (R.endpoint.boundaryPieces i) fun q =>
+          R.endpoint.localBulkTerm i q) =
+      Finset.sum
+        (Finset.univ : Finset
+          (CoverIndexedBoundaryIndex
+            (I := I) (X.selectedCover (I := I) (K := K) (ω := ω)))) fun i =>
+        Finset.sum (R.endpoint.boundaryPieces i) fun q =>
+          R.endpoint.localBoundaryTerm i q := by
+  classical
+  exact
+    R.endpoint.boundaryHalfSpaceBulkSum_eq_trueBoundarySum_of_zeroLocalStokesData
+      (I := I) (K := K) R.localData R.interiorFields
+
+/--
+Conditional intrinsic represented Stokes.
+
+Once the remaining constructor proves `IntrinsicCertificate` from the four
+public input fields, this theorem becomes the final intrinsic statement.
+-/
+theorem representedStokes :
+    R.representedBulkIntegral (I := I) (K := K) (ω := ω) =
+      R.representedBoundaryIntegral (I := I) (K := K) (ω := ω) := by
+  simpa [representedBulkIntegral, representedBoundaryIntegral] using
+    R.endpoint.representedStokes_of_zeroLocalStokesData
+      (I := I) (K := K) R.localData R.interiorFields
+
+end IntrinsicCertificate
+
+/-- Proposition recording that the currently conditional intrinsic route has
+all remaining refined/endpoint constructors available. -/
+def HasIntrinsicRoute : Prop :=
+  Nonempty (X.IntrinsicCertificate (I := I) (K := K) (ω := ω))
+
+/-- The represented bulk integral chosen from an intrinsic route certificate. -/
+def representedBulkIntegral (hroute : X.HasIntrinsicRoute (I := I) (K := K) (ω := ω)) :
+    Real :=
+  (Classical.choice hroute).representedBulkIntegral
+    (I := I) (K := K) (ω := ω)
+
+/-- The represented boundary integral chosen from an intrinsic route certificate. -/
+def representedBoundaryIntegral
+    (hroute : X.HasIntrinsicRoute (I := I) (K := K) (ω := ω)) :
+    Real :=
+  (Classical.choice hroute).representedBoundaryIntegral
+    (I := I) (K := K) (ω := ω)
+
+/-- Intrinsic represented Stokes from the conditional route constructor. -/
+theorem representedStokes_of_hasIntrinsicRoute
+    (hroute : X.HasIntrinsicRoute (I := I) (K := K) (ω := ω)) :
+    X.representedBulkIntegral (I := I) (K := K) (ω := ω) hroute =
+      X.representedBoundaryIntegral (I := I) (K := K) (ω := ω) hroute := by
+  simpa [representedBulkIntegral, representedBoundaryIntegral] using
+    (Classical.choice hroute).representedStokes
+      (I := I) (K := K) (ω := ω)
+
+end CoverIndexedZeroCompactRepresentedStokesIntrinsicInput
+
+end IntrinsicRepresentedStokes
+
+end Stokes
+
+end
