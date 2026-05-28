@@ -1,0 +1,542 @@
+\section{M8 Measure Localization Route}
+\label{sec:m8_measure_localization_route}
+\begingroup
+\sloppy
+\emergencystretch=3em
+
+This fragment records the M8 route from the current represented-integral
+global theorem to a measure-facing Stokes statement.  The goal is to make the
+remaining analytic handoff explicit: indicators localize finite sums, the bulk
+integrand is identified almost everywhere with the localized exterior
+derivative integrand, the local scalar integrands are integrable, the boundary
+measure is reconstructed from selected boundary pieces, and the M8 statement
+packages those facts without redesigning the M7 constructor layer.
+
+\begin{remark}[M8 graph conventions]
+  \label{anc:m8_graph_conventions}
+  \uses{anc:m7_parallel_worker_queue}
+  Figure~\ref{fig:stokes_m8_measure_graph} separates three statuses that were
+  previously easy to conflate, and
+  Figure~\ref{fig:stokes_m8_proof_wave_graph} zooms in on the next true-proof
+  wave.  Green nodes are existing Lean anchors or constructor packages.  Orange
+  nodes are not vague future work: each one names a specific mathematical
+  instance that still has to be produced for the existing fields.  Blue nodes
+  are theorem targets or final wrappers that should become short once the
+  orange nodes are discharged.
+\end{remark}
+
+\begin{theorem}[M8 indicator localization theorem]
+  \label{anc:m8_indicator_theorem}
+  \lean{Stokes.indicator_eq_self_of_support_subset,
+    Stokes.ae_eq_indicator_of_support_subset,
+    Stokes.finset_sum_ae_eq_indicator_sum_of_support_subset,
+    Stokes.Icc_indicator_finset_sum_ae_eq_sum_of_support_subset,
+    Stokes.integral_eq_finset_sum_setIntegral_of_ae_eq_sum_indicator,
+    Stokes.integral_eq_finset_sum_setIntegral_of_support_subset}
+  \leanok
+  \uses{anc:m6_4_partition_localization_support_control,
+    anc:m6_5_global_integral_extderiv_reconstruction}
+  \emph{Lean modules:}
+  \texttt{Stokes.Global.IndicatorSupportLocalization} and
+  \texttt{Stokes.Global.MeasureIntegralLocalization}.
+
+  \emph{Role in M8:}
+  this is the pure measure-theory bridge from support control to finite
+  additivity.  Termwise support containment gives pointwise and a.e. equality
+  between an unlocalized finite sum and the corresponding sum of indicator
+  terms.  The Bochner-integral theorem then turns an a.e. equality
+  \[
+    F = \sum_{i \in A} \mathbf{1}_{K_i} f_i
+  \]
+  into
+  \[
+    \int F\,d\mu =
+      \sum_{i \in A} \int_{K_i} f_i\,d\mu,
+  \]
+  provided the localized terms are integrable.
+
+  \emph{M8 handoff:}
+  later workers should not reprove finite-sum integral algebra inside the bulk
+  or boundary packages.  They should instead prove the support containment,
+  measurability, integrability, and a.e. equality hypotheses needed to call
+  these indicator theorems.
+\end{theorem}
+
+\begin{theorem}[M8 bulk a.e. equality]
+  \label{anc:m8_bulk_ae_equality}
+  \lean{Stokes.bulkIntegrand,
+    Stokes.bulkIntegrand_apply_eq_of_extDeriv_eq,
+    Stokes.bulkIntegrand_ae_eq_of_forall_extDeriv_eq,
+    Stokes.BulkIntegrandAEData,
+    Stokes.BulkIntegrandAEData.ofExtDerivOnSupportData,
+    Stokes.BulkIntegrandAEData.ofExtDerivPartitionReconstructionData,
+    Stokes.BulkIntegrandAEData.ofLocalizedFormEventuallyEqData}
+  \leanok
+  \uses{anc:m8_indicator_theorem,
+    anc:m6_4_partition_localization_support_control,
+    anc:m6_5_global_integral_extderiv_reconstruction}
+  \emph{Lean module:} \texttt{Stokes.Global.BulkIntegrandAE}.
+
+  \emph{Role in M8:}
+  this node identifies the scalar top-degree bulk integrand for
+  \(\dd(\sum_i \rho_i\omega)\) with the scalar top-degree integrand for
+  \(\dd\omega\) for the chartwise measures used by the bulk integral.  The
+  existing package is deliberately measure-parametric: a worker supplies the
+  chartwise measure and proves that its a.e. support lies in the chart-support
+  set where the exterior-derivative reconstruction is valid.
+
+  \emph{Explicit field mathematics:}
+  the next bulk-localization theorem still has to combine this a.e. equality
+  with the indicator theorem above.  Its concrete output should be a genuine
+  measure integral equality for the represented bulk side, not another global
+  Stokes constructor.  Proposed Lean names:
+  \plannedlean{Stokes.bulkMeasureIntegral_eq_indicatorLocalBulkSum}
+  \plannedlean{Stokes.bulkMeasureLocalizationData_of_bulkIntegrandAE}
+\end{theorem}
+
+\begin{theorem}[M8 integrability package]
+  \label{anc:m8_integrability_package}
+  \lean{Stokes.integrableOn_of_continuousOn_isCompact,
+    Stokes.integrable_of_continuousOn_isCompact_support_subset,
+    Stokes.integrableOn_Icc_of_contDiffOn,
+    Stokes.LocalizedSmoothnessData.integrableOn_Icc,
+    Stokes.BoundaryIntegrabilityData,
+    Stokes.BoundaryIntegrabilityData.of_extendedBox_chartwiseSmooth_targetBox,
+    Stokes.boundaryChartTransitionPullbackIntegrand_integrableOn_of_extendedBox,
+    Stokes.boundaryChartInChartIntegrand_integrableOn_of_chartwiseSmooth_selectedBox}
+  \leanok
+  \uses{anc:m6_4_active_compact_support_to_boxes,
+    anc:m6_4_partition_localization_support_control,
+    anc:m6_4_boundary_pieces_chart_change_fields,
+    anc:m8_indicator_theorem}
+  \emph{Lean modules:}
+  \texttt{Stokes.Global.CompactSupportIntegrability} and
+  \texttt{Stokes.Global.BoundaryIntegrabilityCompactSupport}.
+
+  \emph{Role in M8:}
+  the indicator and finite-sum integral theorems require integrability of every
+  selected local term.  The compact-support wrappers prove the bulk side from
+  continuity or \texttt{ContDiffOn} control on compact coordinate boxes.  The
+  boundary wrappers prove the lower-zero-face integrability needed for source
+  transition-pullback terms, Jacobian-weighted chart-change terms, and target
+  in-chart boundary terms.
+
+  \emph{Explicit field mathematics:}
+  M8 workers should instantiate these wrappers with the exact selected boxes
+  and lower-zero face boxes chosen by M6.4--M7.  The important alignment fields
+  are the selected active set, the selected partition coefficient, the source
+  and target box records, and the maps from those boxes to the support sets
+  used by the actual measures.
+\end{theorem}
+
+\begin{theorem}[M8 boundary measure localization]
+  \label{anc:m8_boundary_measure_localization}
+  \lean{Stokes.boundaryMeasurePieceIndicator,
+    Stokes.boundaryMeasurePieceSum,
+    Stokes.boundaryMeasureIndicatorSum,
+    Stokes.boundaryMeasureIntegral_eq_selectedBoundaryPieceSum_of_ae_eq,
+    Stokes.boundaryMeasureIntegral_eq_selectedBoundaryPieceSum_of_ae_indicator_eq,
+    Stokes.BoundaryMeasureLocalizationData,
+    Stokes.BoundaryMeasureLocalizationData.boundaryMeasureIntegral_eq_selectedBoundaryPieceSum,
+    Stokes.BoundaryMeasureLocalizationData.toBoundaryIntegralReconstructionData,
+    Stokes.BoundaryMeasureLocalizationData.manifoldBoundaryIntegral_eq_selectedBoundaryPieceSum}
+  \leanok
+  \uses{anc:m8_indicator_theorem,
+    anc:m8_integrability_package,
+    anc:m6_4_boundary_pieces_chart_change_fields}
+  \emph{Lean modules:}
+  \texttt{Stokes.Global.BoundaryMeasureLocalization} and
+  \texttt{Stokes.Global.BoundaryCOVMeasureConstructor}.
+
+  \emph{Role in M8:}
+  this node fieldizes the genuine boundary measure integral.  It takes an
+  ambient boundary measure, an ambient boundary integrand, selected boundary
+  piece sets, selected piece integrands, and the comparison from each piece
+  integral to the recorded boundary partition term.  The result is the exact
+  finite boundary partition sum consumed by the existing global reconstruction
+  layer.
+
+  \emph{Explicit field mathematics:}
+  the boundary worker must prove the a.e. decomposition of the boundary
+  integrand into selected indicator-localized pieces, termwise integrability,
+  and the equality between every selected piece integral and the transported
+  \texttt{boundaryPartitionTerm}.  Chart-change and COV work should feed this
+  node through term equalities, not by changing the M8 statement shape.
+\end{theorem}
+
+\begin{theorem}[M8 measure-level Stokes statement]
+  \label{anc:m8_measure_level_statement}
+  \lean{Stokes.M8MeasureLocalizationData,
+    Stokes.M8MeasureLocalizationData.toBulkIntegralReconstructionData,
+    Stokes.M8MeasureLocalizationData.toBulkMeasureLocalizationFields,
+    Stokes.M8MeasureLocalizationData.toBoundaryMeasureLocalizationFields,
+    Stokes.M8GlobalStokesInput,
+    Stokes.M8GlobalStokesInput.toNaturalGlobalStokesInput,
+    Stokes.M8GlobalStokesInput.toNaturalMeasureStokesInput,
+    Stokes.M8GlobalStokesInput.stokes,
+    Stokes.m8GlobalStokes,
+    Stokes.m8GlobalStokes_represented}
+  \leanok
+  \uses{anc:m7_selected_mixed_global_assembly,
+    anc:m8_bulk_ae_equality,
+    anc:m8_boundary_measure_localization,
+    anc:m8_integrability_package}
+  \emph{Lean module:} \texttt{Stokes.Global.M8Statement}.
+
+  \emph{Role in M8:}
+  this is the blueprint-facing statement node.  The input keeps the existing
+  M7 mixed-constructor data visible and adds a single measure-localization
+  package containing the genuine bulk and boundary measure integrals.  The
+  proof projects the data to \texttt{NaturalGlobalStokesInput} and then to
+  \texttt{NaturalMeasureStokesInput}; no new final constructor layer is needed.
+
+  \emph{Remaining route:}
+  the statement already exists as bookkeeping.  The mathematical work is to
+  instantiate \texttt{M8MeasureLocalizationData}: prove bulk measure
+  localization from the bulk a.e. equality and integrability package, prove
+  boundary measure localization from the boundary measure node, and align both
+  with the same selected active set, target-image family, artificial-face
+  cancellation, and chart-change cancellation used in M7.  Proposed Lean name:
+  \plannedlean{Stokes.m8MeasureLocalizationData_of_selectedPartition}
+\end{theorem}
+
+\begin{theorem}[M8 measure localization worker queue]
+  \label{anc:m8_measure_localization_worker_queue}
+  \uses{anc:m8_indicator_theorem,
+    anc:m8_bulk_ae_equality,
+    anc:m8_integrability_package,
+    anc:m8_boundary_measure_localization,
+    anc:m8_measure_level_statement}
+  The measure-localization work can be split without touching the final
+  constructor API:
+  \begin{enumerate}
+    \item prove the selected-box and selected-face support containments needed
+      by the indicator theorem;
+    \item prove the chartwise bulk a.e. equality for the measures used by the
+      bulk integral;
+    \item instantiate bulk and boundary integrability on every selected box or
+      lower-zero face box;
+    \item prove boundary a.e. decomposition and piece-integral comparisons;
+    \item fill \texttt{M8MeasureLocalizationData} and call
+      \texttt{m8GlobalStokes}.
+  \end{enumerate}
+  The queue deliberately leaves the existing M6.4--M7 records in charge of
+  compact support, local pieces, artificial-face cancellation, and chart-change
+  cancellation.
+\end{theorem}
+
+\begin{proposition}[Current twenty-agent M8 split]
+  \label{anc:m8_current_twenty_agent_split}
+  \uses{anc:m8_measure_localization_worker_queue,
+    anc:m8_measure_level_statement}
+  \begingroup\raggedright
+  The current parallel wave should be read as a field-owner map, not as twenty
+  independent final theorems.  The useful split is:
+  \begin{enumerate}
+    \item Bulk a.e. equality:
+      \texttt{BulkIntegrandAE} under \texttt{Stokes.Global}.
+    \item Indicator support localization:
+      \texttt{IndicatorSupportLocalization} under \texttt{Stokes.Global}.
+    \item Bulk localization constructor:
+      \texttt{BulkIntegralLocalizationConstructor} under
+      \texttt{Stokes.Global}.
+    \item Boundary measure localization:
+      \texttt{BoundaryMeasureLocalization} under \texttt{Stokes.Global}.
+    \item Boundary COV measure constructor:
+      \texttt{BoundaryCOVMeasureConstructor} under \texttt{Stokes.Global}.
+    \item Boundary compact-support integrability:
+      \texttt{BoundaryIntegrabilityCompactSupport} under
+      \texttt{Stokes.Global}.
+    \item Global integral definitions:
+      \texttt{GlobalIntegralDefinitions} under \texttt{Stokes.Global}.
+    \item Natural measure constructor:
+      \texttt{NaturalMeasureConstructor} under \texttt{Stokes.Global}.
+    \item M8 statement alignment:
+      \texttt{M8Statement} under \texttt{Stokes.Global}.
+    \item Artificial-face field reduction:
+      \texttt{ArtificialFaceFieldReduction} under \texttt{Stokes.Global}.
+    \item Pure boundary target-image reduction:
+      \texttt{TargetImageFieldReduction} under
+      \texttt{Stokes.BoundaryChart}.
+    \item Target-image to global assembly adapter:
+      \texttt{BoundaryTargetImageToAssembly} under \texttt{Stokes.Global}.
+    \item Measure box API:
+      \texttt{MeasureBoxAPI} under \texttt{Stokes.Global}.
+    \item Bulk measure localization fields:
+      \texttt{BulkMeasureLocalizationFields} under \texttt{Stokes.Global}.
+    \item Measure-localization audit:
+      \texttt{MeasureLocalizationAudit} under \texttt{Stokes.Global}.
+    \item Focused build and import-graph audit.
+    \item Remaining \texttt{FIELD} audit and blocker ledger.
+    \item Blueprint and M8 dependency graph maintenance.
+    \item Field-reduction report:
+      \texttt{reports/stokes-m8-field-reduction.md}.
+    \item Measure-route blueprint report and printable PDF.
+  \end{enumerate}
+  The parent integration rule is: keep pure boundary-chart modules out of
+  \texttt{Stokes.HalfSpace}, keep global adapters in \texttt{Stokes.Global},
+  and only promote modules to aggregators after their focused builds and the
+  no-placeholder scan are clean.
+  \par\endgroup
+\end{proposition}
+
+\begin{proposition}[Current twelve-agent M8 implementation wave]
+  \label{anc:m8_current_twelve_agent_wave}
+  \uses{anc:m8_measure_localization_worker_queue,
+    anc:m8_p0_p1_p2_blocker_ledger}
+  \begingroup\raggedright
+  The current implementation wave is intentionally smaller than the previous
+  twenty-agent restart.  It should focus on discharging true M8 instances
+  rather than adding another layer of wrappers.  The twelve owners are:
+  \begin{enumerate}
+    \item bulk measure-localization fields from selected chart data;
+    \item actual bulk a.e. integrand equality for the chartwise measure;
+    \item measure-box comparison between measure-local and project-local terms;
+    \item bulk localization constructor feeding \texttt{M8MeasureLocalizationData};
+    \item ambient boundary measure and selected-piece indicator decomposition;
+    \item boundary piece integrability and COV-to-partition term equalities;
+    \item target boundary boxes, image equalities, and local inverse data;
+    \item artificial-face support-zero or overlap-pairing geometry;
+    \item boundary orientation bridge from oriented atlas/manifold data;
+    \item compact-support selected interior and boundary box construction;
+    \item final M8 assembly constructor calling \texttt{m8GlobalStokes};
+    \item blueprint and report synchronization.
+  \end{enumerate}
+  The intended success condition is not twenty or twelve new theorem names; it
+  is a smaller number of fields in \texttt{M8MeasureLocalizationData} whose
+  values are produced from compact support, selected charts, measures, and
+  orientation data.
+  \par\endgroup
+\end{proposition}
+
+\begin{proposition}[Current eighteen-agent natural compact-support wave]
+  \label{anc:m8_current_eighteen_agent_wave}
+  \uses{anc:m8_current_twelve_agent_wave,
+    anc:m8_to_manifold_dependency_ladder,
+    anc:m8_measure_level_statement}
+  \begingroup\raggedright
+  Figure~\ref{fig:stokes_m8_measure_graph} now includes the current
+  eighteen-agent wave as the explicit bridge from the conditional M8 theorem
+  to a natural compact-support Stokes statement.  The owners are:
+  \begin{enumerate}
+    \item audit the shortest constructor route from M8 fields to natural
+      compact-support inputs;
+    \item define the compact-support-facing input record without changing the
+      M8 theorem shape;
+    \item construct finite selected chart boxes from compact support and chart
+      domains;
+    \item project selected partitions to the localized-interior fields used by
+      M8;
+    \item build the compact-support bulk measure package;
+    \item adapt the bulk measure package to \texttt{M8MeasureLocalizationData};
+    \item build the compact-support boundary measure package;
+    \item adapt boundary measure reconstruction to the M8 boundary field;
+    \item construct target-image data from local inverse and compact-image
+      selections;
+    \item adapt target-image data to the global M8 assembly fields;
+    \item feed artificial-face support-zero or pairing data into the M8
+      artificial-face fields;
+    \item connect the boundary-chart sign convention to the induced oriented
+      boundary orientation;
+    \item align represented global integrals with the canonical compact-support
+      integral interface;
+    \item state the compact-support-facing M8 theorem as a short wrapper around
+      \texttt{m8GlobalStokes};
+    \item assemble a natural compact-support input constructor from the pieces
+      above;
+    \item integrate the new modules serially through aggregators after focused
+      checks;
+    \item maintain this blueprint graph and printable PDF without running Lean;
+    \item perform the final parent-side serialized build and no-placeholder
+      scan.
+  \end{enumerate}
+  The mathematical bottlenecks are still Agents 3, 12, and 13: finite chart-box
+  selection from compact support, induced boundary orientation, and the
+  canonical integral comparison.  The other owners mostly reduce field surface
+  area by turning manual M8 fields into named constructors.
+  \par\endgroup
+\end{proposition}
+
+\begin{proposition}[Proof-wave true-proof nodes]
+  \label{anc:m8_proof_wave_true_nodes}
+  \uses{anc:m8_current_eighteen_agent_wave,
+    anc:m8_bulk_ae_equality,
+    anc:m8_integrability_package,
+    anc:m8_boundary_measure_localization,
+    anc:m8_measure_level_statement}
+  \begingroup\raggedright
+  The next proof wave should not add another layer of M8 wrappers.  Its purpose
+  is to turn the orange mathematical inputs in
+  Figure~\ref{fig:stokes_m8_measure_graph} into theorem-produced data.
+  Figure~\ref{fig:stokes_m8_proof_wave_graph} isolates this proof wave so that
+  workers can take one node without editing the M8 assembly wrapper.  The
+  following nodes are the intended isolated proof tasks.
+
+  \begin{enumerate}
+    \item \textbf{Bulk a.e. theorem.}  Prove the selected-partition version of
+      \texttt{BulkIntegrandAEData}: for the chartwise bulk measures actually
+      used by the global integral, the scalar integrand of
+      \(\dd(\rho_i\omega)\) agrees a.e. with the localized exterior-derivative
+      integrand on the support box.  This is the true proof behind
+      \texttt{ExtDerivToBulkMeasure}; it should output the a.e. input consumed
+      by \texttt{CompactSupportBulkMeasure}.
+
+    \item \textbf{MeasureBoxAPI comparison.}  Prove that the measure-local bulk
+      term for each selected chart is definitionally or theorem-equal to the
+      project-local box term produced by the half-space/local Stokes package.
+      This is the equality that lets the bulk finite sum in
+      \texttt{BulkIntegralLocalizationConstructor} be the same finite sum that
+      M8 receives from local Stokes.
+
+    \item \textbf{Boundary measure theorem.}  Instantiate
+      \texttt{BoundaryMeasureLocalizationData} from the actual boundary measure,
+      selected boundary-piece sets, boundary integrands, integrability on lower
+      zero faces, and the a.e. indicator decomposition of the boundary
+      integrand.  The output should be
+      \texttt{boundaryMeasureIntegral\_eq\_partitionSum}, not a new statement
+      of Stokes.
+
+    \item \textbf{Artificial support-zero route.}  For compactly supported
+      localized forms whose support lies strictly inside the selected interior
+      chart box away from artificial faces, prove that every artificial face
+      contribution in the local box theorem is zero.  This feeds
+      \texttt{ArtificialFaceSupportZeroToM8}.
+
+    \item \textbf{Artificial adjacency route.}  In parallel with the
+      support-zero route, construct the adjacent-face pairing for selected
+      interior boxes: opposite orientation, the same geometric face, and equal
+      unsigned face term.  This feeds \texttt{ArtificialFacePairingToM8}.  Only
+      one of the support-zero or adjacency routes is needed for a first natural
+      theorem, but both are legitimate proof targets.
+
+    \item \textbf{Boundary orientation bridge.}  Connect the project
+      \texttt{BoundaryChartOrientedAtlas} predicate to the intended mathlib
+      oriented-manifold data and induced outward-normal-first boundary
+      orientation.  This should justify the sign used by the lower-zero-face
+      local Stokes theorem across boundary chart changes.
+  \end{enumerate}
+
+  These six nodes are the current true-proof frontier.  The surrounding M8
+  input builders, compact-support statements, target-image adapters, and
+  canonical-integral skeletons are useful only insofar as they expose these
+  exact proof obligations cleanly.
+  \par\endgroup
+\end{proposition}
+
+\begin{remark}[Focused-build policy for parallel M8 waves]
+  \label{anc:m8_twelve_agent_focused_build_policy}
+  \uses{anc:m8_current_twelve_agent_wave,
+    anc:m8_current_eighteen_agent_wave,
+    anc:m8_proof_wave_true_nodes}
+  \begingroup\raggedright
+  Parallel Lean workers should avoid running a full \texttt{lake build}.  Each
+  worker should build only the narrowest target that covers its files, such as
+  \texttt{lake build Stokes.Global.BulkIntegrandAE} or
+  \texttt{lake build Stokes.BoundaryChart.TargetImageFieldReduction}.  The
+  parent integration step should serialize the final full build only after
+  workers are complete and aggregator imports are stable.  Documentation-only
+  workers should not run Lean builds at all.  This is a build-engine constraint,
+  not a mathematical shortcut: it avoids concurrent \texttt{.lake/build}
+  writers and keeps failures local to the responsible owner.
+  \par\endgroup
+\end{remark}
+
+\begin{remark}[M8 P0/P1/P2 blocker ledger]
+  \label{anc:m8_p0_p1_p2_blocker_ledger}
+  \uses{anc:m8_bulk_ae_equality,
+    anc:m8_integrability_package,
+    anc:m8_boundary_measure_localization,
+    anc:m8_measure_level_statement,
+    anc:m8_current_twenty_agent_split,
+    anc:m8_current_twelve_agent_wave,
+    anc:m8_current_eighteen_agent_wave,
+    anc:m8_proof_wave_true_nodes}
+  \begingroup\raggedright
+  The remaining blockers should be reported with priority and field name.
+
+  \emph{P0: real measure-localization blockers.}
+  \begin{enumerate}
+    \item \texttt{bulkIntegralLocalizes} should be filled through
+      \texttt{BulkMeasureLocalizationTermFields.bulkIntegralLocalizes} or the
+      \texttt{BulkIntegralLocalizationInput} constructor.  The real missing
+      data are the chartwise bulk measure terms, the a.e. integrand
+      replacement for the actual measure, integrability of every localized
+      term, and the measure-box comparison saying that the measure-local term
+      is the project-local box term.
+    \item \texttt{boundaryMeasureIntegral} and
+      \texttt{boundaryMeasureIntegral\_eq\_partitionSum} should be filled
+      through \texttt{BoundaryMeasureLocalizationData} or the COV constructor.
+      The real missing data are the ambient boundary measure and integrand, the
+      a.e. indicator decomposition over selected boundary pieces, termwise
+      integrability, \texttt{globalBoundaryIntegral = boundaryMeasureIntegral},
+      and piece-integral equality with the selected partition terms.
+  \end{enumerate}
+
+  \emph{P1: geometric instances behind existing constructors.}
+  \begin{enumerate}
+    \item Artificial faces are fieldized by
+      \texttt{ArtificialFaceResolvedData}.  The missing instance is either a
+      real pairing of opposite selected artificial faces with equal unsigned
+      terms and opposite signs, or a support-zero proof showing that every
+      localized artificial face term vanishes.
+    \item Target-image selection is fieldized on the boundary-chart side and
+      has a global adapter.  The missing instance is the local-inverse/open-map
+      construction producing target selected boxes, image equality, local
+      bijection, and the alignment between target boxes, partition boxes, and
+      selected boxes.
+  \end{enumerate}
+
+  \emph{P2: packaging and API alignment.}
+  \begin{enumerate}
+    \item Boundary reconstruction wrappers and COV wrappers already exist, but
+      selected representatives still have to use the same term names as the
+      assembly layer.
+    \item Import hygiene remains part of the task: global adapters may import
+      boundary-chart work, but \texttt{Stokes.HalfSpace} must not import
+      \texttt{Stokes.Global}.
+    \item The final M8 statement should remain a projection from existing M7
+      data plus \texttt{M8MeasureLocalizationData}; do not add a new final
+      constructor layer unless a field genuinely cannot be expressed there.
+  \end{enumerate}
+  \par\endgroup
+\end{remark}
+
+\begin{theorem}[M8 to manifold Stokes dependency ladder]
+  \label{anc:m8_to_manifold_dependency_ladder}
+  \uses{anc:m8_p0_p1_p2_blocker_ledger,
+    anc:m8_measure_level_statement,
+    thm:global_compact_support_stokes,
+    thm:compact_manifold_stokes}
+  \begingroup\raggedright
+  The route from M8 to the usual manifold theorem should be split into the
+  following assignable layers.
+  \begin{enumerate}
+    \item Local layer: half-space and boundary-chart local Stokes supply the
+      project-local bulk and outward-first boundary terms.
+    \item Geometry layer: compact support and chart sources select finite
+      interior and boundary boxes, extended boxes, and target image boxes.
+    \item Partition layer: a smooth finite active partition produces localized
+      forms, support containment, smoothness on the chosen neighborhoods, and
+      support-local exterior-derivative equality.
+    \item Measure layer: the bulk and boundary measure-localization packages
+      identify the genuine global integrals with the selected finite sums.
+    \item Cancellation layer: artificial interior faces cancel, and real
+      boundary terms are transported through oriented boundary chart changes.
+    \item M8 assembly layer: \texttt{M8MeasureLocalizationData} plus the M7
+      selected mixed input gives \texttt{m8GlobalStokes}.
+    \item Compact-support statement: the selected partition construction fills
+      the M8 input from a compactly supported chartwise smooth form.
+    \item Compact manifold statement: compactness supplies the compact-support
+      wrapper, yielding the ordinary compact oriented smooth
+      manifold-with-boundary theorem.
+    \item Mathlib comparison: if mathlib later provides a canonical manifold
+      differential-form integral, prove that the project-local integral agrees
+      with it.
+  \end{enumerate}
+  This ladder is the intended division of labor after M8: early workers should
+  discharge orange geometric and measure instances; later workers should only
+  assemble stable records into theorem statements.
+  \par\endgroup
+\end{theorem}
+
+\endgroup

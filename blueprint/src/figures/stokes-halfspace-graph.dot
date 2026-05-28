@@ -1,0 +1,146 @@
+digraph StokesHalfSpace {
+  graph [
+    rankdir=TB,
+    splines=true,
+    overlap=false,
+    bgcolor="transparent",
+    pad=0.25,
+    nodesep=0.30,
+    ranksep=0.42,
+    fontname="Arial"
+  ];
+
+  node [
+    style="filled",
+    fontname="Arial",
+    fontsize=9,
+    margin="0.08,0.04",
+    color="#007f36",
+    penwidth=1.25
+  ];
+
+  edge [
+    color="#333333",
+    arrowsize=0.65,
+    fontname="Arial",
+    fontsize=8
+  ];
+
+  box_extderiv [
+    label="box_stokes_extDeriv_smooth",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  upper_halfspace [
+    label="upperHalfSpace\nboundary / interior",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  boundary_inclusion [
+    label="boundaryInclusion\nrange / injective",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  tangent_maps [
+    label="boundaryTangent\ninclusion / projection",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  outward_frame [
+    label="outward-first frame\norientation sign",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  sign_eq [
+    label="halfSpaceBoundarySign\n= outward-first sign",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  face_api [
+    label="faceDomain\nlowerZeroFaceDomain",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  face_coeff [
+    label="boxFormFaceCoeff\nsupport predicate",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  support_box [
+    label="compact support\nfits in box",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  boundary_domain [
+    label="lower-zero face\ncompact / nhds",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  artificial_vanish [
+    label="artificial face\nterms vanish",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  boundary_split [
+    label="bdryIntegral split:\nlower zero + remainder",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  halfspace_boundary_integral [
+    label="halfSpaceBoundary\nFormIntegral",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  tangent_det [
+    label="boundary tangent\npullback determinant",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  lower_eq_boundary [
+    label="lower-zero term\n= boundary form",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  bulk_remainder [
+    label="bulk integral\nboundary remainder",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  with_remainder [
+    label="halfSpace Stokes\nwith remainder",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  compact_support [
+    label="localHalfSpaceStokes\ncompactSupport",
+    shape=ellipse,
+    fillcolor="#1CAC78",
+    penwidth=1.8
+  ];
+
+  upper_halfspace -> boundary_inclusion;
+  boundary_inclusion -> tangent_maps;
+  tangent_maps -> outward_frame;
+  outward_frame -> sign_eq;
+  face_api -> face_coeff;
+  upper_halfspace -> support_box;
+  face_coeff -> support_box;
+  face_api -> boundary_domain;
+  support_box -> artificial_vanish;
+  face_coeff -> artificial_vanish;
+  artificial_vanish -> boundary_split;
+  face_api -> boundary_split;
+  sign_eq -> halfspace_boundary_integral;
+  boundary_inclusion -> halfspace_boundary_integral;
+  tangent_maps -> tangent_det;
+  halfspace_boundary_integral -> tangent_det;
+  tangent_det -> lower_eq_boundary;
+  halfspace_boundary_integral -> lower_eq_boundary;
+  boundary_split -> with_remainder;
+  lower_eq_boundary -> with_remainder;
+  bulk_remainder -> with_remainder;
+  box_extderiv -> with_remainder;
+  with_remainder -> compact_support;
+  artificial_vanish -> compact_support;
+  support_box -> compact_support;
+}

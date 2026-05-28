@@ -1,0 +1,908 @@
+\chapter{Stokes formalization blueprint}
+
+This blueprint is a dependency map for the Lean 4 Stokes project.  The unit of
+work is a public definition, lemma, theorem, or a deliberately named future
+interface.  Green nodes in the figures are already implemented in Lean; orange
+nodes are fieldized blockers whose constructors exist but whose geometric or
+measure-theoretic instances are still genuine work; blue nodes are open theorem
+targets intended to be small enough for independent assignment.
+
+The current formalized stack already reaches boundary-chart local Stokes.  The
+remaining work is not "prove Stokes" as one block: it is the finite-cover,
+partition-of-unity, and global-integral assembly layer recorded in
+\Cref{sec:global_assembly}.
+
+\clearpage
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \noindent\makebox[\linewidth][c]{%
+    \includegraphics[width=0.90\paperheight,height=0.62\paperwidth,keepaspectratio]
+      {figures/stokes-core-graph.pdf}}
+  \caption{Core Euclidean, singular-cube, and chart-representative API.}
+  \label{fig:stokes_core_graph}
+\end{figure}
+\end{landscape}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \noindent\makebox[\linewidth][c]{%
+    \includegraphics[width=0.90\paperheight,height=0.62\paperwidth,keepaspectratio]
+      {figures/stokes-halfspace-graph.pdf}}
+  \caption{Half-space local Stokes and artificial-face cancellation.}
+  \label{fig:stokes_halfspace_graph}
+\end{figure}
+\end{landscape}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \noindent\makebox[\linewidth][c]{%
+    \includegraphics[width=0.90\paperheight,height=0.62\paperwidth,keepaspectratio]
+      {figures/stokes-boundary-chart-graph.pdf}}
+  \caption{Boundary chart change of variables and local inverse data.}
+  \label{fig:stokes_boundary_chart_graph}
+\end{figure}
+\end{landscape}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \noindent\makebox[\linewidth][c]{%
+    \includegraphics[width=0.90\paperheight,height=0.62\paperwidth,keepaspectratio]
+      {figures/stokes-global-assembly-graph.pdf}}
+  \caption{Remaining global assembly tasks.}
+  \label{fig:stokes_global_graph}
+\end{figure}
+\end{landscape}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \noindent\makebox[\linewidth][c]{%
+    \includegraphics[width=0.90\paperheight,height=0.62\paperwidth,keepaspectratio]
+      {figures/stokes-m8-measure-graph.pdf}}
+  \caption{M8 measure localization, the compact-support wave, and route to manifold Stokes.}
+  \label{fig:stokes_m8_measure_graph}
+\end{figure}
+\end{landscape}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \noindent\makebox[\linewidth][c]{%
+    \includegraphics[width=0.88\paperheight,height=0.62\paperwidth,keepaspectratio]
+      {figures/stokes-m8-proof-wave-graph.pdf}}
+  \caption{Current M8 proof wave: true theorem nodes behind the compact-support route.}
+  \label{fig:stokes_m8_proof_wave_graph}
+\end{figure}
+\end{landscape}
+\clearpage
+
+\section{Core Euclidean And Chart API}
+\label{sec:core_chart_api}
+
+\begin{definition}[Model and manifold forms]
+  \label{def:model_manifold_forms}
+  \lean{Stokes.ModelForm, Stokes.ManifoldForm}
+  \leanok
+  A model form is a topological vector-space differential form in coordinates.
+  A manifold form is a fiberwise alternating map on tangent spaces.
+\end{definition}
+
+\begin{definition}[Box integral interface]
+  \label{def:box_integral_interface}
+  \lean{Stokes.CoordNForm, Stokes.extDerivCoord, Stokes.boxIntegral,
+    Stokes.bdryIntegral}
+  \leanok
+  This is the thin coordinate API connecting the project to the Euclidean box
+  Stokes theorem supplied by the cloned local Euclidean stack.
+\end{definition}
+
+\begin{theorem}[Box Stokes on a rectangular box]
+  \label{thm:box_stokes_on_box}
+  \lean{Stokes.box_stokes_on_box}
+  \leanok
+  \uses{def:box_integral_interface}
+  The signed boundary integral of a coordinate form on an axis-aligned box is
+  the integral of its coordinate exterior derivative.
+\end{theorem}
+
+\begin{theorem}[Box Stokes for mathlib forms]
+  \label{thm:box_stokes_extDeriv_smooth}
+  \lean{Stokes.box_stokes_extDeriv_smooth}
+  \leanok
+  \uses{def:model_manifold_forms, thm:box_stokes_on_box}
+  The coordinate theorem is repackaged for mathlib-style differential forms and
+  \texttt{extDeriv}.
+\end{theorem}
+
+\begin{definition}[Smooth singular cubes and chains]
+  \label{def:smooth_singular_cube_chain}
+  \lean{Stokes.SmoothSingularCube, Stokes.SingularChain,
+    Stokes.singularBoundary, Stokes.integrateChain}
+  \leanok
+  Smooth singular cubes, their cubical faces, finite chains, and chain
+  integration provide an intermediate target between boxes and manifolds.
+\end{definition}
+
+\begin{definition}[Pullback form along a cube]
+  \label{def:singular_pullback_form}
+  \lean{Stokes.pullbackForm, Stokes.integrateForm}
+  \leanok
+  \uses{def:smooth_singular_cube_chain}
+  A smooth cube pulls back an ambient Euclidean form to a form on the standard
+  cube, where the box theorem applies.
+\end{definition}
+
+\begin{theorem}[Exterior derivative commutes with cube pullback]
+  \label{thm:singular_pullback_extDeriv}
+  \lean{Stokes.singular_pullback_extDeriv}
+  \leanok
+  \uses{def:singular_pullback_form}
+  Pulling a form back along a smooth singular cube commutes with the exterior
+  derivative in the shape needed by the cubical Stokes theorem.
+\end{theorem}
+
+\begin{theorem}[Smooth singular cube Stokes]
+  \label{thm:singular_cube_stokes}
+  \lean{Stokes.singular_cube_stokes, Stokes.singular_cube_boundary_stokes}
+  \leanok
+  \uses{thm:box_stokes_extDeriv_smooth, thm:singular_pullback_extDeriv}
+  Stokes holds for one smooth singular cube after expanding its oriented faces.
+\end{theorem}
+
+\begin{theorem}[Smooth singular chain Stokes]
+  \label{thm:singular_chain_stokes}
+  \lean{Stokes.singular_cube_chain_stokes, Stokes.singular_chain_stokes,
+    Stokes.singular_boundary_boundary_zero_general}
+  \leanok
+  \uses{def:smooth_singular_cube_chain, thm:singular_cube_stokes}
+  The cube statement extends linearly to finite chains, with boundary squared
+  equal to zero.
+\end{theorem}
+
+\begin{definition}[Chart derivatives and transitions]
+  \label{def:chart_derivative_transition}
+  \lean{Stokes.ManifoldForm.chartInverseDeriv,
+    Stokes.ManifoldForm.chartDeriv,
+    Stokes.ManifoldForm.chartTransitionDeriv,
+    Stokes.ManifoldForm.chartTransition,
+    Stokes.ManifoldForm.chartTransitionSource}
+  \leanok
+  \uses{def:model_manifold_forms}
+  The chart derivative API fixes the Frechet derivative maps used to express
+  form pullback under coordinate changes.
+\end{definition}
+
+\begin{lemma}[Chart transition source and injectivity]
+  \label{lem:chart_transition_source_inj}
+  \lean{Stokes.ManifoldForm.chartTransitionSource_eq,
+    Stokes.ManifoldForm.chartTransition_injOn_source,
+    Stokes.ManifoldForm.chartTransition_mapsTo_extChartAt_target}
+  \leanok
+  \uses{def:chart_derivative_transition}
+  Chart transitions are defined on the expected overlap, map into the target
+  chart, and are injective on their source.
+\end{lemma}
+
+\begin{theorem}[Smoothness of chart transitions]
+  \label{thm:chart_transition_smooth}
+  \lean{Stokes.ManifoldForm.contDiffOn_chartTransition_source,
+    Stokes.ManifoldForm.contDiffOn_chartTransition}
+  \leanok
+  \uses{def:chart_derivative_transition, lem:chart_transition_source_inj}
+  Mathlib's manifold chart API supplies the \texttt{ContDiffOn} facts needed to
+  compose chart representatives with transition maps.
+\end{theorem}
+
+\begin{theorem}[Transition derivative as Frechet derivative]
+  \label{thm:chart_transition_deriv_eq}
+  \lean{Stokes.ManifoldForm.chartTransitionDeriv_eq_fderivWithin}
+  \leanok
+  \uses{def:chart_derivative_transition}
+  The concrete chart-transition derivative agrees with the Frechet derivative
+  within the chart source.
+\end{theorem}
+
+\begin{theorem}[Smoothness of transition derivatives]
+  \label{thm:chart_transition_deriv_smooth}
+  \lean{Stokes.ManifoldForm.contDiffOn_chartTransitionDeriv_source,
+    Stokes.ManifoldForm.contDiffOn_chartTransitionDeriv}
+  \leanok
+  \uses{thm:chart_transition_deriv_eq, thm:chart_transition_smooth}
+  The derivative-valued transition map is smooth on overlaps.
+\end{theorem}
+
+\begin{definition}[Chart representative and transition pullback]
+  \label{def:inchart_transition_pullback}
+  \lean{Stokes.ManifoldForm.inChart,
+    Stokes.ManifoldForm.transitionPullbackInChart}
+  \leanok
+  \uses{def:model_manifold_forms, def:chart_derivative_transition}
+  A manifold form is represented in a chart, and the same representative can be
+  transported through a chart transition using the transition derivative.
+\end{definition}
+
+\begin{theorem}[Chart representative compatibility]
+  \label{thm:inchart_chart_transition}
+  \lean{Stokes.ManifoldForm.inChart_chartTransition,
+    Stokes.ManifoldForm.transitionPullbackInChart_eq_inChart}
+  \leanok
+  \uses{def:inchart_transition_pullback, thm:chart_transition_deriv_eq}
+  On a chart overlap, the chart representative is equal to the transition
+  pullback written in the source coordinates.
+\end{theorem}
+
+\begin{theorem}[Transition-pullback smoothness iff chart smoothness]
+  \label{thm:transition_pullback_smooth_iff}
+  \lean{Stokes.ManifoldForm.contDiffOn_inChart_of_transitionPullback,
+    Stokes.ManifoldForm.contDiffOn_transitionPullbackInChart_of_contDiffOn_inChart,
+    Stokes.ManifoldForm.contDiffOn_transitionPullbackInChart_iff}
+  \leanok
+  \uses{thm:inchart_chart_transition}
+  Smoothness of the transported coordinate form is equivalent to smoothness of
+  the source chart representative on the chosen overlap.
+\end{theorem}
+
+\begin{definition}[Chartwise smooth manifold form]
+  \label{def:chartwise_smooth}
+  \lean{Stokes.ManifoldForm.ChartwiseSmooth}
+  \leanok
+  \uses{def:inchart_transition_pullback}
+  Chartwise smoothness packages the local smoothness hypotheses that later
+  local Stokes statements consume.
+\end{definition}
+
+\begin{theorem}[Chartwise smooth transport]
+  \label{thm:chartwise_smooth_transport}
+  \lean{Stokes.ManifoldForm.ChartwiseSmooth.contDiffOn_inChart,
+    Stokes.ManifoldForm.ChartwiseSmooth.contDiffOn_transitionPullbackInChart_of_chartAPI,
+    Stokes.ManifoldForm.ChartwiseSmooth.contDiffOn_transitionPullbackInChart}
+  \leanok
+  \uses{def:chartwise_smooth, thm:transition_pullback_smooth_iff,
+    thm:chart_transition_smooth, thm:chart_transition_deriv_smooth}
+  A chartwise smooth form remains smooth after transporting it through a chart
+  transition.
+\end{theorem}
+
+\section{Half-Space Local Stokes}
+\label{sec:halfspace_local}
+
+\begin{definition}[Upper half-space model]
+  \label{def:upper_halfspace_model}
+  \lean{Stokes.upperHalfSpace, Stokes.upperHalfSpaceBoundary,
+    Stokes.upperHalfSpaceInterior}
+  \leanok
+  A concrete upper half-space in \(\R^{n+1}\) fixes the local boundary model.
+\end{definition}
+
+\begin{definition}[Boundary inclusion and tangent maps]
+  \label{def:boundary_inclusion_tangent}
+  \lean{Stokes.boundaryInclusion, Stokes.range_boundaryInclusion,
+    Stokes.boundaryInclusion_injective, Stokes.boundaryTangentInclusion,
+    Stokes.boundaryTangentProjection}
+  \leanok
+  \uses{def:upper_halfspace_model}
+  The boundary hyperplane is identified with \(\R^n\), together with the
+  tangent inclusion and projection used by boundary forms.
+\end{definition}
+
+\begin{definition}[Outward-first frame and sign]
+  \label{def:outward_first_frame_sign}
+  \lean{Stokes.outwardNormal, Stokes.outwardFirstBoundaryFrame,
+    Stokes.outwardFirstBoundaryMatrix,
+    Stokes.det_outwardFirstBoundaryMatrix,
+    Stokes.outwardFirstBoundaryOrientationSign,
+    Stokes.halfSpaceBoundarySign,
+    Stokes.halfSpaceBoundarySign_eq_outwardFirstBoundaryOrientationSign}
+  \leanok
+  \uses{def:boundary_inclusion_tangent}
+  The lower face of the box has the same sign as the outward-normal-first
+  boundary orientation.
+\end{definition}
+
+\begin{definition}[Box faces and face coefficients]
+  \label{def:box_faces_coefficients}
+  \lean{Stokes.faceDomain, Stokes.lowerZeroFaceDomain,
+    Stokes.boxUpperFormFaceIntegral, Stokes.boxLowerFormFaceIntegral,
+    Stokes.boxFormFaceCoeff, Stokes.boxFaceMap,
+    Stokes.boxFaceCoeffTSupportInHalfSpaceBox}
+  \leanok
+  \uses{thm:box_stokes_extDeriv_smooth}
+  The box boundary integral is decomposed into the true boundary face and the
+  artificial faces introduced by localizing to a box.
+\end{definition}
+
+\begin{lemma}[Compact support fits in a half-space box]
+  \label{lem:halfspace_support_box_selection}
+  \lean{Stokes.exists_halfSpaceSupportBox_of_isCompact,
+    Stokes.boxFaceCoeffTSupportInHalfSpaceBox_of_tsupport_subset,
+    Stokes.boxFormFaceCoeff_tsupport_subset}
+  \leanok
+  \uses{def:upper_halfspace_model, def:box_faces_coefficients}
+  Compact support contained in the half-space can be enclosed in a box whose
+  artificial faces miss the support.
+\end{lemma}
+
+\begin{lemma}[Boundary face domain compactness]
+  \label{lem:lower_zero_face_domain_selection}
+  \lean{Stokes.isCompact_lowerZeroFaceDomain,
+    Stokes.exists_lowerZeroFaceDomain_of_isCompact,
+    Stokes.lowerZeroFaceDomain_mem_nhds_of_lt,
+    Stokes.exists_lowerZeroFaceDomain_subset_of_mem_nhds}
+  \leanok
+  \uses{def:box_faces_coefficients}
+  A boundary face domain is compact and can be shrunk or selected inside a
+  prescribed neighborhood.
+\end{lemma}
+
+\begin{theorem}[Artificial face terms vanish]
+  \label{thm:artificial_faces_vanish}
+  \lean{Stokes.boxRemainingFormFaceTerms_eq_zero_of_face_cancellation,
+    Stokes.boxRemainingFormFaceTerms_eq_zero_of_support_disjoint,
+    Stokes.boxRemainingFormFaceTerms_eq_zero_of_tsupport_subset_halfSpaceSupportBox,
+    Stokes.boxArtificialFaces_tsupport_disjoint_of_subset_halfSpaceSupportBox}
+  \leanok
+  \uses{def:box_faces_coefficients, lem:halfspace_support_box_selection}
+  If the form is supported in the selected half-space box, every artificial
+  face contribution is zero.
+\end{theorem}
+
+\begin{theorem}[Boundary integral splits into true face plus remainder]
+  \label{thm:box_boundary_split}
+  \lean{Stokes.boxRemainingCoordFaceTerms_toCoordNForm,
+    Stokes.bdryIntegral_eq_lowerZero_add_remaining}
+  \leanok
+  \uses{def:box_faces_coefficients, thm:artificial_faces_vanish}
+  The box boundary integral separates the lower-zero face from all remaining
+  artificial faces.
+\end{theorem}
+
+\begin{definition}[Half-space boundary integral]
+  \label{def:halfspace_boundary_integral}
+  \lean{Stokes.halfSpaceBoundaryCoordTerm,
+    Stokes.halfSpaceBoundaryFormIntegral,
+    Stokes.outwardFirstHalfSpaceBoundaryFormIntegral}
+  \leanok
+  \uses{def:outward_first_frame_sign, def:boundary_inclusion_tangent}
+  The true boundary term is written as an integral over the boundary hyperplane
+  using the outward-first sign convention.
+\end{definition}
+
+\begin{theorem}[Boundary tangent pullback determinant formula]
+  \label{thm:boundary_tangent_pullback_det}
+  \lean{Stokes.boundaryTangentPullbackForm,
+    Stokes.boundaryTangentPullbackForm_comp_apply_basisFun_eq_det_mul,
+    Stokes.ambientBoundaryForm_tangentMap_eq_det_mul}
+  \leanok
+  \uses{def:boundary_inclusion_tangent, def:halfspace_boundary_integral}
+  Pulling a top-degree boundary form through a linear tangent map multiplies
+  the coordinate coefficient by the determinant.
+\end{theorem}
+
+\begin{theorem}[Lower-zero face equals boundary form]
+  \label{thm:lower_zero_face_eq_boundary_form}
+  \lean{Stokes.lowerZero_toCoordNForm_eq_boundaryForm,
+    Stokes.halfSpaceBoundaryCoordTerm_toCoordNForm,
+    Stokes.boxLowerZeroCoordFaceTerm_toCoordNForm_eq_halfSpaceBoundaryFormTerm}
+  \leanok
+  \uses{def:halfspace_boundary_integral, thm:boundary_tangent_pullback_det}
+  The lower-zero face coefficient extracted from the box is exactly the
+  half-space boundary form coefficient.
+\end{theorem}
+
+\begin{definition}[Half-space local bulk and remainder]
+  \label{def:halfspace_bulk_remainder}
+  \lean{Stokes.standardTopFrame, Stokes.halfSpaceLocalBulkIntegral,
+    Stokes.halfSpaceLocalBoundaryRemainder}
+  \leanok
+  \uses{def:halfspace_boundary_integral, def:box_faces_coefficients}
+  The local theorem is stated as a bulk integral equals a boundary integral plus
+  a remainder from artificial faces.
+\end{definition}
+
+\begin{theorem}[Half-space Stokes with remainder]
+  \label{thm:halfspace_stokes_with_remainder}
+  \lean{Stokes.box_stokes_extDeriv_contDiffOn_isOpen,
+    Stokes.halfSpaceLocalStokes_with_remainder,
+    Stokes.halfSpaceLocalStokes_with_remainder_of_contDiffOn_isOpen}
+  \leanok
+  \uses{thm:box_stokes_extDeriv_smooth, thm:box_boundary_split,
+    thm:lower_zero_face_eq_boundary_form, def:halfspace_bulk_remainder}
+  The box theorem gives local half-space Stokes before canceling artificial
+  faces.
+\end{theorem}
+
+\begin{theorem}[Half-space Stokes with compact support]
+  \label{thm:halfspace_stokes_compact_support}
+  \lean{Stokes.halfSpaceLocalBoundaryRemainder_eq_zero_of_tsupport_subset_halfSpaceSupportBox,
+    Stokes.halfSpaceLocalStokes_compactSupport,
+    Stokes.halfSpaceLocalStokes_compactSupport_of_contDiffOn_isOpen,
+    Stokes.localHalfSpaceStokes_compactSupport,
+    Stokes.localHalfSpaceStokes_compactSupport_of_contDiffOn_isOpen}
+  \leanok
+  \uses{thm:halfspace_stokes_with_remainder, thm:artificial_faces_vanish}
+  Once support is contained in the selected half-space box, the remainder
+  vanishes and the local half-space Stokes theorem is obtained.
+\end{theorem}
+
+\section{Boundary Chart Change}
+\label{sec:boundary_chart_change}
+
+\begin{definition}[Boundary chart transition]
+  \label{def:boundary_chart_transition}
+  \lean{Stokes.boundaryChartTransition,
+    Stokes.boundaryChartTransition_apply,
+    Stokes.boundaryChartTransitionTangentMap,
+    Stokes.boundaryChartTransitionTangentMap_apply}
+  \leanok
+  \uses{def:chart_derivative_transition, def:boundary_inclusion_tangent}
+  A boundary chart transition is the tangential coordinate map induced by an
+  ambient chart transition preserving the boundary hyperplane.
+\end{definition}
+
+\begin{theorem}[Boundary chart transition derivative]
+  \label{thm:boundary_chart_transition_derivative}
+  \lean{Stokes.boundaryChartTransition_hasFDerivWithinAt,
+    Stokes.boundaryChartTransition_hasFDerivWithinAt_of_selectedBox,
+    Stokes.boundaryChartTransition_hasFDerivAt_of_selectedBox_mem_nhds}
+  \leanok
+  \uses{def:boundary_chart_transition, thm:chart_transition_deriv_eq}
+  The Frechet derivative of the boundary chart transition is the tangential map
+  obtained by restricting the ambient chart derivative.
+\end{theorem}
+
+\begin{definition}[Boundary Jacobian]
+  \label{def:boundary_chart_jacobian}
+  \lean{Stokes.boundaryChartTransitionMatrix,
+    Stokes.boundaryChartTransitionMatrix_det_eq_linearMap_det,
+    Stokes.boundaryChartTransitionJacobian}
+  \leanok
+  \uses{def:boundary_chart_transition}
+  The tangential derivative is converted to a matrix determinant for the
+  Euclidean change-of-variables theorem.
+\end{definition}
+
+\begin{theorem}[Boundary preservation and tangent preservation]
+  \label{thm:boundary_tangent_preservation}
+  \lean{Stokes.boundaryChartTransitionPreservesBoundaryAt,
+    Stokes.boundaryChartTransitionPreservesBoundaryAt_of_zero,
+    Stokes.boundaryChartTransitionDerivPreservesTangentAt,
+    Stokes.boundaryChartTransitionDerivPreservesTangentAt_of_normal_zero}
+  \leanok
+  \uses{def:boundary_chart_transition, thm:boundary_chart_transition_derivative}
+  The chart transition and its derivative preserve the boundary tangent
+  hyperplane under the expected coordinate zero hypotheses.
+\end{theorem}
+
+\begin{theorem}[Pointwise boundary pullback determinant]
+  \label{thm:boundary_pointwise_pullback_det}
+  \lean{Stokes.boundaryChartTransition_pointwise_pullback_det}
+  \leanok
+  \uses{def:boundary_chart_jacobian, thm:boundary_tangent_pullback_det,
+    thm:boundary_tangent_preservation}
+  The boundary integrand after chart change is the original boundary integrand
+  multiplied by the tangential Jacobian.
+\end{theorem}
+
+\begin{definition}[Boundary chart domain]
+  \label{def:boundary_chart_domain}
+  \lean{Stokes.boundaryChartDomain,
+    Stokes.boundaryChartTransitionBoundarySource,
+    Stokes.mem_boundaryChartTransitionBoundarySource_iff,
+    Stokes.boundaryChartDomain_eq_chartTransitionSource,
+    Stokes.boundaryChartDomain_subset_target,
+    Stokes.boundaryChartDomain_subset_overlap}
+  \leanok
+  \uses{def:boundary_chart_transition, lem:chart_transition_source_inj}
+  The boundary transition source is related to the ambient chart-transition
+  source and overlap.
+\end{definition}
+
+\begin{definition}[Selected boundary chart box]
+  \label{def:boundary_chart_selected_box}
+  \lean{Stokes.boundaryChartSelectedBox,
+    Stokes.boundaryChartSelectedBox.mk_of_subsets,
+    Stokes.boundaryChartSelectedBox.Icc_subset_domain,
+    Stokes.boundaryChartSelectedBox.tsupport_subset,
+    Stokes.boundaryChartSelectedBox.boundaryFace_subset_overlap,
+    Stokes.boundaryChartSelectedBox.boundaryFace_subset_range}
+  \leanok
+  \uses{def:boundary_chart_domain, lem:halfspace_support_box_selection}
+  A selected source box records the local domain, support containment, and
+  boundary-face overlap facts needed by local Stokes.
+\end{definition}
+
+\begin{definition}[Extended boundary chart box]
+  \label{def:boundary_chart_extended_box}
+  \lean{Stokes.boundaryChartExtendedBox,
+    Stokes.boundaryChartExtendedBox.mk,
+    Stokes.boundaryChartExtendedBox.selectedBox,
+    Stokes.boundaryChartExtendedBox.exists_smooth_nhds,
+    Stokes.boundaryChartExtendedBox.boundaryFace_subset_overlap}
+  \leanok
+  \uses{def:boundary_chart_selected_box, thm:chartwise_smooth_transport}
+  The selected box is strengthened with a neighborhood where the transported
+  chart form has \texttt{ContDiffOn} smoothness.
+\end{definition}
+
+\begin{definition}[Boundary chart oriented atlas]
+  \label{def:boundary_chart_oriented_atlas}
+  \lean{Stokes.boundaryChartOrientationCompatibleOn,
+    Stokes.boundaryChartPreservesOrientationOn,
+    Stokes.boundaryChartOrientationCompatibleOn_of_preservesOrientationOn,
+    Stokes.BoundaryChartOrientedAtlas,
+    Stokes.BoundaryChartOrientedManifold}
+  \leanok
+  \uses{def:boundary_chart_jacobian, def:outward_first_frame_sign}
+  This is the local orientation bridge: oriented boundary charts have positive
+  tangential Jacobian on the relevant boundary box.
+\end{definition}
+
+\begin{theorem}[Orientation compatibility from atlas data]
+  \label{thm:boundary_orientation_from_atlas}
+  \lean{Stokes.BoundaryChartOrientedAtlas.orientationCompatibleOn_selectedBox,
+    Stokes.BoundaryChartOrientedAtlas.boundaryChartOrientationCompatibleOn_of_orientedAtlas,
+    Stokes.BoundaryChartOrientedManifold.boundaryChartOrientationCompatibleOn_of_orientedManifold,
+    Stokes.BoundaryChartOrientedManifold.boundaryChartOrientationCompatibleOn_selectedBox_of_orientedManifold}
+  \leanok
+  \uses{def:boundary_chart_selected_box, def:boundary_chart_oriented_atlas}
+  The explicit positive-Jacobian condition can be obtained from the chosen
+  oriented atlas or oriented-manifold class.
+\end{theorem}
+
+\begin{theorem}[Local image is a neighborhood]
+  \label{thm:boundary_transition_open_image}
+  \lean{Stokes.boundaryChartTransitionTangentMap_range_eq_top_of_jacobian_ne_zero,
+    Stokes.boundaryChartTransitionTangentMap_range_eq_top_of_orientationCompatibleOn,
+    Stokes.boundaryChartTransition_hasStrictFDerivAt_of_contDiffAt_hasFDerivAt,
+    Stokes.boundaryChartTransition_image_mem_nhds_of_hasStrictFDerivAt_surj,
+    Stokes.boundaryChartTransition_image_mem_nhds_of_hasStrictFDerivAt_orientationCompatibleOn}
+  \leanok
+  \uses{thm:boundary_chart_transition_derivative, thm:boundary_orientation_from_atlas}
+  The inverse function theorem gives that the boundary chart transition maps a
+  small source neighborhood onto a target neighborhood.
+\end{theorem}
+
+\begin{definition}[Boundary local inverse data]
+  \label{def:boundary_local_inverse_data}
+  \lean{Stokes.boundaryChartInverseImageBoxSelection,
+    Stokes.boundaryChartLocalInverseData,
+    Stokes.boundaryChartLocalInverseData.of_inverseImageBoxSelection,
+    Stokes.boundaryChartLocalInverseData.surjOn}
+  \leanok
+  \uses{lem:lower_zero_face_domain_selection, thm:boundary_transition_open_image}
+  Local inverse data packages a target boundary box and a right inverse into the
+  source boundary box.
+\end{definition}
+
+\begin{theorem}[Selected source box gives target inverse data]
+  \label{thm:exists_boundary_local_inverse_data}
+  \lean{Stokes.exists_boundaryChartInverseImageBoxSelection_of_selectedBox_orientedAtlas,
+    Stokes.exists_boundaryChartInverseImageBoxSelection_of_selectedBox_orientedManifold,
+    Stokes.exists_boundaryChartLocalInverseData_of_selectedBox_orientedAtlas_lt,
+    Stokes.exists_boundaryChartLocalInverseData_of_selectedBox_orientedManifold_lt}
+  \leanok
+  \uses{def:boundary_chart_selected_box, def:boundary_local_inverse_data,
+    thm:boundary_orientation_from_atlas}
+  A selected source boundary box, an interior boundary point, and oriented atlas
+  data produce the target box and local inverse data needed for chart change.
+\end{theorem}
+
+\begin{definition}[Boundary selected box image data]
+  \label{def:boundary_selected_box_image_data}
+  \lean{Stokes.boundaryChartSelectedBoxImageData,
+    Stokes.boundaryChartSelectedBoxImageData.mapsTo,
+    Stokes.boundaryChartSelectedBoxImageData.surjOn,
+    Stokes.boundaryChartSelectedBoxImageData_of_mapsTo_localInverseData,
+    Stokes.boundaryChartSelectedBoxImageData_of_compactImage_localInverseData}
+  \leanok
+  \uses{def:boundary_chart_selected_box, def:boundary_local_inverse_data}
+  Image data is the version of local inverse information consumed by the
+  integral invariance theorems.
+\end{definition}
+
+\begin{theorem}[Selected boundary box image equality]
+  \label{thm:boundary_selected_box_image_eq}
+  \lean{Stokes.boundaryChartTransition_image_eq_lowerZeroFaceDomain_of_selectedBox_orientedAtlas,
+    Stokes.boundaryChartTransition_image_eq_lowerZeroFaceDomain_of_orientedAtlas_imageData,
+    Stokes.boundaryChartTransition_image_eq_lowerZeroFaceDomain_of_selectedBox_orientedManifold,
+    Stokes.boundaryChartTransition_image_eq_lowerZeroFaceDomain_of_orientedManifold_imageData}
+  \leanok
+  \uses{def:boundary_selected_box_image_data, thm:boundary_orientation_from_atlas}
+  The boundary chart transition maps the source boundary face exactly to the
+  chosen target boundary box.
+\end{theorem}
+
+\begin{theorem}[Boundary change of variables]
+  \label{thm:boundary_change_of_variables}
+  \lean{Stokes.abs_det_boundaryChartTransitionTangentMap_eq_jacobian_of_orientation,
+    Stokes.boundaryChartTransition_image_integral_eq_jacobian_integral_of_changeOfVariables,
+    Stokes.boundaryChartTransition_jacobian_integral_eq_inChart_of_changeOfVariables,
+    Stokes.boundaryChartOrientedChangeOfVariables,
+    Stokes.boundaryChartOrientedChangeOfVariables_of_selectedBox_orientedManifold_localInverse}
+  \leanok
+  \uses{thm:boundary_pointwise_pullback_det, thm:boundary_selected_box_image_eq}
+  Mathlib change of variables converts the source boundary integral into the
+  target chart boundary integral, using orientation to remove the absolute
+  value from the Jacobian.
+\end{theorem}
+
+\begin{theorem}[Outward-first boundary chart integral invariance]
+  \label{thm:boundary_chart_integral_invariance}
+  \lean{Stokes.outwardFirstBoundaryChartIntegral_chartChange_invariant,
+    Stokes.outwardFirstBoundaryChartIntegral_invariant_of_orientedAtlas_localInverse,
+    Stokes.outwardFirstBoundaryChartIntegral_invariant_of_orientedManifold_localInverse}
+  \leanok
+  \uses{thm:boundary_change_of_variables, def:outward_first_frame_sign}
+  Boundary chart integrals are independent of the selected oriented boundary
+  chart on the local box.
+\end{theorem}
+
+\begin{definition}[Transition-pullback local half-space integrals]
+  \label{def:transition_pullback_halfspace_integrals}
+  \lean{Stokes.halfSpaceLocalTransitionBulkIntegral,
+    Stokes.halfSpaceLocalTransitionBoundaryRemainder,
+    Stokes.halfSpaceTransitionFaceCoeff,
+    Stokes.halfSpaceTransitionFaceCoeffTSupportInHalfSpaceBox,
+    Stokes.halfSpaceBoundaryTransitionFormIntegral}
+  \leanok
+  \uses{def:halfspace_bulk_remainder, def:inchart_transition_pullback}
+  The half-space local theorem is re-indexed for the transition-pullback of a
+  manifold form.
+\end{definition}
+
+\begin{theorem}[Transition-pullback local half-space Stokes]
+  \label{thm:transition_pullback_halfspace_stokes}
+  \lean{Stokes.contDiffOn_transitionPullbackInChart_halfSpaceBox,
+    Stokes.halfSpaceLocalStokes_transitionPullback_compactSupport_of_contDiffOn_isOpen,
+    Stokes.localHalfSpaceStokes_transitionPullback_compactSupport_of_contDiffOn_isOpen}
+  \leanok
+  \uses{thm:halfspace_stokes_compact_support, thm:chartwise_smooth_transport,
+    def:transition_pullback_halfspace_integrals}
+  Local half-space Stokes applies to the transition-pullback chart
+  representative of a chartwise smooth manifold form.
+\end{theorem}
+
+\begin{theorem}[Boundary chart local Stokes]
+  \label{thm:boundary_chart_local_stokes}
+  \lean{Stokes.boundaryChartLocalStokes_transitionPullback_compactSupport,
+    Stokes.boundaryChartLocalStokes_transitionPullback_of_extendedBox,
+    Stokes.boundaryChartLocalStokes_transitionPullback_of_extendedBox_outwardFirst,
+    Stokes.boundaryChartLocalStokes_transitionPullback_of_orientedManifold_imageData,
+    Stokes.boundaryChartLocalStokes_transitionPullback_of_extendedBox_outwardFirst_package}
+  \leanok
+  \uses{def:boundary_chart_extended_box, thm:transition_pullback_halfspace_stokes,
+    thm:boundary_chart_integral_invariance}
+  A selected oriented boundary chart box carries the half-space theorem to a
+  chart-written local Stokes statement with the outward-first boundary term.
+\end{theorem}
+
+\section{Global Assembly Targets}
+\label{sec:global_assembly}
+
+\begin{definition}[Interior chart selected box]
+  \label{def:interior_chart_selected_box}
+  \uses{def:chart_derivative_transition, lem:halfspace_support_box_selection}
+  \plannedlean{Stokes.interiorChartSelectedBox}
+  This should be the interior analogue of \texttt{boundaryChartSelectedBox}, with support
+  contained in an ordinary Euclidean box inside a chart domain.
+\end{definition}
+
+\begin{definition}[Interior chart extended box]
+  \label{def:interior_chart_extended_box}
+  \uses{def:interior_chart_selected_box, thm:chartwise_smooth_transport}
+  \plannedlean{Stokes.interiorChartExtendedBox}
+  It should add the neighborhood \texttt{ContDiffOn} data needed to invoke the Euclidean box
+  theorem.
+\end{definition}
+
+\begin{theorem}[Interior chart local Stokes]
+  \label{thm:interior_chart_local_stokes}
+  \uses{def:interior_chart_extended_box, thm:box_stokes_extDeriv_smooth,
+    thm:chartwise_smooth_transport}
+  \plannedlean{Stokes.interiorChartLocalStokes}
+  If the support is contained in an interior chart box, the boundary contribution of the box is
+  artificial and cancels.
+\end{theorem}
+
+\begin{definition}[Unified selected chart box]
+  \label{def:selected_chart_box}
+  \uses{def:interior_chart_selected_box, def:boundary_chart_selected_box}
+  \plannedlean{Stokes.SelectedChartBox}
+  This should be a small sum-like wrapper with interior and boundary cases, not a new geometric theory.
+\end{definition}
+
+\begin{definition}[Chart-supported form]
+  \label{def:chart_supported_form}
+  \uses{def:selected_chart_box, def:inchart_transition_pullback}
+  \plannedlean{Stokes.ChartSupportedForm}
+  It records that the support of the relevant chart representative is contained in one selected
+  chart box.
+\end{definition}
+
+\begin{theorem}[Chart-supported interior Stokes]
+  \label{thm:chart_supported_interior_stokes}
+  \uses{def:chart_supported_form, thm:interior_chart_local_stokes}
+  \plannedlean{Stokes.chartSupportedInteriorStokes}
+  The interior case of a chart-supported form has zero boundary term.
+\end{theorem}
+
+\begin{theorem}[Chart-supported boundary Stokes]
+  \label{thm:chart_supported_boundary_stokes}
+  \uses{def:chart_supported_form, thm:boundary_chart_local_stokes}
+  \plannedlean{Stokes.chartSupportedBoundaryStokes}
+  The boundary case is exactly the existing local boundary chart theorem with the
+  auxiliary chart choices hidden.
+\end{theorem}
+
+\begin{theorem}[Unified chart-supported Stokes]
+  \label{thm:chart_supported_stokes}
+  \uses{thm:chart_supported_interior_stokes, thm:chart_supported_boundary_stokes}
+  \plannedlean{Stokes.chartSupportedStokes}
+  A form supported in one selected chart box satisfies the local manifold Stokes identity.
+\end{theorem}
+
+\begin{definition}[Selected chart box cover]
+  \label{def:selected_chart_box_cover}
+  \uses{def:selected_chart_box}
+  \plannedlean{Stokes.SelectedChartBoxCover}
+  This finite structure should contain selected boxes covering a compact support, separated
+  into interior and boundary boxes.
+\end{definition}
+
+\begin{theorem}[Compact support has a finite selected box cover]
+  \label{thm:finite_selected_box_cover_exists}
+  \uses{def:selected_chart_box_cover, lem:halfspace_support_box_selection,
+    lem:lower_zero_face_domain_selection, thm:exists_boundary_local_inverse_data}
+  \plannedlean{Stokes.exists_selectedChartBoxCover}
+  This is the main compactness and chart-box selection theorem for global assembly.
+\end{theorem}
+
+\begin{definition}[Partition of unity subordinate to selected boxes]
+  \label{def:partition_subordinate_selected_boxes}
+  \uses{def:selected_chart_box_cover}
+  \plannedlean{Stokes.SelectedBoxPartitionOfUnity}
+  It should use mathlib's smooth partition-of-unity API and expose support containment in
+  selected boxes.
+\end{definition}
+
+\begin{lemma}[Partition piece support]
+  \label{lem:partition_piece_support}
+  \uses{def:partition_subordinate_selected_boxes, def:chart_supported_form}
+  \plannedlean{Stokes.partitionPiece_chartSupported}
+  Each partition-localized form is chart-supported in its selected box.
+\end{lemma}
+
+\begin{definition}[Partition-localized form]
+  \label{def:partition_localized_form}
+  \uses{def:partition_subordinate_selected_boxes, def:model_manifold_forms}
+  \plannedlean{Stokes.partitionLocalizedForm}
+  This packages multiplication of a manifold form by a smooth scalar partition function.
+\end{definition}
+
+\begin{lemma}[Exterior derivative of a finite sum]
+  \label{lem:extderiv_finite_sum}
+  \uses{def:partition_localized_form, def:model_manifold_forms}
+  \plannedlean{Stokes.extDeriv_sum}
+  The exterior derivative commutes with the finite sum of localized forms.
+\end{lemma}
+
+\begin{lemma}[Leibniz rule for partition pieces]
+  \label{lem:partition_piece_extderiv}
+  \uses{def:partition_localized_form}
+  \plannedlean{Stokes.extDeriv_partitionPiece}
+  This is the local calculation identifying the derivative of each scalar-multiplied piece.
+\end{lemma}
+
+\begin{lemma}[Partition sum recovers the original form]
+  \label{lem:partition_sum_form}
+  \uses{def:partition_subordinate_selected_boxes, def:partition_localized_form}
+  \plannedlean{Stokes.sum_partitionLocalizedForm}
+  The finite sum of all localized pieces is the original compactly supported form.
+\end{lemma}
+
+\begin{lemma}[Bulk integral of a finite sum]
+  \label{lem:bulk_integral_finite_sum}
+  \uses{def:partition_localized_form}
+  \plannedlean{Stokes.bulkIntegral_sum}
+  The bulk integral is additive over the finite family of partition-localized forms.
+\end{lemma}
+
+\begin{lemma}[Boundary integral of a finite sum]
+  \label{lem:boundary_integral_finite_sum}
+  \uses{def:partition_localized_form, thm:boundary_chart_integral_invariance}
+  \plannedlean{Stokes.boundaryIntegral_sum}
+  The boundary integral is additive over the same finite family.
+\end{lemma}
+
+\begin{definition}[Project-local bulk integral]
+  \label{def:project_local_bulk_integral}
+  \uses{thm:chart_supported_stokes, thm:chart_transition_smooth}
+  \plannedlean{Stokes.projectLocalBulkIntegral}
+  The global bulk integral is defined or compared using selected oriented chart boxes.
+\end{definition}
+
+\begin{definition}[Project-local boundary integral]
+  \label{def:project_local_boundary_integral}
+  \uses{thm:boundary_chart_integral_invariance}
+  \plannedlean{Stokes.projectLocalBoundaryIntegral}
+  The global boundary integral is defined or compared using the boundary chart invariance
+  already proved.
+\end{definition}
+
+\begin{theorem}[Local integral definitions are chart independent]
+  \label{thm:project_local_integral_chart_independent}
+  \uses{def:project_local_bulk_integral, def:project_local_boundary_integral,
+    thm:boundary_chart_integral_invariance}
+  \plannedlean{Stokes.projectLocalIntegral_chartIndependent}
+  The selected chart used to compute a local contribution does not change the
+  resulting integral.
+\end{theorem}
+
+\begin{theorem}[Project-local chart-supported Stokes]
+  \label{thm:project_local_chart_supported_stokes}
+  \uses{thm:chart_supported_stokes, thm:project_local_integral_chart_independent}
+  \plannedlean{Stokes.projectLocalChartSupportedStokes}
+  The chart-supported theorem is rewritten into the chosen global integral API.
+\end{theorem}
+
+\begin{theorem}[Global bulk integral equals sum of local bulk integrals]
+  \label{thm:global_bulk_eq_local_sum}
+  \uses{def:project_local_bulk_integral, lem:bulk_integral_finite_sum,
+    lem:partition_sum_form}
+  \plannedlean{Stokes.globalBulkIntegral_eq_localSum}
+  The bulk side of the global theorem is reduced to finitely many selected boxes.
+\end{theorem}
+
+\begin{theorem}[Global boundary integral equals sum of local boundary integrals]
+  \label{thm:global_boundary_eq_local_sum}
+  \uses{def:project_local_boundary_integral, lem:boundary_integral_finite_sum,
+    lem:partition_sum_form}
+  \plannedlean{Stokes.globalBoundaryIntegral_eq_localSum}
+  The boundary side is reduced to the same finite selected-box family.
+\end{theorem}
+
+\begin{theorem}[Finite sum of local Stokes identities]
+  \label{thm:sum_local_stokes}
+  \uses{thm:project_local_chart_supported_stokes, lem:partition_piece_support,
+    lem:bulk_integral_finite_sum, lem:boundary_integral_finite_sum}
+  \plannedlean{Stokes.sum_localChartSupportedStokes}
+  Summing the local identities gives the finite-cover identity.
+\end{theorem}
+
+\begin{theorem}[Global compact-support Stokes]
+  \label{thm:global_compact_support_stokes}
+  \uses{thm:finite_selected_box_cover_exists,
+    def:partition_subordinate_selected_boxes, thm:sum_local_stokes,
+    thm:global_bulk_eq_local_sum, thm:global_boundary_eq_local_sum}
+  \plannedlean{Stokes.globalStokes_compactSupport}
+  For a compactly supported chartwise smooth form on an oriented manifold with
+  boundary, the global integral of \(\dd \omega\) equals the global
+  outward-first boundary integral of \(\omega\).
+\end{theorem}
+
+\begin{theorem}[Compact manifold Stokes]
+  \label{thm:compact_manifold_stokes}
+  \uses{thm:global_compact_support_stokes}
+  \plannedlean{Stokes.globalStokes_compactManifold}
+  If the manifold is compact, the compact-support theorem specializes to the standard
+  compact oriented smooth manifold with boundary statement.
+\end{theorem}
+
+\begin{theorem}[Comparison with mathlib integral API]
+  \label{thm:compare_mathlib_integral_api}
+  \uses{def:project_local_bulk_integral, def:project_local_boundary_integral,
+    thm:global_compact_support_stokes}
+  \plannedlean{Stokes.compareProjectLocalIntegralToMathlib}
+  If mathlib later exposes a canonical manifold-form integral, this theorem
+  should identify the project-local definition with it.
+\end{theorem}
+
+\input{stokes-global-anchors}
+\input{stokes-m6-constructors}
+\input{stokes-m6-next}
+\input{stokes-m7-obligations}
+\input{stokes-m8-measure}

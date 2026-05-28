@@ -1,0 +1,224 @@
+\section{Global Stokes Lean Anchor Alignment}
+\label{sec:global_stokes_lean_anchor_alignment}
+\begingroup
+\sloppy
+\emergencystretch=3em
+
+This fragment records the current Lean anchors that refine the open nodes in
+\Cref{sec:global_assembly}.  Each entry is meant to be usable as a small
+coordination task: instantiate the named Lean package, discharge the listed
+explicit hypotheses, then replace the corresponding planned blueprint node by
+the implemented anchor.
+
+\begin{definition}[Interior selected and extended chart boxes]
+  \label{anc:interior_chart_box_anchors}
+  \lean{Stokes.interiorChartSelectedBox, Stokes.interiorChartExtendedBox,
+    Stokes.interiorChartExtendedBox.mk_of_subsets}
+  \leanok
+  \uses{def:chart_derivative_transition, thm:chartwise_smooth_transport}
+  \emph{Carries blueprint nodes:}
+  \texttt{def:interior\_chart\_selected\_box} and
+  \texttt{def:interior\_chart\_extended\_box}.
+  The selected-box anchor records \(a \le b\), the closed coordinate box inside
+  the chart-transition domain, and support of
+  \texttt{ManifoldForm.transitionPullbackInChart} inside that box.  The
+  extended-box anchor adds an open neighborhood on which the same chart
+  representative is \texttt{ContDiffOn}.
+
+  \emph{Remaining explicit hypotheses:}
+  concrete lower and upper corners; target and overlap inclusions; support
+  containment for the chart representative being localized; and the
+  neighborhood smoothness statement.  The local Euclidean Stokes theorem for
+  these interior boxes is still a separate task.
+\end{definition}
+
+\begin{definition}[Selected box partition of unity]
+  \label{anc:selected_box_partition_of_unity}
+  \lean{Stokes.SelectedBoxPartitionOfUnity,
+    Stokes.SelectedBoxPartitionOfUnity.mkOfBoxes,
+    Stokes.SelectedBoxPartitionOfUnity.mkOfSubsets,
+    Stokes.exists_smoothPartitionOfUnity_subordinate_chartAt_source}
+  \leanok
+  \uses{anc:interior_chart_box_anchors}
+  \emph{Carries blueprint node:}
+  \texttt{def:partition\_subordinate\_selected\_boxes}.  It also supplies the
+  finite activity bridge needed by \texttt{lem:partition\_piece\_support}
+  through \texttt{mem\_active\_of\_mem\_fintsupport} and
+  \texttt{mem\_active\_of\_mem\_tsupport}.
+
+  \emph{Remaining explicit hypotheses:}
+  a smooth partition \(\rho\); a compact control set \(K\); a finite active set;
+  the proof that every partition term active on \(K\) lies in that finite set;
+  selected extended boxes for all active indices; and, for existence, the
+  compactness argument selecting boxes from chart sources.  The current package
+  is interior-chart shaped; adding boundary-box indices or a unified
+  interior/boundary sum wrapper remains open.
+\end{definition}
+
+\begin{definition}[Partition-localized form data]
+  \label{anc:localized_form_data}
+  \lean{Stokes.ManifoldForm.localizedForm, Stokes.LocalizedFormData,
+    Stokes.LocalizedFormData.mkLocalized,
+    Stokes.LocalizedFormData.interiorChartSelectedBox}
+  \leanok
+  \uses{anc:selected_box_partition_of_unity, def:inchart_transition_pullback}
+  \emph{Carries blueprint nodes:}
+  \texttt{def:partition\_localized\_form},
+  \texttt{lem:partition\_piece\_support}, and the interior part of
+  \texttt{def:chart\_supported\_form}.  The anchor stores the scalar
+  coefficient, the localized form, the equality with pointwise scalar
+  multiplication, and the selected-box support data needed to pass a localized
+  form to interior chart-box APIs.
+
+  \emph{Remaining explicit hypotheses:}
+  smoothness of the scalar partition coefficient; the support proof for
+  \(\rho_i \omega\) in the selected box; compatibility with boundary selected
+  boxes; the finite-sum reconstruction of \(\omega\); and the exterior
+  derivative finite-sum and Leibniz rules
+  \texttt{lem:extderiv\_finite\_sum} and
+  \texttt{lem:partition\_piece\_extderiv}.
+\end{definition}
+
+\begin{definition}[Boundary orientation map bridge]
+  \label{anc:boundary_chart_orientation_map_data}
+  \lean{Stokes.BoundaryChartOrientationMapData,
+    Stokes.BoundaryChartOrientationMapDataOn,
+    Stokes.boundaryChartOrientationCompatibleOn_of_orientationMapDataOn,
+    Stokes.boundaryChartPreservesOrientationOn_of_orientationMapDataOn}
+  \leanok
+  \uses{def:boundary_chart_oriented_atlas, thm:boundary_orientation_from_atlas}
+  \emph{Carries blueprint nodes:}
+  the orientation-map content behind
+  \texttt{def:boundary\_chart\_oriented\_atlas} and
+  \texttt{thm:boundary\_orientation\_from\_atlas}; it is also the clean bridge
+  into \texttt{thm:boundary\_transition\_open\_image},
+  \texttt{thm:boundary\_change\_of\_variables}, and
+  \texttt{thm:boundary\_chart\_integral\_invariance}.
+
+  \emph{Remaining explicit hypotheses:}
+  a tangential linear equivalence for each boundary-coordinate point; equality
+  of its underlying linear map with
+  \texttt{boundaryChartTransitionTangentMap}; either a positive determinant or
+  an \texttt{Orientation.map} equality; and setwise data upgrading the
+  pointwise bridge to the selected boundary face.  Local inverse data and image
+  equality for boundary boxes are still supplied by the boundary-chart
+  image-data packages.
+\end{definition}
+
+\begin{definition}[Project-local integral wrappers]
+  \label{anc:project_local_integral_wrappers}
+  \lean{Stokes.projectLocalBulkIntegral, Stokes.projectLocalBoundaryIntegral,
+    Stokes.projectLocalStokes_of_boundaryChartExtendedBox,
+    Stokes.projectLocalStokes_of_orientedAtlas_imageData,
+    Stokes.projectLocalStokes_of_orientedManifold_imageData}
+  \leanok
+  \uses{thm:boundary_chart_local_stokes, thm:boundary_chart_integral_invariance}
+  \emph{Carries blueprint nodes:}
+  \texttt{def:project\_local\_bulk\_integral},
+  \texttt{def:project\_local\_boundary\_integral}, and the boundary-chart part
+  of \texttt{thm:project\_local\_chart\_supported\_stokes}.  The wrappers fix
+  the project-facing names for the local bulk and outward-first boundary terms.
+
+  \emph{Remaining explicit hypotheses:}
+  selected or extended boundary-chart boxes; oriented-atlas or oriented-manifold
+  assumptions when transporting the boundary term to a target chart; and
+  boundary image data identifying the source lower face with the target
+  boundary box.  Interior project-local wrappers have not yet been added.
+\end{definition}
+
+\begin{definition}[Finite-sum global assembly data]
+  \label{anc:global_stokes_assembly_data}
+  \lean{Stokes.GlobalStokesAssemblyData, Stokes.globalStokesAssembly,
+    Stokes.sum_localChartSupportedStokes}
+  \leanok
+  \uses{anc:project_local_integral_wrappers}
+  \emph{Carries blueprint nodes:}
+  \texttt{thm:sum\_local\_stokes},
+  \texttt{thm:global\_bulk\_eq\_local\_sum}, and
+  \texttt{thm:global\_boundary\_eq\_local\_sum}.  This is the algebraic
+  finite-cover layer: local Stokes identities for interior and boundary pieces
+  are summed, artificial interior boundary terms are cancelled, and the result
+  is compared with the stored global bulk and boundary real numbers.
+
+  \emph{Remaining explicit hypotheses:}
+  the finite active chart set; interior and boundary piece finsets; bulk and
+  boundary real-valued term functions; local Stokes identities for every active
+  piece; reconstruction of the global bulk and boundary integrals from those
+  sums; and cancellation of artificial interior faces.  The field
+  \texttt{chartChangeInvariance} is presently only recorded as a proposition;
+  the newer final package below makes the chart-change sum equality explicit.
+\end{definition}
+
+\begin{definition}[Final global Stokes data package]
+  \label{anc:global_stokes_data}
+  \lean{Stokes.GlobalStokesData, Stokes.GlobalStokesData.stokes,
+    Stokes.globalStokes}
+  \leanok
+  \uses{anc:global_stokes_assembly_data,
+    anc:boundary_chart_orientation_map_data}
+  \emph{Carries blueprint node:}
+  \texttt{thm:global\_compact\_support\_stokes} as the current final Lean
+  theorem anchor.  It refines the older assembly package by naming a separate
+  boundary partition sum and by making chart-change compatibility an equality
+  between boundary-chart terms and boundary-partition terms.
+
+  \emph{Remaining explicit hypotheses:}
+  all fields of \texttt{GlobalStokesData}: finite chart and piece data; local
+  Stokes identities for interior and boundary pieces; global bulk
+  reconstruction; artificial interior-boundary cancellation; chart-change
+  cancellation into boundary partition terms; and global boundary
+  reconstruction.  Compact support, manifold-with-boundary assumptions,
+  partition-of-unity construction, and actual manifold integral definitions are
+  not in the theorem statement yet; they must be used to build an instance of
+  this data package.
+\end{definition}
+
+\begin{definition}[Project-local final Stokes package]
+  \label{anc:project_local_global_stokes}
+  \lean{Stokes.ProjectLocalGlobalStokesData,
+    Stokes.ProjectLocalGlobalStokesData.stokes,
+    Stokes.projectLocalGlobalStokes}
+  \leanok
+  \uses{anc:project_local_integral_wrappers, anc:global_stokes_data}
+  \emph{Carries blueprint nodes:}
+  \texttt{thm:project\_local\_chart\_supported\_stokes},
+  \texttt{thm:sum\_local\_stokes}, and the project-local specialization of
+  \texttt{thm:global\_compact\_support\_stokes}.  This is the most direct
+  finite-sum target for boundary-chart boxes because the local terms are
+  exactly \texttt{projectLocalBulkIntegral} and
+  \texttt{projectLocalBoundaryIntegral}.
+
+  \emph{Remaining explicit hypotheses:}
+  active chart and piece finsets; source and target chart choices for every
+  piece; lower and upper box corners; the equality reducing the represented
+  global bulk integral to project-local bulk sums; pointwise project-local
+  Stokes for every active piece; chart-change cancellation into boundary
+  partition terms; and boundary partition reconstruction.  A useful next
+  collaboration task is to instantiate \texttt{localProjectStokes} from
+  \texttt{projectLocalStokes\_of\_boundaryChartExtendedBox} or the oriented
+  image-data variants.
+\end{definition}
+
+\begin{theorem}[Compact and mathlib-facing final statements]
+  \label{anc:remaining_final_global_nodes}
+  \lean{Stokes.globalStokes}
+  \leanok
+  \uses{anc:selected_box_partition_of_unity, anc:localized_form_data,
+    anc:project_local_global_stokes}
+  \emph{Carries blueprint nodes conditionally:}
+  \texttt{thm:compact\_manifold\_stokes} and
+  \texttt{thm:compare\_mathlib\_integral\_api} should not be marked closed by
+  the bare algebraic theorem.  Instead, they should point to
+  \texttt{Stokes.globalStokes} as the final assembly target once the data
+  package is produced from compactness, partitions of unity, boundary
+  orientation, and the chosen integral API.
+
+  \emph{Remaining explicit hypotheses:}
+  conversion from compact manifold hypotheses to compact support data; a
+  canonical or project-local global integral definition; comparison with any
+  future mathlib manifold-form integral; and a proof that the selected-box
+  partition/localized-form layer supplies every field of either
+  \texttt{GlobalStokesData} or \texttt{ProjectLocalGlobalStokesData}.
+\end{theorem}
+
+\endgroup

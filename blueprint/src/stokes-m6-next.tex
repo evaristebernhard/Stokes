@@ -1,0 +1,382 @@
+\section{M6.4--M7 Parallel Blueprint Fragment}
+\label{sec:m6_4_m7_parallel_blueprint_fragment}
+\begingroup
+\sloppy
+\emergencystretch=3em
+
+This fragment is the next handoff layer after the M6 constructor split.  Its
+purpose is not to introduce another final theorem package.  The constructor
+layer is already in place.  The remaining work is mathematical field
+production: compact-support geometry, localized smoothness, artificial-face
+geometry, boundary chart-change identification, and global integral
+reconstruction.
+
+Each entry below is organized by Lean module, record field, and theorem anchor.
+The ``constructor status'' paragraph says what can already be used without
+additional design.  The ``explicit field mathematics'' paragraph names the
+field-level facts that are still mathematical work.  The ``parallel theorem
+anchors'' paragraph is the intended worker queue.
+
+\begin{definition}[Completed constructor layer]
+  \label{anc:m6_4_completed_constructor_layer}
+  \lean{Stokes.GlobalStokesData, Stokes.ProjectLocalGlobalStokesData,
+    Stokes.PartitionReconstructionData, Stokes.BulkIntegralReconstructionData,
+    Stokes.ExtDerivOnSupportData, Stokes.MixedGlobalStokesData,
+    Stokes.SelectedMixedGlobalInput, Stokes.BoundaryGlobalConstructorData,
+    Stokes.ArtificialFaceGeometryData, Stokes.BoundaryChartChangeFamilyData,
+    Stokes.LocalizedInteriorPieces}
+  \leanok
+  \uses{anc:m6_constructor_dependency_order, anc:global_stokes_data}
+  \emph{Lean modules:}
+  the completed constructor modules are
+  \texttt{Theorem}, \texttt{Reconstruction},
+  \texttt{ReconstructionWrappers}, \texttt{IntegralReconstruction},
+  \texttt{ExtDerivReconstruction}, \texttt{ExtDerivOnSupport},
+  \texttt{MixedGlobalConstructor}, \texttt{MixedSelectedConstructor},
+  \texttt{BoundaryGlobalConstructor}, \texttt{BoundaryChartChangePieces},
+  \texttt{ArtificialFacePairing}, \texttt{ArtificialFaceGeometry}, and
+  \texttt{LocalizedInteriorPieces}, all under \texttt{Stokes.Global}.
+
+  \emph{Constructor status:}
+  these modules already turn named local packages, cancellation packages,
+  chart-change packages, and reconstruction packages into
+  \texttt{GlobalStokesData}, \texttt{ProjectLocalGlobalStokesData}, or
+  \texttt{MixedGlobalStokesData}.  The final theorems
+  \texttt{globalStokes}, \texttt{projectLocalGlobalStokes},
+  \texttt{mixedGlobalStokes}, and \texttt{selectedMixedGlobalStokes} are now
+  bookkeeping theorem calls once their records are filled.
+
+  \emph{Fields still mathematical:}
+  do not add another global constructor to hide these fields.  Workers should
+  instead prove the data needed for
+  \texttt{globalBulkIntegral\_eq\_localBulkSum},
+  \texttt{globalBoundaryIntegral\_eq\_boundaryPartitionSum},
+  \texttt{interiorLocalStokes}, \texttt{boundaryLocalStokes},
+  \texttt{interiorBoundaryCancellation},
+  \texttt{chartChangeCancellation}, and the support-local
+  \texttt{chartwiseExtDeriv\_eq\_global\_on} field.
+
+  \emph{Handoff rule:}
+  M6.4 workers should output one of the existing data packages, not a new
+  final wrapper.  M7 workers should assemble those outputs through
+  \texttt{SelectedMixedGlobalInput} or through
+  \texttt{BulkIntegralReconstructionData.toMixedGlobalStokesData}.
+\end{definition}
+
+\begin{definition}[M6.4 active compact support to selected boxes]
+  \label{anc:m6_4_active_compact_support_to_boxes}
+  \lean{Stokes.ChartCompactImage, Stokes.ActiveChartCompactImages,
+    Stokes.ChartCompactSupportData, Stokes.ActiveChartCompactSupportData,
+    Stokes.CompactActiveBoxData, Stokes.CompactActiveExtendedBoxData}
+  \leanok
+  \uses{anc:m6_compact_active_boxes, def:selected_chart_box_cover,
+    thm:finite_selected_box_cover_exists}
+  \emph{Lean modules:}
+  \texttt{ChartCompactImage}, \texttt{CompactSupportChartBox}, and
+  \texttt{CompactActiveBoxes} under \texttt{Stokes.Global}.
+
+  \emph{Constructor status:}
+  \texttt{ChartCompactImage} and \texttt{ActiveChartCompactImages} already
+  convert compact manifold control sets into compact coordinate images and
+  selected coordinate boxes.  \texttt{ChartCompactSupportData} and
+  \texttt{ActiveChartCompactSupportData} already carry the
+  \texttt{tsupport} containment that converts those boxes into
+  \texttt{interiorChartSelectedBox}.  \texttt{CompactActiveBoxData} and
+  \texttt{CompactActiveExtendedBoxData} already expose lower corners, upper
+  corners, support containment, target containment, overlap containment, and
+  selected or extended box accessors.
+
+  \emph{Explicit field mathematics:}
+  the hard fields are still the compact coordinate support for each active
+  chart, compactness of that support, the
+  \texttt{tsupport\_subset\_coordSupport} proof, and the geometric shrinkage
+  facts
+  \[
+    \operatorname{Icc}(a_i,b_i) \subseteq
+      (\operatorname{extChartAt}\ I\ i).\operatorname{target},
+    \qquad
+    \operatorname{Icc}(a_i,b_i) \subseteq
+      \operatorname{chartOverlap}(I,i,i).
+  \]
+  For extended boxes, workers must also supply an open neighborhood containing
+  each box and the corresponding \texttt{ContDiffOn} proof.
+
+  \emph{Parallel theorem anchors:}
+  one worker can prove compact coordinate-image selection from a compact
+  support set; one can prove target and overlap shrinkage for boxes chosen
+  inside chart domains; one can produce the support-containment theorem for
+  chart representatives; and one can lift selected boxes to extended boxes via
+  localized smoothness.  Proposed Lean names:
+  \plannedlean{Stokes.activeChartCompactSupportData_of_compactSupport}
+  \plannedlean{Stokes.compactActiveBoxData_of_activeChartCompactSupport}
+  \plannedlean{Stokes.compactActiveExtendedBoxes_of_smoothness}
+\end{definition}
+
+\begin{definition}[M6.4 partition localization and support control]
+  \label{anc:m6_4_partition_localization_support_control}
+  \lean{Stokes.FiniteActiveOnCompact, Stokes.SelectedBoxPartitionOfUnity,
+    Stokes.LocalizedFormReconstructionFields, Stokes.LocalizedSupportControl,
+    Stokes.LocalizedSmoothnessData, Stokes.ExtDerivOnSupportData}
+  \leanok
+  \uses{anc:m6_partition_sum_one, anc:m6_localized_support_smoothness,
+    lem:partition_piece_support, lem:partition_sum_form}
+  \emph{Lean modules:}
+  \texttt{Stokes.Global.FiniteActive},
+  \texttt{Stokes.Global.PartitionSumOne},
+  \texttt{Stokes.Global.LocalizedSupport},
+  \texttt{Stokes.Global.CoefficientBoxSupport},
+  \texttt{Stokes.Global.LocalizedSmoothness},
+  \texttt{Stokes.Global.ReconstructionWrappers}, and
+  \texttt{Stokes.Global.ExtDerivOnSupport}.
+
+  \emph{Constructor status:}
+  \texttt{FiniteActiveOnCompact} already supplies the finite active set and
+  the active-support membership lemmas.  \texttt{PartitionSumOne} already turns
+  finite activity into the coefficient-sum-one facts used by
+  \texttt{LocalizedFormReconstructionFields.ofCoeffSumEqOneOn}.
+  \texttt{LocalizedSupportControl} already converts coefficient support in a
+  selected box into selected-box support for the localized form
+  \(\rho_i\omega\).  \texttt{LocalizedSmoothnessData} already packages the
+  open-neighborhood smoothness field needed by extended boxes.
+
+  \emph{Explicit field mathematics:}
+  workers still have to prove that the coefficient family used in the
+  reconstruction is exactly the selected partition coefficient, that each
+  coefficient has the stated compact or boxed support, that
+  \(\rho_i\omega\) is smooth in the selected chart neighborhood, and that the
+  localized finite sum reconstructs \(\omega\) on the support set used by the
+  global integrals.  The support-local exterior-derivative field
+  \texttt{ExtDerivOnSupportData.chartwiseExtDeriv\_eq\_global\_on} is still a
+  theorem, not a constructor obligation that should be guessed.
+
+  \emph{Parallel theorem anchors:}
+  a partition worker can prove the coefficient-sum-one and localized-form
+  reconstruction on the compact control set; a support worker can build
+  \texttt{LocalizedSupportControl} from coefficient support; a smoothness
+  worker can prove \texttt{LocalizedSmoothnessData} from chartwise smoothness
+  plus scalar smoothness; and an exterior-derivative worker can prove the
+  support-local equality using
+  \texttt{extDeriv\_transitionPullbackInChart\_localizedFormSum}.
+  Proposed Lean names:
+  \plannedlean{Stokes.selectedPartition_localizedFormReconstruction}
+  \plannedlean{Stokes.localizedSupportControl_of_partitionCoeff}
+  \plannedlean{Stokes.extDerivOnSupport_of_partitionSumOne}
+\end{definition}
+
+\begin{definition}[M6.4 interior local pieces and artificial faces]
+  \label{anc:m6_4_interior_pieces_artificial_faces}
+  \lean{Stokes.LocalizedInteriorPiece, Stokes.LocalizedInteriorPieces,
+    Stokes.InteriorLocalStokesData, Stokes.ArtificialFaceGeometryData,
+    Stokes.ArtificialFacePairingData, Stokes.ArtificialBoundaryCancellationData}
+  \leanok
+  \uses{anc:m6_localized_interior_pieces,
+    anc:m6_artificial_face_pairing, thm:interior_chart_local_stokes}
+  \emph{Lean modules:}
+  \texttt{Stokes.Global.LocalizedInteriorPieces},
+  \texttt{Stokes.Global.InteriorLocalStokes},
+  \texttt{Stokes.Global.ArtificialFacePairing},
+  \texttt{Stokes.Global.ArtificialFaceGeometry}, and
+  \texttt{Stokes.Global.Cancellation}.
+
+  \emph{Constructor status:}
+  one \texttt{LocalizedInteriorPiece} already gives a localized form, selected
+  box, extended box, \texttt{InteriorLocalStokesData}, and project-local
+  equality.  A finite \texttt{LocalizedInteriorPieces} family already sums
+  those local equalities.  \texttt{ArtificialFaceGeometryData} already forgets
+  to \texttt{ArtificialFacePairingData} and then to
+  \texttt{ArtificialBoundaryCancellationData}.
+
+  \emph{Explicit field mathematics:}
+  the remaining mathematical fields are the actual face labels for every
+  interior piece, the map from each local artificial-boundary term to the
+  recorded face sum, the pairing on flattened face indices, proof that the
+  pairing preserves the active finite set, involutivity, equality of paired
+  geometric faces, equality of paired unsigned face integrals, and opposite
+  cubical signs.  If the chosen pairing has no fixed points, use
+  \texttt{ArtificialFaceGeometryData.ofCoordinateFixedPointFreePairing};
+  otherwise fixed-point zero terms must be proved explicitly.
+
+  \emph{Parallel theorem anchors:}
+  one worker can construct the \texttt{LocalizedInteriorPieces} family from
+  support and smoothness packages; one can define the geometric face labels and
+  unsigned terms; one can prove the opposite-face pairing; and one can prove
+  that the artificial boundary term used by the local Stokes package equals
+  the face sum consumed by the cancellation package.  Proposed Lean names:
+  \plannedlean{Stokes.localizedInteriorPieces_of_activeBoxes}
+  \plannedlean{Stokes.artificialFaceGeometryData_of_boxes}
+  \plannedlean{Stokes.interiorBoundaryTerm_eq_artificialFaceSum}
+\end{definition}
+
+\begin{definition}[M6.4 boundary local pieces and chart-change fields]
+  \label{anc:m6_4_boundary_pieces_chart_change_fields}
+  \lean{Stokes.BoundaryProjectLocalPieces,
+    Stokes.OrientedBoundaryProjectLocalPieces,
+    Stokes.BoundaryChartChangePieceData,
+    Stokes.BoundaryChartChangeFamilyData,
+    Stokes.OrientedBoundaryChartChangeFamilyData,
+    Stokes.BoundaryGlobalConstructorData}
+  \leanok
+  \uses{anc:m6_boundary_chart_change_pieces,
+    anc:m6_boundary_piece_constructors, thm:boundary_chart_local_stokes}
+  \emph{Lean modules:}
+  \texttt{BoundaryPieces}, \texttt{BoundaryChartChangePieces}, and
+  \texttt{BoundaryGlobalConstructor} under \texttt{Stokes.Global}, together
+  with the boundary chart modules \texttt{LocalStokes},
+  \texttt{SelectedBoxImageConstructor}, and \texttt{BoundaryPieceConvenience}.
+
+  \emph{Constructor status:}
+  boundary local Stokes can already be packaged either as
+  \texttt{BoundaryProjectLocalPieces} or as
+  \texttt{OrientedBoundaryProjectLocalPieces}.  Selected-target and
+  extended-target \texttt{BoundaryChartChangeFamilyData} already produce the
+  finite \texttt{chartChangeCancellation} field.  Boundary-only global
+  constructors are already available for smoke tests, but the mixed theorem
+  should use the same chart-change data through \texttt{SelectedMixedGlobalInput}.
+
+  \emph{Explicit field mathematics:}
+  boundary workers still need target chart choices, target lower and upper
+  corners, target selected or extended boundary boxes, image data identifying
+  source lower faces with target boundary boxes, the oriented change-of-
+  variables package for every active boundary piece, and the pointwise field
+  \texttt{boundaryPartitionTerm\_eq}.  Separately, the boundary reconstruction
+  worker must identify the summed \texttt{boundaryPartitionTerm} with the
+  chosen global boundary integral.
+
+  \emph{Parallel theorem anchors:}
+  one worker can build source boundary local pieces from selected image data;
+  one can construct target selected boxes and local inverse/image data; one can
+  prove oriented change of variables piecewise; and one can prove the
+  \texttt{boundaryPartitionTerm\_eq} identification used by the chart-change
+  family.  Proposed Lean names:
+  \plannedlean{Stokes.boundaryPieces_of_selectedBoxImageData_family}
+  \plannedlean{Stokes.boundaryChartChangeFamilyData_of_imageData}
+  \plannedlean{Stokes.boundaryPartitionTerm_eq_targetBoundary}
+\end{definition}
+
+\begin{definition}[M6.5 global integral and exterior-derivative reconstruction]
+  \label{anc:m6_5_global_integral_extderiv_reconstruction}
+  \lean{Stokes.BulkIntegralReconstructionData,
+    Stokes.BulkIntegralReconstructionData.BoundaryPartitionFields,
+    Stokes.PartitionReconstructionData,
+    Stokes.GlobalStokesReconstructionFields,
+    Stokes.ExtDerivPartitionReconstructionData,
+    Stokes.ExtDerivOnSupportData}
+  \leanok
+  \uses{anc:m6_reconstruction_constructors,
+    thm:global_bulk_eq_local_sum, thm:global_boundary_eq_local_sum,
+    lem:extderiv_finite_sum}
+  \emph{Lean modules:}
+  \texttt{Stokes.Global.IntegralReconstruction},
+  \texttt{Stokes.Global.Reconstruction},
+  \texttt{Stokes.Global.ReconstructionWrappers},
+  \texttt{Stokes.Global.ExtDerivReconstruction}, and
+  \texttt{Stokes.Global.ExtDerivOnSupport}.
+
+  \emph{Constructor status:}
+  bulk reconstruction, boundary reconstruction, and exterior-derivative
+  reconstruction have been split into reusable records.  A worker may first
+  prove only \texttt{BulkIntegralReconstructionData}; another worker may add
+  \texttt{BoundaryPartitionFields}; another may add
+  \texttt{ExtDerivOnSupportData}.  These records already convert back to
+  \texttt{PartitionReconstructionData} and to the final
+  \texttt{GlobalStokesData} or \texttt{MixedGlobalStokesData} shapes.
+
+  \emph{Explicit field mathematics:}
+  the project still needs actual definitions or comparisons for the represented
+  global bulk and boundary integrals.  The bulk field must prove finite
+  additivity over localized pieces and the equality with the local
+  project-integral terms.  The boundary field must prove finite additivity over
+  the boundary partition and compatibility with the boundary chart-change
+  target terms.  The exterior-derivative field must prove that the coordinate
+  representative of \(\dd(\sum_i \rho_i\omega)\) equals the coordinate
+  representative of \(\dd\omega\) on the support on which the bulk integral is
+  reconstructed.
+
+  \emph{Parallel theorem anchors:}
+  one worker can implement the bulk integral definition and finite-additivity
+  theorem; one can implement the boundary integral definition and
+  finite-additivity theorem; one can prove the \texttt{extDeriv} support-local
+  reconstruction; and one can write the comparison wrappers from these
+  definitions to the project-local terms.  Proposed Lean names:
+  \plannedlean{Stokes.globalBulkIntegral_eq_selectedLocalBulkSum}
+  \plannedlean{Stokes.globalBoundaryIntegral_eq_boundaryPartitionSum}
+  \plannedlean{Stokes.chartwiseExtDeriv_sum_eq_global_on}
+\end{definition}
+
+\begin{theorem}[M7 selected mixed global assembly]
+  \label{anc:m7_selected_mixed_global_assembly}
+  \lean{Stokes.SelectedMixedGlobalInput,
+    Stokes.SelectedMixedGlobalInput.toMixedGlobalStokesData,
+    Stokes.SelectedMixedGlobalInput.toGlobalStokesData,
+    Stokes.SelectedMixedGlobalInput.stokes,
+    Stokes.selectedMixedGlobalStokes, Stokes.globalStokes}
+  \leanok
+  \uses{anc:m6_4_active_compact_support_to_boxes,
+    anc:m6_4_partition_localization_support_control,
+    anc:m6_4_interior_pieces_artificial_faces,
+    anc:m6_4_boundary_pieces_chart_change_fields,
+    anc:m6_5_global_integral_extderiv_reconstruction}
+  \emph{Lean module:} \texttt{Stokes.Global.MixedSelectedConstructor}.
+
+  \emph{Constructor status:}
+  \texttt{SelectedMixedGlobalInput} is the M7 parent-agent target.  Once its
+  fields are supplied, \texttt{selectedMixedGlobalStokes} gives the final
+  equality recorded by the reconstruction package.  The fields
+  \texttt{selectedPartition\_active},
+  \texttt{artificialCancellation\_active},
+  \texttt{artificialCancellation\_pieces},
+  \texttt{artificialCancellation\_term},
+  \texttt{chartChange\_active}, \texttt{chartChange\_pieces},
+  \texttt{chartChange\_oldTerm}, and \texttt{chartChange\_newTerm} are
+  alignment fields; they should be solved by choosing common indices and common
+  term functions, not by new analysis.
+
+  \emph{Explicit field mathematics:}
+  the only remaining non-bookkeeping inputs are the selected partition, the
+  reconstruction package, the interior local package, the boundary local
+  package, artificial-boundary cancellation, and chart-change cancellation.
+  These are exactly the outputs of the M6.4 and M6.5 entries above.
+
+  \emph{M7 theorem anchors:}
+  the compact-support theorem should instantiate
+  \texttt{SelectedMixedGlobalInput} from a compact support set, a selected
+  partition of unity, local boxes, reconstruction data, and cancellation data.
+  The compact-manifold theorem should reduce to compact support.  A later
+  mathlib-facing theorem should compare the project-local integral API to any
+  canonical manifold-form integral exposed upstream.  Proposed Lean names:
+  \plannedlean{Stokes.globalStokes_compactSupport_from_input}
+  \plannedlean{Stokes.globalStokes_compactSupport}
+  \plannedlean{Stokes.globalStokes_compactManifold}
+\end{theorem}
+
+\begin{theorem}[Parallel theorem queue for M6.4--M7]
+  \label{anc:m6_4_m7_parallel_theorem_queue}
+  \uses{anc:m6_4_completed_constructor_layer,
+    anc:m6_4_active_compact_support_to_boxes,
+    anc:m6_4_partition_localization_support_control,
+    anc:m6_4_interior_pieces_artificial_faces,
+    anc:m6_4_boundary_pieces_chart_change_fields,
+    anc:m6_5_global_integral_extderiv_reconstruction,
+    anc:m7_selected_mixed_global_assembly}
+  The next parallel pass should avoid record redesign.  The natural independent
+  work units are:
+  \begin{enumerate}
+    \item compact support to active selected boxes;
+    \item selected partition coefficient support and sum-one reconstruction;
+    \item localized smoothness and support-local exterior derivative
+      reconstruction;
+    \item localized interior local Stokes packages;
+    \item artificial-face geometry and cancellation;
+    \item boundary selected-box image data and oriented chart change;
+    \item global bulk reconstruction;
+    \item global boundary reconstruction;
+    \item final \texttt{SelectedMixedGlobalInput} assembly.
+  \end{enumerate}
+  Items 1--3 can run in parallel with the boundary chart-change work, provided
+  all workers agree on the active chart labels and coefficient family.  Items
+  4 and 5 can run as soon as support and smoothness packages exist.  Items 7
+  and 8 should consume the same local term functions used by items 4--6, so the
+  final M7 assembly is mostly field alignment.
+\end{theorem}
+
+\endgroup

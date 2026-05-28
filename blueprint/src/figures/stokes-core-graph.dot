@@ -1,0 +1,183 @@
+digraph StokesCore {
+  graph [
+    rankdir=TB,
+    splines=true,
+    overlap=false,
+    bgcolor="transparent",
+    pad=0.25,
+    nodesep=0.32,
+    ranksep=0.45,
+    fontname="Arial"
+  ];
+
+  node [
+    style="filled",
+    fontname="Arial",
+    fontsize=9,
+    margin="0.08,0.04",
+    color="#007f36",
+    penwidth=1.25
+  ];
+
+  edge [
+    color="#333333",
+    arrowsize=0.65,
+    fontname="Arial",
+    fontsize=8
+  ];
+
+  mathlib_forms [
+    label="mathlib forms\nextDeriv / ContDiff",
+    shape=ellipse,
+    fillcolor="#5F8D4E",
+    fontcolor="white"
+  ];
+  mathlib_manifold [
+    label="mathlib manifold\nchart API",
+    shape=ellipse,
+    fillcolor="#5F8D4E",
+    fontcolor="white"
+  ];
+  euclidean_box_source [
+    label="Euclidean box\nStokes source",
+    shape=ellipse,
+    fillcolor="#5F8D4E",
+    fontcolor="white"
+  ];
+
+  model_forms [
+    label="ModelForm\nManifoldForm",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  box_interface [
+    label="CoordNForm\nbox/bdry integrals",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  box_on_box [
+    label="box_stokes_on_box",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  box_extderiv [
+    label="box_stokes_extDeriv_smooth",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+
+  singular_cube_api [
+    label="SmoothSingularCube\nSingularChain",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  singular_pullback [
+    label="pullbackForm\nintegrateForm",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  singular_pullback_ext [
+    label="singular_pullback_extDeriv",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  singular_cube [
+    label="singular_cube_stokes",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  singular_chain [
+    label="singular_chain_stokes\nboundary^2=0",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+
+  chart_derivs [
+    label="chartDeriv\nchartTransitionDeriv",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  chart_transition [
+    label="chartTransition\nchartTransitionSource",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  chart_source_inj [
+    label="source / target /\ninjOn lemmas",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  chart_transition_smooth [
+    label="contDiffOn\nchartTransition",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  chart_deriv_eq [
+    label="chartTransitionDeriv\n= fderivWithin",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  chart_deriv_smooth [
+    label="contDiffOn\nchartTransitionDeriv",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  inchart_api [
+    label="inChart\ntransitionPullbackInChart",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  inchart_transition [
+    label="inChart_chartTransition",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  transition_smooth_iff [
+    label="transitionPullback\nsmooth iff",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  chartwise [
+    label="ChartwiseSmooth",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  chartwise_transport [
+    label="ChartwiseSmooth\ntransport",
+    shape=ellipse,
+    fillcolor="#1CAC78",
+    penwidth=1.8
+  ];
+
+  mathlib_forms -> model_forms;
+  euclidean_box_source -> box_interface;
+  model_forms -> box_extderiv;
+  box_interface -> box_on_box;
+  box_on_box -> box_extderiv;
+
+  box_extderiv -> singular_cube;
+  singular_cube_api -> singular_pullback;
+  singular_pullback -> singular_pullback_ext;
+  singular_pullback_ext -> singular_cube;
+  singular_cube -> singular_chain;
+  singular_cube_api -> singular_chain;
+
+  mathlib_manifold -> chart_derivs;
+  model_forms -> chart_derivs;
+  chart_derivs -> chart_transition;
+  chart_transition -> chart_source_inj;
+  chart_source_inj -> chart_transition_smooth;
+  chart_derivs -> chart_deriv_eq;
+  chart_transition_smooth -> chart_deriv_smooth;
+  chart_deriv_eq -> chart_deriv_smooth;
+  chart_derivs -> inchart_api;
+  model_forms -> inchart_api;
+  inchart_api -> inchart_transition;
+  chart_deriv_eq -> inchart_transition;
+  inchart_transition -> transition_smooth_iff;
+  inchart_api -> chartwise;
+  transition_smooth_iff -> chartwise_transport;
+  chart_deriv_smooth -> chartwise_transport;
+  chart_transition_smooth -> chartwise_transport;
+  chartwise -> chartwise_transport;
+}

@@ -1,0 +1,217 @@
+digraph StokesBoundaryChart {
+  graph [
+    rankdir=TB,
+    splines=true,
+    overlap=false,
+    bgcolor="transparent",
+    pad=0.25,
+    nodesep=0.30,
+    ranksep=0.40,
+    fontname="Arial"
+  ];
+
+  node [
+    style="filled",
+    fontname="Arial",
+    fontsize=8.6,
+    margin="0.07,0.035",
+    color="#007f36",
+    penwidth=1.2
+  ];
+
+  edge [
+    color="#333333",
+    arrowsize=0.62,
+    fontname="Arial",
+    fontsize=8
+  ];
+
+  chart_api [
+    label="chart transition /\nderivative API",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  halfspace_local [
+    label="localHalfSpaceStokes\ncompactSupport",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  chartwise_transport [
+    label="ChartwiseSmooth\ntransport",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  halfspace_boundary [
+    label="boundary tangent\nand sign API",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+
+  bdy_transition [
+    label="boundaryChartTransition\nTangentMap",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  bdy_deriv [
+    label="boundary transition\nFrechet derivative",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  bdy_jacobian [
+    label="tangent matrix\nJacobian",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  tangent_preservation [
+    label="boundary/tangent\npreservation",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  pointwise_det [
+    label="pointwise pullback\nJacobian formula",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+
+  bdy_domain [
+    label="boundaryChartDomain\nsource / overlap",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  selected_box [
+    label="boundaryChart\nSelectedBox",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  extended_box [
+    label="boundaryChart\nExtendedBox",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+
+  orientation_struct [
+    label="BoundaryChart\nOrientedAtlas/Manifold",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  orientation_selected [
+    label="orientationCompatibleOn\nfrom atlas/manifold",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  local_image_nhds [
+    label="IFT image is\nneighborhood",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  inverse_image_selection [
+    label="InverseImage\nBoxSelection",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  local_inverse_data [
+    label="boundaryChart\nLocalInverseData",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  exists_local_inverse [
+    label="selected box ->\ntarget inverse data",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  image_data [
+    label="SelectedBox\nImageData",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  image_eq [
+    label="source face image\n= target box",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+
+  cov_integrand [
+    label="boundary COV\nintegrands",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  cov_mathlib [
+    label="mathlib COV ->\nJacobian integral",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  oriented_cov [
+    label="oriented boundary\nchange of variables",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  boundary_invariance [
+    label="outward-first boundary\nchart invariance",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+
+  transition_integrals [
+    label="transition-pullback\nhalf-space integrals",
+    shape=box,
+    fillcolor="#B0ECA3"
+  ];
+  transition_local [
+    label="transition-pullback\nlocal half-space Stokes",
+    shape=ellipse,
+    fillcolor="#1CAC78"
+  ];
+  boundary_chart_stokes [
+    label="boundary chart\nlocal Stokes",
+    shape=ellipse,
+    fillcolor="#1CAC78",
+    penwidth=1.8
+  ];
+
+  chart_api -> bdy_transition;
+  halfspace_boundary -> bdy_transition;
+  bdy_transition -> bdy_deriv;
+  chart_api -> bdy_deriv;
+  bdy_transition -> bdy_jacobian;
+  bdy_deriv -> tangent_preservation;
+  bdy_jacobian -> pointwise_det;
+  tangent_preservation -> pointwise_det;
+  halfspace_boundary -> pointwise_det;
+
+  bdy_transition -> bdy_domain;
+  bdy_domain -> selected_box;
+  selected_box -> extended_box;
+  chartwise_transport -> extended_box;
+
+  bdy_jacobian -> orientation_struct;
+  halfspace_boundary -> orientation_struct;
+  orientation_struct -> orientation_selected;
+  selected_box -> orientation_selected;
+  bdy_deriv -> local_image_nhds;
+  orientation_selected -> local_image_nhds;
+  local_image_nhds -> inverse_image_selection;
+  inverse_image_selection -> local_inverse_data;
+  selected_box -> exists_local_inverse;
+  orientation_selected -> exists_local_inverse;
+  local_inverse_data -> exists_local_inverse;
+  local_inverse_data -> image_data;
+  selected_box -> image_data;
+  image_data -> image_eq;
+  orientation_selected -> image_eq;
+
+  pointwise_det -> cov_integrand;
+  image_eq -> cov_mathlib;
+  cov_integrand -> cov_mathlib;
+  orientation_selected -> oriented_cov;
+  cov_mathlib -> oriented_cov;
+  local_inverse_data -> oriented_cov;
+  oriented_cov -> boundary_invariance;
+
+  halfspace_local -> transition_integrals;
+  transition_integrals -> transition_local;
+  chartwise_transport -> transition_local;
+  extended_box -> transition_local;
+  transition_local -> boundary_chart_stokes;
+  boundary_invariance -> boundary_chart_stokes;
+  oriented_cov -> boundary_chart_stokes;
+}

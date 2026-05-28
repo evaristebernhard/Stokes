@@ -1,0 +1,241 @@
+digraph StokesM8ProofWave {
+  graph [
+    rankdir=LR,
+    splines=true,
+    overlap=false,
+    bgcolor="transparent",
+    pad=0.22,
+    nodesep=0.38,
+    ranksep=0.7,
+    fontname="Arial"
+  ];
+
+  node [
+    style="filled",
+    fontname="Arial",
+    fontsize=9.2,
+    margin="0.08,0.05",
+    color="#2F6EA5",
+    penwidth=1.2,
+    fillcolor="#A3D6FF"
+  ];
+
+  edge [
+    color="#333333",
+    arrowsize=0.65,
+    fontname="Arial",
+    fontsize=8.2
+  ];
+
+  subgraph cluster_inputs {
+    label="Common selected data";
+    color="#DDDDDD";
+    style="rounded";
+
+    selected_partition [
+      label="selected partition\nand localized forms",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    selected_boxes [
+      label="selected interior /\nboundary chart boxes",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    local_terms [
+      label="project-local bulk\nand boundary terms",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    target_images [
+      label="target image and\nlocal inverse data",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    oriented_atlas [
+      label="oriented atlas /\ninduced boundary data",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+  }
+
+  subgraph cluster_bulk {
+    label="Bulk true proofs";
+    color="#DDDDDD";
+    style="rounded";
+
+    bulk_ae_true [
+      label="TRUE: bulk AE\nfor selected measures",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    measure_box_true [
+      label="TRUE: MeasureBoxAPI\nmeasure term =\nproject-local box term",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    bulk_constructors [
+      label="existing constructors:\nindicator + integrability +\nCompactSupportBulkMeasure",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    bulk_output [
+      label="bulk side of\nM8MeasureLocalizationData",
+      shape=ellipse,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+  }
+
+  subgraph cluster_boundary {
+    label="Boundary true proofs";
+    color="#DDDDDD";
+    style="rounded";
+
+    boundary_measure_true [
+      label="TRUE: boundary measure\na.e. piece sum and\npiece integral equality",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    boundary_constructors [
+      label="existing constructors:\nBoundaryCompactMeasure +\nBoundaryMeasureToM8",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    boundary_output [
+      label="boundary side of\nM8MeasureLocalizationData",
+      shape=ellipse,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+  }
+
+  subgraph cluster_faces {
+    label="Artificial-face true proofs";
+    color="#DDDDDD";
+    style="rounded";
+
+    artificial_support_zero [
+      label="TRUE option A:\nsupport-zero theorem",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    artificial_adjacency [
+      label="TRUE option B:\nadjacency/pairing theorem",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    artificial_constructors [
+      label="existing constructors:\nArtificialFaceSupportZeroToM8 /\nArtificialFacePairingToM8",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    artificial_output [
+      label="M8 artificial-face\nfields",
+      shape=ellipse,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+  }
+
+  subgraph cluster_orientation {
+    label="Boundary orientation true proof";
+    color="#DDDDDD";
+    style="rounded";
+
+    orientation_bridge_true [
+      label="TRUE: mathlib orientation\n-> outward-first\nboundary sign",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    orientation_skeleton [
+      label="existing skeleton:\nOrientationMathlibBridge",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    orientation_output [
+      label="boundary chart COV\nhas correct sign",
+      shape=ellipse,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+  }
+
+  subgraph cluster_assembly {
+    label="M8 assembly";
+    color="#DDDDDD";
+    style="rounded";
+
+    m8_builder [
+      label="M8InputBuilder /\nNaturalCompactSupportStokesInput",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    natural_m8 [
+      label="natural compact-support\nM8 input",
+      shape=ellipse,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    compact_stokes [
+      label="compact-support\nmanifold Stokes",
+      shape=ellipse,
+      penwidth=1.7,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+  }
+
+  selected_partition -> bulk_ae_true;
+  selected_boxes -> bulk_ae_true;
+  bulk_ae_true -> bulk_constructors;
+  local_terms -> measure_box_true;
+  selected_boxes -> measure_box_true;
+  measure_box_true -> bulk_constructors;
+  bulk_constructors -> bulk_output;
+
+  selected_boxes -> boundary_measure_true;
+  target_images -> boundary_measure_true;
+  local_terms -> boundary_measure_true;
+  boundary_measure_true -> boundary_constructors;
+  boundary_constructors -> boundary_output;
+
+  selected_partition -> artificial_support_zero;
+  selected_boxes -> artificial_support_zero;
+  local_terms -> artificial_support_zero;
+  artificial_support_zero -> artificial_constructors;
+  selected_boxes -> artificial_adjacency;
+  local_terms -> artificial_adjacency;
+  artificial_adjacency -> artificial_constructors;
+  artificial_constructors -> artificial_output;
+
+  oriented_atlas -> orientation_bridge_true;
+  target_images -> orientation_bridge_true;
+  orientation_bridge_true -> orientation_skeleton;
+  orientation_skeleton -> orientation_output;
+
+  bulk_output -> m8_builder;
+  boundary_output -> m8_builder;
+  artificial_output -> m8_builder;
+  orientation_output -> m8_builder;
+  selected_partition -> m8_builder;
+  target_images -> m8_builder;
+  m8_builder -> natural_m8;
+  natural_m8 -> compact_stokes;
+}

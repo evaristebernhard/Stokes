@@ -1,0 +1,576 @@
+\section{M7 Proof Obligation Graph}
+\label{sec:m7_proof_obligation_graph}
+\begingroup
+\sloppy
+\emergencystretch=3em
+
+This fragment turns the M7 parent target into a fine-grained proof-obligation
+graph.  Each node is intended to be small enough for an independent Lean task:
+it names the output package or theorem, records the immediate dependencies, and
+lists the fields that block the node.  The final assembly should not introduce a
+new global constructor; it should fill \texttt{SelectedMixedGlobalInput} from
+the existing M6.4 and M6.5 packages.
+
+\begin{definition}[M7 shared index spine]
+  \label{obl:m7_shared_index_spine}
+  \uses{anc:m6_4_completed_constructor_layer,
+    anc:m7_selected_mixed_global_assembly}
+  \plannedlean{Stokes.M7SharedIndexSpine}
+  This node fixes the common finite active index set, selected partition
+  coefficient family, source chart family, and source selected boxes used by all
+  later M7 packages.
+
+  \emph{Dependency chain:}
+  compact support and partition choices feed the active finset; the active
+  finset feeds interior pieces, boundary pieces, artificial-face terms, and
+  reconstruction sums.
+
+  \emph{Parallel queue:}
+  after this node, the support/smoothness queue, artificial-face queue,
+  boundary chart-change queue, and integral-reconstruction queue can start.
+
+  \emph{Blocking fields:}
+  exact equality of active finsets across packages; exact equality of the
+  coefficient family; common term functions for project-local interior terms,
+  artificial-boundary terms, and boundary partition terms.
+\end{definition}
+
+\begin{definition}[M7 selected partition witness]
+  \label{obl:m7_selected_partition_witness}
+  \uses{obl:m7_shared_index_spine,
+    anc:m6_4_partition_localization_support_control,
+    def:partition_subordinate_selected_boxes}
+  \plannedlean{Stokes.m7SelectedPartitionWitness}
+  This node instantiates the selected partition of unity for the active compact
+  support and exposes the coefficient family consumed by localized forms.
+
+  \emph{Dependency chain:}
+  \texttt{SelectedBoxPartitionOfUnity} gives coefficient support, finite
+  activity, and sum-one fields; those become the inputs for localized support
+  and localized reconstruction.
+
+  \emph{Parallel queue:}
+  coefficient support and sum-one reconstruction can be proved independently
+  once the same active finset and coefficient function have been fixed.
+
+  \emph{Blocking fields:}
+  support containment of each coefficient in the selected box; finite active
+  membership lemmas; pointwise sum-one on the compact control set.
+\end{definition}
+
+\begin{definition}[M7 compact support to active boxes]
+  \label{obl:m7_compact_support_active_boxes}
+  \uses{obl:m7_selected_partition_witness,
+    anc:m6_4_active_compact_support_to_boxes,
+    thm:finite_selected_box_cover_exists}
+  \plannedlean{Stokes.m7ActiveCompactBoxes}
+  This node builds the active selected and extended box data used by interior
+  localized pieces.
+
+  \emph{Dependency chain:}
+  compact coordinate images produce selected boxes; selected boxes plus
+  localized smoothness neighborhoods produce extended boxes.
+
+  \emph{Parallel queue:}
+  target-domain shrinkage, overlap shrinkage, compact coordinate support, and
+  smooth-neighborhood construction can be split across workers.
+
+  \emph{Blocking fields:}
+  \texttt{tsupport\_subset\_coordSupport}; compactness of coordinate supports;
+  lower and upper corners with \(a_i \le b_i\); target and overlap inclusions;
+  one open \texttt{ContDiffOn} neighborhood for every active index.
+\end{definition}
+
+\begin{lemma}[M7 localized support controls]
+  \label{obl:m7_localized_support_controls}
+  \uses{obl:m7_selected_partition_witness,
+    obl:m7_compact_support_active_boxes,
+    anc:m6_4_partition_localization_support_control}
+  \plannedlean{Stokes.m7LocalizedSupportControls}
+  This node proves that every partition-localized chart representative is
+  supported in its selected active box.
+
+  \emph{Dependency chain:}
+  coefficient support and original-form support combine to bound the support of
+  \(\rho_i\omega\); the bound is converted into
+  \texttt{LocalizedSupportControl}.
+
+  \emph{Parallel queue:}
+  support of scalar multiplication and support transfer through chart
+  representatives can be developed independently.
+
+  \emph{Blocking fields:}
+  equality between the chosen coefficient and the selected partition
+  coefficient; topological-support or \texttt{tsupport} containment for scalar
+  multiplication; chart representative support transfer.
+\end{lemma}
+
+\begin{lemma}[M7 localized smoothness witnesses]
+  \label{obl:m7_localized_smoothness_witnesses}
+  \uses{obl:m7_localized_support_controls,
+    anc:m6_4_partition_localization_support_control,
+    thm:chartwise_smooth_transport}
+  \plannedlean{Stokes.m7LocalizedSmoothnessWitnesses}
+  This node supplies the smooth-neighborhood witness needed to upgrade selected
+  localized boxes to extended boxes.
+
+  \emph{Dependency chain:}
+  scalar smoothness of \(\rho_i\), chartwise smoothness of \(\omega\), and the
+  product rule for localized forms feed \texttt{LocalizedSmoothnessData}.
+
+  \emph{Parallel queue:}
+  scalar partition smoothness, chartwise transport, and localized product
+  smoothness can be proved as separate lemmas.
+
+  \emph{Blocking fields:}
+  open source neighborhood; containment of the selected box in that
+  neighborhood; \texttt{ContDiffOn} for the localized chart representative.
+\end{lemma}
+
+\begin{lemma}[M7 localized exterior derivative on support]
+  \label{obl:m7_extderiv_on_support}
+  \uses{obl:m7_selected_partition_witness,
+    obl:m7_localized_smoothness_witnesses,
+    anc:m6_5_global_integral_extderiv_reconstruction,
+    lem:extderiv_finite_sum}
+  \plannedlean{Stokes.m7ChartwiseExtDerivOnSupport}
+  This node proves the support-local equality between the chart representative
+  of the exterior derivative of the localized finite sum and the chart
+  representative of the exterior derivative of the original form.
+
+  \emph{Dependency chain:}
+  finite sum reconstruction gives equality of forms on the control support;
+  \texttt{extDeriv} finite-sum and chartwise transport convert it into the
+  field required by \texttt{ExtDerivOnSupportData}.
+
+  \emph{Parallel queue:}
+  this can run in parallel with artificial-face and boundary chart-change work
+  once the selected partition witness is fixed.
+
+  \emph{Blocking fields:}
+  exact support set for the global bulk reconstruction; finite-sum
+  \texttt{extDeriv} equality; restriction of the equality to the integration
+  support.
+\end{lemma}
+
+\begin{definition}[M7 localized interior piece family]
+  \label{obl:m7_localized_interior_piece_family}
+  \uses{obl:m7_localized_support_controls,
+    obl:m7_localized_smoothness_witnesses,
+    anc:m6_4_interior_pieces_artificial_faces,
+    thm:interior_chart_local_stokes}
+  \plannedlean{Stokes.m7LocalizedInteriorPieces}
+  This node constructs the finite family of localized interior pieces and the
+  local project-Stokes equality for each piece.
+
+  \emph{Dependency chain:}
+  support control gives selected boxes; smoothness witnesses give extended
+  boxes; extended boxes feed \texttt{InteriorLocalStokesData}; the finite family
+  feeds the artificial-face queue.
+
+  \emph{Parallel queue:}
+  individual active indices can be proved independently, then bundled into
+  \texttt{LocalizedInteriorPieces}.
+
+  \emph{Blocking fields:}
+  selected box accessors; extended box accessors; local integral term equality;
+  alignment between the per-piece local term and the global project-local term.
+\end{definition}
+
+\begin{definition}[M7 artificial face labels]
+  \label{obl:m7_artificial_face_labels}
+  \uses{obl:m7_localized_interior_piece_family,
+    anc:m6_4_interior_pieces_artificial_faces}
+  \plannedlean{Stokes.m7ArtificialFaceLabels}
+  This node defines the flattened artificial-face index type and the signed face
+  term attached to each interior localized box.
+
+  \emph{Dependency chain:}
+  localized interior boxes determine ordinary cubical faces; boundary faces
+  that lie on the real manifold boundary are excluded from this artificial
+  queue; the remaining faces become cancellation terms.
+
+  \emph{Parallel queue:}
+  face indexing and unsigned face-integral comparison can proceed independently
+  of the pairing proof.
+
+  \emph{Blocking fields:}
+  face-domain containment; proof that the face is artificial; sign convention
+  for lower and upper faces; equality with the boundary term emitted by the
+  local Stokes package.
+\end{definition}
+
+\begin{lemma}[M7 artificial face pairing]
+  \label{obl:m7_artificial_face_pairing}
+  \uses{obl:m7_artificial_face_labels,
+    anc:m6_4_interior_pieces_artificial_faces}
+  \plannedlean{Stokes.m7ArtificialFacePairing}
+  This node proves that artificial faces pair by opposite orientation and equal
+  unsigned integral.
+
+  \emph{Dependency chain:}
+  face labels produce a pairing candidate; geometric equality of paired faces
+  gives equality of unsigned terms; cubical orientation gives opposite signs.
+
+  \emph{Parallel queue:}
+  fixed-point-freeness, geometric face equality, unsigned term equality, and
+  sign opposition can be separate lemmas.
+
+  \emph{Blocking fields:}
+  active-finset preservation; involutivity; no fixed points or explicit
+  fixed-point-zero proof; paired-domain equality; paired integrand equality;
+  opposite signed face coefficients.
+\end{lemma}
+
+\begin{theorem}[M7 artificial boundary cancellation]
+  \label{obl:m7_artificial_boundary_cancellation}
+  \uses{obl:m7_artificial_face_labels,
+    obl:m7_artificial_face_pairing,
+    anc:m6_4_interior_pieces_artificial_faces}
+  \plannedlean{Stokes.m7ArtificialBoundaryCancellation}
+  This node produces the cancellation field consumed by the mixed global
+  constructor.
+
+  \emph{Dependency chain:}
+  the local artificial-boundary term is rewritten as the signed face sum; the
+  pairing theorem cancels that sum; the result is the
+  \texttt{interiorBoundaryCancellation} field.
+
+  \emph{Parallel queue:}
+  this waits only for labels, local-term identification, and pairing; it does
+  not need global bulk or boundary reconstruction.
+
+  \emph{Blocking fields:}
+  \texttt{artificialCancellation\_active};
+  \texttt{artificialCancellation\_pieces};
+  \texttt{artificialCancellation\_term}; equality between the local Stokes
+  boundary term and the chosen artificial-face sum.
+\end{theorem}
+
+\begin{definition}[M7 boundary source piece family]
+  \label{obl:m7_boundary_source_piece_family}
+  \uses{obl:m7_shared_index_spine,
+    anc:m6_4_boundary_pieces_chart_change_fields,
+    thm:boundary_chart_local_stokes}
+  \plannedlean{Stokes.m7BoundarySourcePieces}
+  This node constructs source-side boundary local pieces from selected
+  boundary chart boxes.
+
+  \emph{Dependency chain:}
+  active boundary indices select source boundary boxes; selected image data
+  invokes boundary chart local Stokes; the resulting source terms feed
+  chart-change cancellation.
+
+  \emph{Parallel queue:}
+  source image data can be proved independently for each boundary active
+  index.
+
+  \emph{Blocking fields:}
+  boundary-active index set; source lower and upper corners; lower-face image
+  data; outward-first orientation convention; equality with the source
+  boundary partition term.
+\end{definition}
+
+\begin{definition}[M7 boundary target image boxes]
+  \label{obl:m7_boundary_target_image_boxes}
+  \uses{obl:m7_boundary_source_piece_family,
+    anc:m6_4_boundary_pieces_chart_change_fields,
+    thm:exists_boundary_local_inverse_data}
+  \plannedlean{Stokes.m7BoundaryTargetImageBoxes}
+  This node chooses target boundary boxes and local inverse data for the
+  source-to-target chart-change comparison.
+
+  \emph{Dependency chain:}
+  source boundary boxes and chart overlap data determine target boxes; local
+  inverse data identifies the source lower face with the target boundary box.
+
+  \emph{Parallel queue:}
+  target box selection, local inverse construction, and target support
+  containment can be split by boundary active index.
+
+  \emph{Blocking fields:}
+  target chart choices; target lower and upper corners; target selected or
+  extended boxes; source-to-target image equality; support containment after
+  chart change.
+\end{definition}
+
+\begin{lemma}[M7 oriented boundary chart change pieces]
+  \label{obl:m7_oriented_boundary_chart_change}
+  \uses{obl:m7_boundary_source_piece_family,
+    obl:m7_boundary_target_image_boxes,
+    anc:m6_4_boundary_pieces_chart_change_fields,
+    thm:boundary_chart_integral_invariance}
+  \plannedlean{Stokes.m7OrientedBoundaryChartChangePieces}
+  This node proves the oriented change-of-variables equality for every active
+  boundary piece.
+
+  \emph{Dependency chain:}
+  local inverse data supplies the map; boundary chart integral invariance
+  supplies the integral equality; orientation comparison supplies the sign.
+
+  \emph{Parallel queue:}
+  each boundary active index is independent once source and target boxes are
+  fixed.
+
+  \emph{Blocking fields:}
+  derivative orientation sign; Jacobian or orientation-map compatibility;
+  target-domain containment; pointwise equality of pulled-back boundary
+  representatives.
+\end{lemma}
+
+\begin{theorem}[M7 boundary chart-change cancellation]
+  \label{obl:m7_boundary_chart_change_cancellation}
+  \uses{obl:m7_oriented_boundary_chart_change,
+    anc:m6_4_boundary_pieces_chart_change_fields}
+  \plannedlean{Stokes.m7BoundaryChartChangeCancellation}
+  This node produces the finite chart-change cancellation package used by the
+  mixed global constructor.
+
+  \emph{Dependency chain:}
+  oriented per-piece chart-change equalities are summed over the active
+  boundary finset; the source sum is identified with the old boundary term;
+  the target sum is identified with the new boundary partition term.
+
+  \emph{Parallel queue:}
+  old-term and new-term identifications can be assigned separately after the
+  per-piece chart-change lemmas exist.
+
+  \emph{Blocking fields:}
+  \texttt{chartChange\_active}; \texttt{chartChange\_pieces};
+  \texttt{chartChange\_oldTerm}; \texttt{chartChange\_newTerm};
+  \texttt{boundaryPartitionTerm\_eq}.
+\end{theorem}
+
+\begin{theorem}[M7 global bulk reconstruction]
+  \label{obl:m7_global_bulk_reconstruction}
+  \uses{obl:m7_selected_partition_witness,
+    obl:m7_localized_interior_piece_family,
+    anc:m6_5_global_integral_extderiv_reconstruction,
+    thm:global_bulk_eq_local_sum}
+  \plannedlean{Stokes.m7GlobalBulkReconstruction}
+  This node proves that the represented global bulk integral equals the selected
+  sum of local project-bulk terms.
+
+  \emph{Dependency chain:}
+  finite additivity over localized forms and partition-sum reconstruction
+  reduce the global bulk side to the active local terms.
+
+  \emph{Parallel queue:}
+  this can run in parallel with boundary reconstruction after the shared
+  coefficient family and local term functions are fixed.
+
+  \emph{Blocking fields:}
+  definition or comparison theorem for the represented global bulk integral;
+  finite additivity over the active finset; equality between local bulk terms
+  and project-local bulk terms; compatibility with the support-local
+  \texttt{extDeriv} field.
+\end{theorem}
+
+\begin{theorem}[M7 global boundary reconstruction]
+  \label{obl:m7_global_boundary_reconstruction}
+  \uses{obl:m7_boundary_chart_change_cancellation,
+    anc:m6_5_global_integral_extderiv_reconstruction,
+    thm:global_boundary_eq_local_sum}
+  \plannedlean{Stokes.m7GlobalBoundaryReconstruction}
+  This node proves that the represented global boundary integral equals the
+  selected boundary partition sum after chart-change normalization.
+
+  \emph{Dependency chain:}
+  boundary local pieces give source boundary terms; chart-change cancellation
+  rewrites them to target partition terms; finite additivity identifies the
+  resulting sum with the chosen global boundary integral.
+
+  \emph{Parallel queue:}
+  finite additivity and target-term comparison can proceed separately once the
+  target boundary partition term function is fixed.
+
+  \emph{Blocking fields:}
+  definition or comparison theorem for the represented global boundary
+  integral; finite additivity over boundary active terms; equality between
+  target chart-change terms and the global boundary partition term.
+\end{theorem}
+
+\begin{definition}[M7 reconstruction data fusion]
+  \label{obl:m7_reconstruction_data_fusion}
+  \uses{obl:m7_extderiv_on_support,
+    obl:m7_global_bulk_reconstruction,
+    obl:m7_global_boundary_reconstruction,
+    anc:m6_5_global_integral_extderiv_reconstruction}
+  \plannedlean{Stokes.m7PartitionReconstructionData}
+  This node fuses bulk reconstruction, boundary reconstruction, and
+  support-local exterior-derivative reconstruction into the reconstruction
+  package expected by \texttt{SelectedMixedGlobalInput}.
+
+  \emph{Dependency chain:}
+  bulk reconstruction supplies the left side; boundary reconstruction supplies
+  the right side; support-local exterior derivative aligns the form being
+  integrated; the wrapper constructors produce \texttt{PartitionReconstructionData}
+  or \texttt{BulkIntegralReconstructionData} with boundary fields.
+
+  \emph{Parallel queue:}
+  this is a synchronization node, not an analysis node.
+
+  \emph{Blocking fields:}
+  identical active finset and coefficient family in all three reconstruction
+  inputs; identical local bulk term function; identical boundary partition term
+  function; exact equality of represented global integral names.
+\end{definition}
+
+\begin{theorem}[M7 selected mixed input fields]
+  \label{obl:m7_selected_mixed_input_fields}
+  \uses{obl:m7_shared_index_spine,
+    obl:m7_reconstruction_data_fusion,
+    obl:m7_localized_interior_piece_family,
+    obl:m7_artificial_boundary_cancellation,
+    obl:m7_boundary_chart_change_cancellation,
+    anc:m7_selected_mixed_global_assembly}
+  \plannedlean{Stokes.m7SelectedMixedGlobalInput}
+  This node fills \texttt{SelectedMixedGlobalInput} from the completed queues.
+
+  \emph{Dependency chain:}
+  shared indices align the selected partition, interior pieces, artificial
+  cancellation, boundary pieces, chart-change cancellation, and reconstruction
+  package; the existing constructor converts the record to
+  \texttt{MixedGlobalStokesData}.
+
+  \emph{Parallel queue:}
+  this is the final M7 assembly gate.
+
+  \emph{Blocking fields:}
+  the eight alignment fields
+  \texttt{selectedPartition\_active},
+  \texttt{artificialCancellation\_active},
+  \texttt{artificialCancellation\_pieces},
+  \texttt{artificialCancellation\_term},
+  \texttt{chartChange\_active},
+  \texttt{chartChange\_pieces},
+  \texttt{chartChange\_oldTerm}, and
+  \texttt{chartChange\_newTerm}; all should be definitional or short rewrite
+  goals if upstream queues chose the same names.
+\end{theorem}
+
+\begin{theorem}[M7 compact-support theorem from selected input]
+  \label{obl:m7_compact_support_from_selected_input}
+  \uses{obl:m7_selected_mixed_input_fields,
+    anc:m7_selected_mixed_global_assembly,
+    thm:global_compact_support_stokes}
+  \plannedlean{Stokes.globalStokes_compactSupport_from_selectedInput}
+  This node states the compact-support theorem as an application of
+  \texttt{selectedMixedGlobalStokes} to the fully populated selected input.
+
+  \emph{Dependency chain:}
+  compact support creates the selected input; the selected input gives the mixed
+  global Stokes equality; the theorem exposes the project-facing compact-support
+  statement.
+
+  \emph{Parallel queue:}
+  no independent work should remain here except theorem-shape adaptation.
+
+  \emph{Blocking fields:}
+  theorem statement must use the same global bulk and boundary integral API as
+  the reconstruction package; compact-support hypotheses must expose the
+  selected partition and compact control set expected by the selected input.
+\end{theorem}
+
+\begin{theorem}[M7 compact manifold specialization]
+  \label{obl:m7_compact_manifold_specialization}
+  \uses{obl:m7_compact_support_from_selected_input,
+    thm:compact_manifold_stokes}
+  \plannedlean{Stokes.globalStokes_compactManifold}
+  This node specializes the compact-support theorem to the standard compact
+  oriented smooth manifold-with-boundary statement.
+
+  \emph{Dependency chain:}
+  compactness of the manifold gives compact support for the form or a
+  compact-support wrapper; the compact-support theorem supplies the final
+  equality.
+
+  \emph{Parallel queue:}
+  this should wait until the compact-support theorem shape is stable.
+
+  \emph{Blocking fields:}
+  compact-support coercion or wrapper; theorem statement matching the chosen
+  manifold integral API; any comparison theorem to a future canonical mathlib
+  manifold-form integral.
+\end{theorem}
+
+\begin{proposition}[M7 critical dependency chain]
+  \label{obl:m7_critical_dependency_chain}
+  \uses{obl:m7_shared_index_spine,
+    obl:m7_selected_partition_witness,
+    obl:m7_compact_support_active_boxes,
+    obl:m7_localized_support_controls,
+    obl:m7_localized_smoothness_witnesses,
+    obl:m7_extderiv_on_support,
+    obl:m7_localized_interior_piece_family,
+    obl:m7_artificial_boundary_cancellation,
+    obl:m7_boundary_chart_change_cancellation,
+    obl:m7_reconstruction_data_fusion,
+    obl:m7_selected_mixed_input_fields,
+    obl:m7_compact_support_from_selected_input}
+  The critical path is:
+  \begin{enumerate}
+    \item shared indices to selected partition;
+    \item selected partition to active boxes;
+    \item active boxes to support and smoothness;
+    \item support and smoothness to interior local pieces;
+    \item interior local pieces to artificial cancellation;
+    \item artificial cancellation to selected mixed input;
+    \item selected mixed input to compact-support Stokes.
+  \end{enumerate}
+  The boundary chart-change queue and the global reconstruction queue attach to
+  this path at the shared-index and local-term synchronization points.  They
+  should not force redesign of the final constructor layer.
+\end{proposition}
+
+\begin{theorem}[M7 parallel worker queue]
+  \label{obl:m7_parallel_worker_queue}
+  \uses{obl:m7_critical_dependency_chain,
+    obl:m7_artificial_face_pairing,
+    obl:m7_oriented_boundary_chart_change,
+    obl:m7_global_bulk_reconstruction,
+    obl:m7_global_boundary_reconstruction}
+  The recommended parallel queue is:
+  \begin{enumerate}
+    \item Index spine and selected partition: fix active labels, coefficients,
+      source charts, and term names.
+    \item Compact geometry: construct active selected boxes, extended boxes,
+      target inclusions, and overlap inclusions.
+    \item Localized analysis: prove support control, localized smoothness, and
+      support-local exterior derivative equality.
+    \item Interior local queue: build localized interior pieces, artificial
+      face labels, pairing, and cancellation.
+    \item Boundary queue: build source boundary pieces, target image boxes,
+      oriented chart-change pieces, and chart-change cancellation.
+    \item Reconstruction queue: prove global bulk reconstruction, global
+      boundary reconstruction, and fusion into the reconstruction data package.
+    \item Final assembly: fill \texttt{SelectedMixedGlobalInput}, call
+      \texttt{selectedMixedGlobalStokes}, and expose the compact-support and
+      compact-manifold theorem shapes.
+  \end{enumerate}
+  Queues 2, 3, 4, 5, and 6 can overlap after Queue 1 fixes names.  Queue 7
+  should be mostly record-field alignment.
+\end{theorem}
+
+\begin{remark}[M7 blocker ledger]
+  \label{obl:m7_blocker_ledger}
+  \uses{obl:m7_parallel_worker_queue}
+  The blockers that should be reported explicitly by future workers are:
+  \begin{enumerate}
+    \item active finset mismatch;
+    \item coefficient family mismatch;
+    \item selected or extended box containment not strong enough;
+    \item unavailable \texttt{ContDiffOn} neighborhood;
+    \item artificial face term not matching the local Stokes boundary term;
+    \item missing fixed-point-free pairing or fixed-point-zero proof;
+    \item boundary target image data missing;
+    \item orientation sign mismatch in boundary chart change;
+    \item global bulk or boundary integral API mismatch;
+    \item support-local \texttt{extDeriv} equality not stated on the integration
+      support.
+  \end{enumerate}
+  A worker blocked by one of these should return the exact field name and the
+  upstream node above that owns it.
+\end{remark}
+
+\endgroup

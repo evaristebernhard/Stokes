@@ -1,0 +1,401 @@
+\section{M6 Constructor Anchor Split}
+\label{sec:m6_constructor_anchor_split}
+\begingroup
+\sloppy
+\emergencystretch=3em
+
+This fragment refines the global-assembly anchors into constructor-level
+handoff tasks from the 20-agent M6 pass.  Each item names the Lean module and
+anchors to use, says which explicit hypotheses it removes from downstream
+packages, and lists the fields that still have to be supplied by geometry,
+partition, or integral-reconstruction workers.
+
+\begin{definition}[Finite active compact boxes]
+  \label{anc:m6_compact_active_boxes}
+  \lean{Stokes.FiniteActiveOnCompact, Stokes.FiniteActiveOnCompact.ofCompact,
+    Stokes.CompactActiveBoxData, Stokes.CompactActiveExtendedBoxData,
+    Stokes.CompactActiveExtendedBoxData.toSelectedBoxPartitionOfUnity,
+    Stokes.exists_activeCompactCoordinateBoxSelections_piReal}
+  \leanok
+  \uses{anc:selected_box_partition_of_unity,
+    def:partition_subordinate_selected_boxes}
+  \emph{Module:} \texttt{Stokes.Global.FiniteActive} and
+  \texttt{Stokes.Global.CompactActiveBoxes}.
+
+  \emph{Explicit hypotheses discharged:}
+  once a compact control set \(K\) and smooth partition \(\rho\) are fixed,
+  \texttt{FiniteActiveOnCompact.ofCompact} supplies the finite active set and
+  the pointwise \texttt{fintsupport} subset facts.  Once
+  \texttt{CompactActiveBoxData} is built, the per-index lower and upper
+  corners, \(a_i \le b_i\), support containment in \(\operatorname{Icc} a_i b_i\),
+  and the selected interior box facts are recovered by accessors.  Once
+  \texttt{CompactActiveExtendedBoxData} is built, the older
+  \texttt{SelectedBoxPartitionOfUnity} fields are obtained without restating
+  them index by index.
+
+  \emph{Fields still required:}
+  the compact coordinate support set for each active index; compactness of
+  those coordinate supports; the equality between the selected
+  \texttt{CompactCoordinateBoxSelection.K} and that support; containment of the
+  chart representative's \texttt{tsupport} in the coordinate support;
+  target-chart and overlap inclusions for every active box; and one open
+  smoothness neighborhood with \texttt{ContDiffOn} for every active index.
+
+  \emph{Handoff task:}
+  geometry workers should construct \texttt{CompactActiveExtendedBoxData};
+  partition workers should consume only
+  \texttt{toSelectedBoxPartitionOfUnity} and avoid reopening the box-selection
+  fields unless a target/overlap inclusion fails.
+\end{definition}
+
+\begin{definition}[Localized support and smoothness controls]
+  \label{anc:m6_localized_support_smoothness}
+  \lean{Stokes.LocalizedSupportControl,
+    Stokes.LocalizedSupportControl.toLocalizedFormData,
+    Stokes.LocalizedSupportControl.interiorChartSelectedBox,
+    Stokes.CoefficientBoxSupportData,
+    Stokes.CoefficientBoxSupportData.toLocalizedSupportControl,
+    Stokes.LocalizedSmoothnessData,
+    Stokes.LocalizedSmoothnessData.interiorChartExtendedBox}
+  \leanok
+  \uses{anc:localized_form_data, def:chart_supported_form,
+    def:interior_chart_extended_box}
+  \emph{Module:} \texttt{Stokes.Global.LocalizedSupport},
+  \texttt{Stokes.Global.CoefficientBoxSupport}, and
+  \texttt{Stokes.Global.LocalizedSmoothness}.
+
+  \emph{Explicit hypotheses discharged:}
+  the raw support calculation for
+  \texttt{transitionPullbackInChart} of \(\rho_i \omega\) is replaced by
+  \texttt{LocalizedSupportControl}; coefficient-box constructors turn compact
+  coordinate-image support data into the exact selected-box support statement;
+  \texttt{LocalizedSmoothnessData} packages the open-neighborhood smoothness
+  witness needed to upgrade from selected to extended boxes.
+
+  \emph{Fields still required:}
+  the concrete source and target charts; lower and upper box corners;
+  target and overlap inclusions; a coefficient support or topological-support
+  bound for \(\rho_i\); smoothness of the localized chart representative, either
+  directly or via chartwise smoothness plus scalar smoothness; and a proof that
+  the coefficient being used is the selected partition coefficient.
+
+  \emph{Handoff task:}
+  use this layer before building localized interior pieces.  It is the right
+  place to solve support and \texttt{ContDiffOn} obligations; downstream
+  global constructors should receive a finished support-control or
+  extended-box package, not the raw analytic lemmas.
+\end{definition}
+
+\begin{definition}[Localized interior pieces]
+  \label{anc:m6_localized_interior_pieces}
+  \lean{Stokes.LocalizedInteriorPiece,
+    Stokes.LocalizedInteriorPiece.localizedFormData,
+    Stokes.LocalizedInteriorPiece.extendedBox,
+    Stokes.LocalizedInteriorPiece.localStokesData,
+    Stokes.LocalizedInteriorPiece.projectLocalEquality,
+    Stokes.LocalizedInteriorPieces,
+    Stokes.LocalizedInteriorPieces.localProjectEquality,
+    Stokes.LocalizedInteriorPieces.sum_projectInterior_eq_artificialBoundary}
+  \leanok
+  \uses{anc:m6_localized_support_smoothness,
+    thm:interior_chart_local_stokes, thm:sum_local_stokes}
+  \emph{Module:} \texttt{Stokes.Global.LocalizedInteriorPieces}.
+
+  \emph{Explicit hypotheses discharged:}
+  for one active index, \texttt{LocalizedInteriorPiece} turns the coefficient
+  \(\rho_i\), support control, and smooth-neighborhood witness into the
+  localized form, selected box, extended box, \texttt{InteriorLocalStokesData},
+  and project-local interior Stokes equality.  For a finite family,
+  \texttt{LocalizedInteriorPieces.localProjectEquality} removes the explicit
+  ``prove local Stokes for each active interior piece'' hypothesis, and
+  \texttt{sum\_projectInterior\_eq\_artificialBoundary} removes the finite-sum
+  local-Stokes algebra.
+
+  \emph{Fields still required:}
+  the active finset; the coefficient family; for each index, source chart,
+  target chart, lower and upper corners, a \texttt{LocalizedSupportControl},
+  and a smooth-neighborhood witness.  This package does not prove that the
+  active finset came from a compact partition, that the finite localized sum
+  reconstructs \(\omega\), or that artificial faces cancel.
+
+  \emph{Handoff task:}
+  interior workers should output \texttt{LocalizedInteriorPieces} plus a map
+  from its artificial boundary term to the chosen face-sum model.  The global
+  worker can then combine it with \texttt{ArtificialFacePairingData}.
+\end{definition}
+
+\begin{definition}[Partition sum-one reconstruction]
+  \label{anc:m6_partition_sum_one}
+  \lean{Stokes.SmoothPartitionOfUnity.sum_finsupport_univ,
+    Stokes.SmoothPartitionOfUnity.sum_eq_one_of_finsupport_subset,
+    Stokes.SmoothPartitionOfUnity.sum_eq_one_of_fintsupport_subset,
+    Stokes.FiniteActiveOnCompact.coeff_sum_eq_one_on,
+    Stokes.FiniteActiveOnCompact.localizedFormSum_apply_eq_self_on,
+    Stokes.FiniteActiveOnCompact.localizedFormSum_eqOn,
+    Stokes.SelectedBoxPartitionOfUnity.coeff_sum_eq_one_on,
+    Stokes.SelectedBoxPartitionOfUnity.localizedFormSum_apply_eq_self_on,
+    Stokes.SelectedBoxPartitionOfUnity.localizedFormSum_eqOn}
+  \leanok
+  \uses{anc:m6_compact_active_boxes, lem:partition_sum_form}
+  \emph{Module:} \texttt{Stokes.Global.PartitionSumOne}.
+
+  \emph{Explicit hypotheses discharged:}
+  the ad hoc hypothesis
+  \[
+    \forall x \in K,\quad \sum_{i \in s} \rho_i(x)=1
+  \]
+  is now obtained from \texttt{FiniteActiveOnCompact} or
+  \texttt{SelectedBoxPartitionOfUnity}.  The pointwise reconstruction of the
+  localized finite form sum on \(K\) is also available directly, so
+  reconstruction workers do not need to manipulate mathlib's
+  \texttt{finsupport} and \texttt{fintsupport} APIs.
+
+  \emph{Fields still required:}
+  the compact set \(K\) must actually contain the support region on which the
+  global integral is reconstructed; the coefficient family in later
+  constructors must be definitionally or propositionally the stored partition;
+  and any theorem needing equality outside \(K\) must either enlarge \(K\) or
+  supply an everywhere coefficient-sum hypothesis separately.
+
+  \emph{Handoff task:}
+  use this anchor to fill the \texttt{lem:partition\_sum\_form} side of the
+  blueprint.  For exterior-derivative reconstruction, pass the resulting
+  coefficient-sum fact to the \texttt{ExtDerivPartitionReconstructionData}
+  constructors only after checking the statement is on the same domain.
+\end{definition}
+
+\begin{definition}[Artificial face pairing]
+  \label{anc:m6_artificial_face_pairing}
+  \lean{Stokes.ArtificialFaceIndex, Stokes.artificialFaceIndexSet,
+    Stokes.artificialFaceTerm, Stokes.interiorBoundaryFace_sum_eq_indexSet_sum,
+    Stokes.interiorBoundaryFace_sum_eq_zero_of_pairing,
+    Stokes.ArtificialFacePairingData,
+    Stokes.ArtificialFacePairingData.toArtificialBoundaryCancellationData,
+    Stokes.ArtificialFacePairingData.toArtificialBoundaryCancellationData_of_boundaryTerm,
+    Stokes.GlobalStokesData.interiorBoundaryCancellation_of_facePairing}
+  \leanok
+  \uses{thm:artificial_faces_vanish, thm:global_compact_support_stokes}
+  \emph{Module:} \texttt{Stokes.Global.ArtificialFacePairing}.
+
+  \emph{Explicit hypotheses discharged:}
+  the single final-field proof
+  \[
+    \sum_x \sum_p \operatorname{interiorBoundaryTerm}(x,p)=0
+  \]
+  can now be supplied by a face-level involution.  The module flattens the
+  chart/piece/face indices, proves that the nested sum equals the flattened
+  sum, and converts the pairing package into
+  \texttt{ArtificialBoundaryCancellationData} or directly into the
+  \texttt{GlobalStokesData.interiorBoundaryCancellation} shape.
+
+  \emph{Fields still required:}
+  active charts; interior pieces per chart; face labels per interior piece; the
+  signed face-term function; a set-preserving pairing on flattened face
+  indices; the involution proof; opposite-term cancellation for paired faces;
+  zero fixed-point terms; and, when an external per-piece artificial boundary
+  term is already chosen, an equality identifying it with the sum of recorded
+  face terms on active pieces.
+
+  \emph{Handoff task:}
+  local-geometry workers should provide the pairing and sign equations.
+  Assembly workers should consume only
+  \texttt{toArtificialBoundaryCancellationData} or
+  \texttt{interiorBoundaryCancellation\_of\_facePairing}; they should not expand
+  the flattened sigma index set unless debugging signs.
+\end{definition}
+
+\begin{definition}[Boundary chart-change pieces]
+  \label{anc:m6_boundary_chart_change_pieces}
+  \lean{Stokes.BoundaryChartChangePieceData,
+    Stokes.BoundaryChartChangeSelectedPieceData,
+    Stokes.BoundaryChartChangeExtendedPieceData,
+    Stokes.BoundaryChartChangeFamilyData,
+    Stokes.BoundaryChartChangeSelectedFamilyData,
+    Stokes.BoundaryChartChangeExtendedFamilyData,
+    Stokes.BoundaryChartChangeFamilyData.toChartChangeCancellationData_selected,
+    Stokes.BoundaryChartChangeFamilyData.toChartChangeCancellationData_extended,
+    Stokes.ProjectLocalGlobalStokesData.chartChangeCancellation_of_boundaryChartChange_selected,
+    Stokes.ProjectLocalGlobalStokesData.chartChangeCancellation_of_boundaryChartChange_extended}
+  \leanok
+  \uses{thm:boundary_chart_integral_invariance,
+    anc:project_local_global_stokes}
+  \emph{Module:} \texttt{Stokes.Global.BoundaryChartChangePieces}.
+
+  \emph{Explicit hypotheses discharged:}
+  the finite-sum field
+  \texttt{ProjectLocalGlobalStokesData.chartChangeCancellation} no longer has
+  to be proved by hand.  A per-piece oriented change-of-variables package plus
+  a target selected or extended boundary box gives pointwise equality from the
+  source project-local boundary term to the chosen boundary-partition term; the
+  family wrapper then sums those equalities in the exact final-field shape.
+
+  \emph{Fields still required:}
+  for every active boundary piece: target boundary chart, target lower and
+  upper corners, \texttt{boundaryChartOrientedChangeOfVariables}, and either a
+  selected or extended target boundary box.  At the family level, one still
+  needs the equality identifying \texttt{D.boundaryPartitionTerm} with the
+  transported target project-local boundary integral, plus the
+  \texttt{IsManifold I 1 M} instance required by the chart-change wrappers.
+
+  \emph{Handoff task:}
+  boundary workers should build a selected-family or extended-family package
+  immediately after constructing image data.  Global workers can then fill
+  \texttt{chartChangeCancellation} by one theorem call.
+\end{definition}
+
+\begin{definition}[Boundary-piece global constructors]
+  \label{anc:m6_boundary_piece_constructors}
+  \lean{Stokes.BoundaryProjectLocalPieces,
+    Stokes.BoundaryProjectLocalPieces.toProjectLocalGlobalStokesData,
+    Stokes.BoundaryProjectLocalPieces.toGlobalStokesData,
+    Stokes.BoundaryProjectLocalPieces.stokes,
+    Stokes.OrientedBoundaryProjectLocalPieces,
+    Stokes.OrientedBoundaryProjectLocalPieces.toGlobalStokesData_of_orientedAtlas,
+    Stokes.OrientedBoundaryProjectLocalPieces.toGlobalStokesData_of_orientedManifold,
+    Stokes.OrientedBoundaryProjectLocalPieces.stokes_of_orientedAtlas,
+    Stokes.OrientedBoundaryProjectLocalPieces.stokes_of_orientedManifold}
+  \leanok
+  \uses{anc:m6_boundary_chart_change_pieces,
+    thm:boundary_chart_local_stokes, anc:project_local_global_stokes}
+  \emph{Module:} \texttt{Stokes.Global.BoundaryPieces}.
+
+  \emph{Explicit hypotheses discharged:}
+  \texttt{BoundaryProjectLocalPieces} derives local project Stokes from stored
+  extended boundary-chart boxes and instantiates
+  \texttt{ProjectLocalGlobalStokesData}.  The oriented variant uses source
+  extended boxes, target selected boxes, and image data to instantiate
+  \texttt{GlobalStokesData} directly with no interior pieces.
+
+  \emph{Fields still required:}
+  active charts and local pieces; source and target chart choices; source box
+  corners; extended source boundary boxes; the global bulk and boundary real
+  numbers; bulk reconstruction; boundary-partition reconstruction; and the
+  chart-change cancellation field.  The oriented variant additionally needs
+  target chart choices, target corners, target selected boxes, image data, and
+  either oriented-atlas chart membership hypotheses or a
+  \texttt{BoundaryChartOrientedManifold} instance.
+
+  \emph{Handoff task:}
+  use this constructor for boundary-only tests and for validating the boundary
+  side of mixed global Stokes before interior artificial-face cancellation is
+  connected.
+\end{definition}
+
+\begin{definition}[Interior and mixed global constructors]
+  \label{anc:m6_interior_mixed_constructors}
+  \lean{Stokes.InteriorProjectLocalPieces,
+    Stokes.InteriorProjectLocalPieces.ofCancellationData,
+    Stokes.InteriorProjectLocalPieces.toGlobalStokesData,
+    Stokes.interiorProjectLocalGlobalStokes,
+    Stokes.MixedInteriorPackage, Stokes.MixedBoundaryPackage,
+    Stokes.MixedGlobalStokesData,
+    Stokes.MixedGlobalStokesData.toGlobalStokesData,
+    Stokes.mixedGlobalStokes}
+  \leanok
+  \uses{anc:m6_localized_interior_pieces,
+    anc:m6_artificial_face_pairing, anc:m6_boundary_piece_constructors,
+    anc:global_stokes_data}
+  \emph{Module:} \texttt{Stokes.Global.InteriorGlobalConstructor} and
+  \texttt{Stokes.Global.MixedGlobalConstructor}.
+
+  \emph{Explicit hypotheses discharged:}
+  the interior-only constructor turns stored \texttt{InteriorLocalStokesData}
+  packages plus artificial-boundary cancellation into a final
+  \texttt{GlobalStokesData} instance with empty genuine boundary pieces.  The
+  mixed constructor separates the final theorem into three handoff outputs:
+  reconstruction data, an interior local-Stokes package, and a boundary
+  local-Stokes package.  Its \texttt{toGlobalStokesData} definition performs
+  only record alignment.
+
+  \emph{Fields still required:}
+  for the interior-only path: active charts, interior pieces, local Stokes data
+  per piece, global bulk reconstruction, artificial-boundary cancellation, and
+  the proof that the represented boundary integral is zero.  For the mixed
+  path: a \texttt{PartitionReconstructionData} package, interior and boundary
+  boundary-term functions, local Stokes packages for both sides, artificial
+  interior-boundary cancellation, and boundary chart-change cancellation.
+
+  \emph{Handoff task:}
+  use the interior-only constructor as a narrow smoke test for
+  \texttt{LocalizedInteriorPieces} plus \texttt{ArtificialFacePairingData}.
+  Use \texttt{MixedGlobalStokesData} as the main parent-agent assembly target.
+\end{definition}
+
+\begin{definition}[Partition and exterior-derivative reconstruction constructors]
+  \label{anc:m6_reconstruction_constructors}
+  \lean{Stokes.localizedFormSum,
+    Stokes.localizedFormSum_apply_eq_self_on,
+    Stokes.PartitionReconstructionData,
+    Stokes.PartitionReconstructionData.toGlobalStokesData,
+    Stokes.extDeriv_finset_sum,
+    Stokes.extDerivWithin_finset_sum,
+    Stokes.extDeriv_transitionPullbackInChart_localizedFormSum,
+    Stokes.ExtDerivPartitionReconstructionData,
+    Stokes.ExtDerivPartitionReconstructionData.ofPartitionReconstructionData,
+    Stokes.ExtDerivPartitionReconstructionData.ofPartitionReconstructionData_of_coeff_sum_eq_one,
+    Stokes.ExtDerivPartitionReconstructionData.toGlobalStokesData}
+  \leanok
+  \uses{anc:m6_partition_sum_one, lem:extderiv_finite_sum,
+    lem:partition_sum_form, thm:global_bulk_eq_local_sum,
+    thm:global_boundary_eq_local_sum}
+  \emph{Module:} \texttt{Stokes.Global.Reconstruction} and
+  \texttt{Stokes.Global.ExtDerivReconstruction}.
+
+  \emph{Explicit hypotheses discharged:}
+  \texttt{PartitionReconstructionData} isolates the two global reconstruction
+  equalities and converts them, together with local/cancellation/chart-change
+  inputs, into the final \texttt{GlobalStokesData} record.  The exterior
+  derivative module supplies the finite-sum \texttt{extDeriv} wrappers and an
+  augmented reconstruction package whose chartwise exterior-derivative
+  equality can be carried as a named field or produced from an everywhere
+  coefficient-sum-one hypothesis.
+
+  \emph{Fields still required:}
+  finite active chart labels; interior and boundary piece finsets; local bulk
+  term functions; boundary partition terms; represented global bulk and
+  boundary values; the two reconstruction equalities; local Stokes on all
+  pieces; artificial-face cancellation; chart-change cancellation; and, for
+  the exterior-derivative package, the chartwise equality comparing
+  \texttt{extDeriv} of the localized finite sum with \texttt{extDeriv} of the
+  original chart representative.
+
+  \emph{Handoff task:}
+  reconstruction workers should build this package before calling any final
+  Stokes theorem.  Analytic workers should decide whether the ext-derivative
+  field is proved from \texttt{PartitionSumOne} or recorded as an explicit
+  chartwise theorem.
+\end{definition}
+
+\begin{theorem}[M6 constructor dependency order]
+  \label{anc:m6_constructor_dependency_order}
+  \lean{Stokes.mixedGlobalStokes, Stokes.globalStokes,
+    Stokes.projectLocalGlobalStokes}
+  \leanok
+  \uses{anc:m6_compact_active_boxes,
+    anc:m6_localized_support_smoothness,
+    anc:m6_localized_interior_pieces,
+    anc:m6_partition_sum_one,
+    anc:m6_artificial_face_pairing,
+    anc:m6_boundary_chart_change_pieces,
+    anc:m6_reconstruction_constructors}
+  \emph{Explicit hypotheses discharged:}
+  this order discharges no mathematical field by itself; it records which
+  constructor should be used before a parent worker asks for the next final-data
+  equality.
+
+  \emph{Fields still required:}
+  the union of the fields listed in the preceding constructor anchors.  In
+  practice, missing fields should be assigned to the earliest constructor that
+  names them, not patched into \texttt{GlobalStokesData} directly.
+
+  The intended parent-agent integration order is:
+  first build compact active boxes and partition sum-one reconstruction; then
+  construct localized interior pieces from support and smoothness controls;
+  then provide artificial face pairings for their boundary terms; then build
+  boundary chart-change family data for genuine boundary pieces; finally feed
+  the reconstruction, local-Stokes, cancellation, and chart-change packages
+  into \texttt{MixedGlobalStokesData} or directly into
+  \texttt{GlobalStokesData}.
+\end{theorem}
+
+\endgroup

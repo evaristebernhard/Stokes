@@ -1,0 +1,414 @@
+digraph StokesM8MeasureGlobal {
+  graph [
+    rankdir=LR,
+    splines=true,
+    overlap=false,
+    bgcolor="transparent",
+    pad=0.25,
+    nodesep=0.32,
+    ranksep=0.58,
+    fontname="Arial"
+  ];
+
+  node [
+    style="filled",
+    fontname="Arial",
+    fontsize=8.4,
+    margin="0.07,0.04",
+    color="#2F6EA5",
+    penwidth=1.2,
+    fillcolor="#A3D6FF"
+  ];
+
+  edge [
+    color="#333333",
+    arrowsize=0.62,
+    fontname="Arial",
+    fontsize=7.8
+  ];
+
+  subgraph cluster_local {
+    label="Local and selected geometry";
+    color="#DDDDDD";
+    style="rounded";
+
+    local_halfspace [
+      label="half-space and\nboundary-chart local Stokes",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    selected_boxes [
+      label="compact support ->\nselected chart boxes",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    partition_local_forms [
+      label="partition and\nlocalized forms",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    local_terms [
+      label="project-local bulk\nand boundary terms",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+  }
+
+  subgraph cluster_bulk {
+    label="Bulk measure path";
+    color="#DDDDDD";
+    style="rounded";
+
+    indicator [
+      label="indicator localization\nfinite-sum integral",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    bulk_ae [
+      label="bulk integrand\na.e. equality package",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    compact_integrability [
+      label="compact-support\nintegrability wrappers",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    bulk_measure_terms [
+      label="P0: real bulk measure\nterms and measure-box API",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    bulk_localizes [
+      label="bulkIntegralLocalizes",
+      shape=ellipse,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+  }
+
+  subgraph cluster_boundary {
+    label="Boundary measure path";
+    color="#DDDDDD";
+    style="rounded";
+
+    boundary_measure_pkg [
+      label="boundary measure\nlocalization constructors",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    boundary_cov_pkg [
+      label="boundary COV\nmeasure constructor",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    target_image_pkg [
+      label="target-image\nfield reductions",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    boundary_measure_blocker [
+      label="P0: real boundary measure,\na.e. decomposition,\npiece integral equality",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    target_image_blocker [
+      label="P1: local inverse,\nbox image and bijection",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    boundary_localizes [
+      label="boundaryMeasureIntegral\n= partition sum",
+      shape=ellipse,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+  }
+
+  subgraph cluster_faces {
+    label="Artificial faces";
+    color="#DDDDDD";
+    style="rounded";
+
+    artificial_pkg [
+      label="artificial-face\nresolved data",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    artificial_geometry [
+      label="P1: pairing or\nsupport-zero geometry",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    artificial_cancel [
+      label="artificial boundary\ncancellation",
+      shape=ellipse,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+  }
+
+  subgraph cluster_statement {
+    label="M8 to manifold Stokes";
+    color="#DDDDDD";
+    style="rounded";
+
+    m8_records [
+      label="M8 statement and\nnatural measure records",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    p2_alignment [
+      label="P2: record/import/API\nalignment wrappers",
+      shape=box,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    m8_data [
+      label="M8MeasureLocalizationData\nfrom selected partition",
+      shape=box,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    m8_stokes [
+      label="m8GlobalStokes\nmeasure-facing equality",
+      shape=ellipse,
+      penwidth=1.7,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    compact_support [
+      label="compact-support\nmanifold Stokes",
+      shape=ellipse,
+      penwidth=1.7,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    compact_manifold [
+      label="compact oriented\nmanifold-with-boundary Stokes",
+      shape=ellipse,
+      penwidth=1.7,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    mathlib_compare [
+      label="compare to future\nmathlib integral API",
+      shape=ellipse,
+      style="filled,dashed",
+      color="#777777",
+      fillcolor="#DDDDDD"
+    ];
+  }
+
+  subgraph cluster_wave18 {
+    label="Current 18-agent wave: M8 -> natural compact-support Stokes";
+    color="#CFCFCF";
+    style="rounded";
+
+    wave18_audit [
+      label="A1 audit:\nshortest M8 route",
+      shape=note,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    wave18_input [
+      label="A2 compact-support\ninput record",
+      shape=note,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    wave18_box_select [
+      label="A3 finite chart boxes\nfrom compact support",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    wave18_localized [
+      label="A4 localized-interior\nM8 fields",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_bulk_compact [
+      label="A5 compact-support\nbulk measure",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_bulk_m8 [
+      label="A6 bulk measure\n-> M8",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_boundary_compact [
+      label="A7 compact-support\nboundary measure",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_boundary_m8 [
+      label="A8 boundary measure\n-> M8",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_target_inverse [
+      label="A9 local inverse\n-> target image",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_target_m8 [
+      label="A10 target image\n-> M8",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_faces_m8 [
+      label="A11 artificial faces\n-> M8",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_orientation [
+      label="A12 induced boundary\norientation bridge",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    wave18_integral_api [
+      label="A13 canonical global\nintegral interface",
+      shape=box,
+      color="#B05F00",
+      fillcolor="#F7C46C"
+    ];
+    wave18_m8_compact [
+      label="A14 compact-support\nM8 theorem",
+      shape=ellipse,
+      color="#007f36",
+      fillcolor="#1CAC78"
+    ];
+    wave18_natural_ctor [
+      label="A15 natural compact-support\ninput constructor",
+      shape=box,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    wave18_import [
+      label="A16 serial import\nintegration",
+      shape=note,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    wave18_blueprint [
+      label="A17 blueprint graph\nand PDF",
+      shape=note,
+      color="#2F6EA5",
+      fillcolor="#A3D6FF"
+    ];
+    wave18_parent [
+      label="A18 parent full build\nand no-placeholder scan",
+      shape=note,
+      style="filled,dashed",
+      color="#777777",
+      fillcolor="#DDDDDD"
+    ];
+  }
+
+  local_halfspace -> selected_boxes;
+  selected_boxes -> partition_local_forms;
+  partition_local_forms -> local_terms;
+
+  partition_local_forms -> bulk_ae;
+  partition_local_forms -> compact_integrability;
+  selected_boxes -> compact_integrability;
+  selected_boxes -> bulk_measure_terms;
+  indicator -> bulk_localizes;
+  bulk_ae -> bulk_localizes;
+  compact_integrability -> bulk_localizes;
+  bulk_measure_terms -> bulk_localizes;
+
+  local_terms -> boundary_measure_pkg;
+  local_terms -> boundary_cov_pkg;
+  selected_boxes -> target_image_blocker;
+  target_image_pkg -> target_image_blocker;
+  target_image_blocker -> boundary_measure_blocker;
+  boundary_measure_pkg -> boundary_localizes;
+  boundary_cov_pkg -> boundary_localizes;
+  compact_integrability -> boundary_localizes;
+  indicator -> boundary_localizes;
+  boundary_measure_blocker -> boundary_localizes;
+
+  local_terms -> artificial_pkg;
+  selected_boxes -> artificial_geometry;
+  artificial_pkg -> artificial_cancel;
+  artificial_geometry -> artificial_cancel;
+
+  bulk_localizes -> m8_data;
+  boundary_localizes -> m8_data;
+  artificial_cancel -> m8_data;
+  m8_records -> p2_alignment;
+  p2_alignment -> m8_data;
+  m8_data -> m8_stokes;
+  m8_stokes -> compact_support;
+  selected_boxes -> compact_support;
+  partition_local_forms -> compact_support;
+  compact_support -> compact_manifold;
+  compact_support -> mathlib_compare;
+
+  m8_records -> wave18_audit;
+  wave18_audit -> wave18_input;
+  wave18_input -> wave18_box_select;
+  selected_boxes -> wave18_box_select;
+  wave18_box_select -> wave18_localized;
+  partition_local_forms -> wave18_localized;
+  wave18_box_select -> wave18_bulk_compact;
+  bulk_ae -> wave18_bulk_compact;
+  compact_integrability -> wave18_bulk_compact;
+  indicator -> wave18_bulk_compact;
+  wave18_bulk_compact -> wave18_bulk_m8;
+  wave18_bulk_m8 -> bulk_localizes;
+  wave18_box_select -> wave18_boundary_compact;
+  boundary_measure_pkg -> wave18_boundary_compact;
+  boundary_cov_pkg -> wave18_boundary_compact;
+  wave18_boundary_compact -> wave18_boundary_m8;
+  wave18_boundary_m8 -> boundary_localizes;
+  wave18_box_select -> wave18_target_inverse;
+  target_image_pkg -> wave18_target_inverse;
+  wave18_target_inverse -> wave18_target_m8;
+  wave18_target_m8 -> target_image_blocker;
+  artificial_pkg -> wave18_faces_m8;
+  artificial_geometry -> wave18_faces_m8;
+  wave18_faces_m8 -> artificial_cancel;
+  wave18_orientation -> boundary_localizes;
+  wave18_integral_api -> m8_records;
+  m8_stokes -> wave18_m8_compact;
+  wave18_localized -> wave18_natural_ctor;
+  wave18_bulk_m8 -> wave18_natural_ctor;
+  wave18_boundary_m8 -> wave18_natural_ctor;
+  wave18_target_m8 -> wave18_natural_ctor;
+  wave18_faces_m8 -> wave18_natural_ctor;
+  wave18_orientation -> wave18_natural_ctor;
+  wave18_integral_api -> wave18_natural_ctor;
+  wave18_natural_ctor -> wave18_m8_compact;
+  wave18_m8_compact -> compact_support;
+  wave18_import -> wave18_parent;
+  wave18_blueprint -> wave18_parent;
+}

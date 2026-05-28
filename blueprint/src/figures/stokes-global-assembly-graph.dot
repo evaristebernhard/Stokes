@@ -1,0 +1,241 @@
+digraph StokesGlobalAssembly {
+  graph [
+    rankdir=TB,
+    splines=true,
+    overlap=false,
+    bgcolor="transparent",
+    pad=0.25,
+    nodesep=0.28,
+    ranksep=0.42,
+    fontname="Arial"
+  ];
+
+  node [
+    style="filled",
+    fontname="Arial",
+    fontsize=8.6,
+    margin="0.07,0.035",
+    color="#2F6EA5",
+    penwidth=1.2,
+    fillcolor="#A3D6FF"
+  ];
+
+  edge [
+    color="#333333",
+    arrowsize=0.62,
+    fontname="Arial",
+    fontsize=8
+  ];
+
+  existing_boundary_chart [
+    label="boundary chart\nlocal Stokes",
+    shape=ellipse,
+    color="#007f36",
+    fillcolor="#1CAC78"
+  ];
+  existing_chart_api [
+    label="chart / smoothness\ntransport API",
+    shape=ellipse,
+    color="#007f36",
+    fillcolor="#1CAC78"
+  ];
+  existing_box [
+    label="box Stokes\nand support boxes",
+    shape=ellipse,
+    color="#007f36",
+    fillcolor="#1CAC78"
+  ];
+  existing_boundary_cov [
+    label="boundary chart\nintegral invariance",
+    shape=ellipse,
+    color="#007f36",
+    fillcolor="#1CAC78"
+  ];
+  existing_local_inverse [
+    label="selected boundary box\nlocal inverse data",
+    shape=ellipse,
+    color="#007f36",
+    fillcolor="#1CAC78"
+  ];
+
+  interior_selected [
+    label="interiorChart\nSelectedBox",
+    shape=box
+  ];
+  interior_extended [
+    label="interiorChart\nExtendedBox",
+    shape=box
+  ];
+  interior_local [
+    label="interiorChart\nLocalStokes",
+    shape=ellipse
+  ];
+  selected_chart_box [
+    label="SelectedChartBox\ninterior | boundary",
+    shape=box
+  ];
+  chart_supported [
+    label="ChartSupportedForm",
+    shape=box
+  ];
+  chart_supported_interior [
+    label="chartSupported\nInteriorStokes",
+    shape=ellipse
+  ];
+  chart_supported_boundary [
+    label="chartSupported\nBoundaryStokes",
+    shape=ellipse
+  ];
+  chart_supported_stokes [
+    label="chartSupportedStokes",
+    shape=ellipse,
+    penwidth=1.6
+  ];
+
+  selected_cover [
+    label="SelectedChart\nBoxCover",
+    shape=box
+  ];
+  finite_cover_exists [
+    label="compact support ->\nfinite selected cover",
+    shape=ellipse
+  ];
+  partition_api [
+    label="SelectedBox\nPartitionOfUnity",
+    shape=box
+  ];
+  partition_piece [
+    label="partitionLocalizedForm",
+    shape=box
+  ];
+  piece_supported [
+    label="partition piece\nis chart-supported",
+    shape=ellipse
+  ];
+  ext_sum [
+    label="extDeriv finite sum",
+    shape=ellipse
+  ];
+  leibniz_piece [
+    label="extDeriv of\npartition piece",
+    shape=ellipse
+  ];
+  partition_sum [
+    label="sum of pieces\n= original form",
+    shape=ellipse
+  ];
+  bulk_sum [
+    label="bulk integral\nfinite sum",
+    shape=ellipse
+  ];
+  boundary_sum [
+    label="boundary integral\nfinite sum",
+    shape=ellipse
+  ];
+
+  project_bulk [
+    label="projectLocal\nBulkIntegral",
+    shape=box
+  ];
+  project_boundary [
+    label="projectLocal\nBoundaryIntegral",
+    shape=box
+  ];
+  chart_independent [
+    label="project-local integrals\nchart-independent",
+    shape=ellipse
+  ];
+  project_local_stokes [
+    label="projectLocal\nChartSupportedStokes",
+    shape=ellipse
+  ];
+  global_bulk_sum [
+    label="global bulk =\nlocal sum",
+    shape=ellipse
+  ];
+  global_boundary_sum [
+    label="global boundary =\nlocal sum",
+    shape=ellipse
+  ];
+  sum_local [
+    label="sum local Stokes\nidentities",
+    shape=ellipse
+  ];
+  compact_support_stokes [
+    label="globalStokes\ncompactSupport",
+    shape=ellipse,
+    penwidth=1.8
+  ];
+  compact_manifold [
+    label="globalStokes\ncompactManifold",
+    shape=ellipse,
+    penwidth=1.8
+  ];
+  mathlib_compare [
+    label="compare with future\nmathlib integral API",
+    shape=ellipse,
+    style="filled,dashed"
+  ];
+
+  existing_chart_api -> interior_selected;
+  existing_box -> interior_selected;
+  interior_selected -> interior_extended;
+  existing_chart_api -> interior_extended;
+  interior_extended -> interior_local;
+  existing_box -> interior_local;
+
+  interior_selected -> selected_chart_box;
+  existing_boundary_chart -> selected_chart_box;
+  selected_chart_box -> chart_supported;
+  interior_local -> chart_supported_interior;
+  chart_supported -> chart_supported_interior;
+  existing_boundary_chart -> chart_supported_boundary;
+  chart_supported -> chart_supported_boundary;
+  chart_supported_interior -> chart_supported_stokes;
+  chart_supported_boundary -> chart_supported_stokes;
+
+  selected_chart_box -> selected_cover;
+  existing_local_inverse -> finite_cover_exists;
+  selected_cover -> finite_cover_exists;
+  existing_box -> finite_cover_exists;
+  selected_cover -> partition_api;
+  finite_cover_exists -> partition_api;
+  partition_api -> partition_piece;
+  partition_piece -> piece_supported;
+  chart_supported -> piece_supported;
+  partition_piece -> leibniz_piece;
+  partition_piece -> ext_sum;
+  partition_api -> partition_sum;
+  partition_piece -> partition_sum;
+  partition_piece -> bulk_sum;
+  partition_piece -> boundary_sum;
+  existing_boundary_cov -> boundary_sum;
+
+  chart_supported_stokes -> project_bulk;
+  existing_boundary_cov -> project_boundary;
+  project_bulk -> chart_independent;
+  project_boundary -> chart_independent;
+  existing_boundary_cov -> chart_independent;
+  chart_supported_stokes -> project_local_stokes;
+  chart_independent -> project_local_stokes;
+
+  project_bulk -> global_bulk_sum;
+  bulk_sum -> global_bulk_sum;
+  partition_sum -> global_bulk_sum;
+  project_boundary -> global_boundary_sum;
+  boundary_sum -> global_boundary_sum;
+  partition_sum -> global_boundary_sum;
+  project_local_stokes -> sum_local;
+  piece_supported -> sum_local;
+  bulk_sum -> sum_local;
+  boundary_sum -> sum_local;
+  finite_cover_exists -> compact_support_stokes;
+  partition_api -> compact_support_stokes;
+  sum_local -> compact_support_stokes;
+  global_bulk_sum -> compact_support_stokes;
+  global_boundary_sum -> compact_support_stokes;
+  compact_support_stokes -> compact_manifold;
+  compact_support_stokes -> mathlib_compare;
+  project_bulk -> mathlib_compare;
+  project_boundary -> mathlib_compare;
+}
