@@ -1,0 +1,137 @@
+digraph StokesFirstPrinciplesRoute {
+  graph [
+    rankdir=LR,
+    splines=true,
+    overlap=false,
+    bgcolor="transparent",
+    pad=0.25,
+    nodesep=0.36,
+    ranksep=0.65,
+    fontname="Arial"
+  ];
+
+  node [
+    style="filled",
+    fontname="Arial",
+    fontsize=8.8,
+    margin="0.08,0.045",
+    color="#007f36",
+    penwidth=1.2,
+    fillcolor="#1CAC78"
+  ];
+
+  edge [
+    color="#333333",
+    arrowsize=0.65,
+    fontname="Arial",
+    fontsize=8
+  ];
+
+  subgraph cluster_public {
+    label="Public first-principles input";
+    color="#DDDDDD";
+    style="rounded";
+
+    chartwise [
+      label="ChartwiseSmooth I omega",
+      shape=box
+    ];
+    compact_support [
+      label="IsCompact\nclosure(support omega)",
+      shape=box
+    ];
+    first_input [
+      label="CoverIndexedZeroCompact\nRepresentedStokes\nFirstPrinciplesInput",
+      shape=box,
+      penwidth=1.7
+    ];
+  }
+
+  subgraph cluster_generated {
+    label="Generated internal geometry";
+    color="#DDDDDD";
+    style="rounded";
+
+    halfspace_model [
+      label="HalfSpaceModel\nrange = upperHalfSpace",
+      shape=box
+    ];
+    pointwise [
+      label="ofHalfSpaceModel\nSelfCharts",
+      shape=ellipse
+    ];
+    intrinsic_input [
+      label="IntrinsicInput:\npointwise + K + smooth\n+ support control",
+      shape=box
+    ];
+    selected_cover [
+      label="open selected cover\nand support-controlled\npartition",
+      shape=ellipse
+    ];
+    finite_boundary_cover [
+      label="selected boundary\nfinite half-space cover",
+      shape=ellipse
+    ];
+    smooth_refinement [
+      label="selectedSmooth\nRefinement",
+      shape=ellipse
+    ];
+  }
+
+  subgraph cluster_zero {
+    label="Zero-localized local Stokes route";
+    color="#DDDDDD";
+    style="rounded";
+
+    regularity [
+      label="interiorFieldsOf\nSelectedSmoothRefinement",
+      shape=ellipse
+    ];
+    zero_support [
+      label="zeroSupportOf\nSelectedSmoothRefinement",
+      shape=ellipse
+    ];
+    intrinsic_route [
+      label="hasIntrinsicRoute\n_intrinsic",
+      shape=ellipse,
+      penwidth=1.6
+    ];
+  }
+
+  subgraph cluster_endpoint {
+    label="Canonical represented endpoint";
+    color="#DDDDDD";
+    style="rounded";
+
+    bulk [
+      label="canonicalRepresented\nBulkIntegral",
+      shape=box
+    ];
+    boundary [
+      label="canonicalRepresented\nBoundaryIntegral",
+      shape=box
+    ];
+    represented [
+      label="representedStokes",
+      shape=ellipse,
+      penwidth=2.0
+    ];
+  }
+
+  chartwise -> first_input;
+  compact_support -> first_input;
+  halfspace_model -> pointwise;
+  first_input -> intrinsic_input;
+  pointwise -> intrinsic_input;
+  intrinsic_input -> selected_cover;
+  selected_cover -> finite_boundary_cover;
+  finite_boundary_cover -> smooth_refinement;
+  smooth_refinement -> regularity;
+  smooth_refinement -> zero_support;
+  regularity -> intrinsic_route;
+  zero_support -> intrinsic_route;
+  intrinsic_route -> bulk;
+  intrinsic_route -> boundary;
+  bulk -> represented;
+  boundary -> represented;
+}

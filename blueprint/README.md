@@ -31,8 +31,7 @@ cd .\src
 $env:Path += ";C:\Program Files\Graphviz\bin"
 dot -Tpdf figures\stokes-core-graph.dot -o figures\stokes-core-graph.pdf
 dot -Tpdf figures\stokes-halfspace-graph.dot -o figures\stokes-halfspace-graph.pdf
-dot -Tpdf figures\stokes-boundary-chart-graph.dot -o figures\stokes-boundary-chart-graph.pdf
-dot -Tpdf figures\stokes-global-assembly-graph.dot -o figures\stokes-global-assembly-graph.pdf
+dot -Tpdf figures\stokes-first-principles-graph.dot -o figures\stokes-first-principles-graph.pdf
 xelatex -interaction=nonstopmode -halt-on-error print.tex
 xelatex -interaction=nonstopmode -halt-on-error print.tex
 Copy-Item -LiteralPath print.pdf -Destination ..\stokes-blueprint.pdf -Force
