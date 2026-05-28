@@ -1,0 +1,18 @@
+name = "Stokes"
+version = "0.1.0"
+keywords = ["math", "stokes-theorem", "lean4", "mathlib"]
+defaultTargets = ["Stokes"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "LeanStokes"
+git = "https://github.com/d0d1/lean-stokes-theorem.git"
+rev = "adffb99be9fd00a42369561068c9d11475cbedb8"
+
+[[lean_lib]]
+name = "Stokes"

@@ -1,1 +1,10 @@
 target/
+external/
+.lake/
+blueprint/web/
+blueprint/print/
+blueprint/src/*.aux
+blueprint/src/*.log
+blueprint/src/*.out
+blueprint/src/*.pdf
+!blueprint/stokes-blueprint.pdf
