@@ -1,0 +1,139 @@
+\section{Proof Obligations and Discharge Points}
+\label{app:proof-obligations}
+
+This appendix gives a more operational map of the proof.  Each item records a
+mathematical obligation that appears in the compact-support Stokes proof and
+the layer where the Lean development discharges it.  The list is useful
+because many early theorem statements exposed these obligations as input
+fields; the first-principles theorem hides them by proving the corresponding
+constructors.
+
+\subsection{Carrier and support obligations}
+
+\paragraph{Compact carrier.}
+The proof needs a compact set \(K\) containing the support of the form.  The
+first-principles theorem chooses
+\[
+  K=\overline{\supp(\omega)}.
+\]
+The public hypothesis is compactness of this set.  The inclusion
+\(\supp(\omega)\subseteq K\) is discharged by closure monotonicity, not by a
+user-provided field.
+
+\paragraph{Localized support.}
+For each partition coefficient \(\rho_i\), the support of \(\rho_i\omega\)
+must lie in the corresponding active carrier.  This is discharged by combining
+two facts: a localized form can be nonzero only where the coefficient is
+nonzero and where the original form is nonzero; the latter points lie in the
+compact carrier.  This obligation is used again after refinement, when
+\(\rho_{i,q}\omega\) is rewritten as a second localization of
+\(\rho_i\omega\).
+
+\paragraph{Topological support.}
+Local Stokes does not merely need ordinary support.  It needs a topological
+support inclusion strong enough to prove artificial face integrals vanish.
+The proof therefore upgrades ordinary support control to \(\tsupp\) control
+using closedness of the selected half-space support boxes.
+
+\subsection{Cover and partition obligations}
+
+\paragraph{Pointwise chart boxes.}
+For each point of the compact carrier, the proof needs a chart box adapted to
+the half-space model.  The first-principles route generates this data from
+self charts and the \code{HalfSpaceModel} assumption.  Boundary points receive
+boxes whose lower normal coordinate is zero; interior points receive boxes
+away from the boundary face.
+
+\paragraph{Open shrink.}
+The assigned chart boxes are not themselves the right objects for partition
+construction.  The proof chooses open shrinks inside them.  This produces an
+open cover suitable for a partition of unity while preserving the assigned box
+needed later for support.
+
+\paragraph{Finite selected cover.}
+Compactness extracts finitely many of the open shrinks.  The selected cover
+remembers the finite index, the selected chart, the open set, and the assigned
+box.  This is more structured than an ordinary finite subcover because later
+theorems need all four pieces of data.
+
+\paragraph{Support-controlled partition.}
+The partition must satisfy a support theorem, not only a sum-to-one theorem.
+For each selected index \(j\), the development proves
+\[
+  \tsupp(\rho_j)\cap K \subseteq U_j,
+\]
+where \(U_j\) is the selected open shrink.  Since \(U_j\) is contained in the
+assigned chart box, this becomes the first support input for the local Stokes
+route.
+
+\subsection{Boundary refinement obligations}
+
+\paragraph{Boundary active carrier.}
+Only the boundary-selected partition coefficients contribute to the boundary
+route.  For each boundary index \(i\), the active carrier records the part of
+\(K\) where the boundary coefficient can matter.  Its coordinate image is the
+set to be covered by half-space boxes.
+
+\paragraph{Finite half-space cover.}
+The active coordinate carrier is covered by finitely many half-space boxes.
+In the final route, these boxes are generated from the selected boundary box
+data rather than supplied as a public ambient/collar certificate.
+
+\paragraph{Smooth refinement.}
+The finite half-space cover is converted into smooth subpartition
+coefficients \(\psi_{i,q}\).  The refined coefficient is
+\[
+  \rho_{i,q}=\rho_i\psi_{i,q}.
+\]
+The refinement must prove both algebraic reconstruction
+\(\sum_q\rho_{i,q}=\rho_i\) on the active carrier and support containment of
+each \(\psi_{i,q}\) in its assigned refined box.
+
+\subsection{Local Stokes obligations}
+
+\paragraph{Zero representative.}
+The local theorem is applied to a coordinate representative.  Because ordinary
+chart representatives are total functions, the proof uses the zero-localized
+representative.  The obligation is twofold: it must agree with the ordinary
+representative on the chart source, and it must be supported in the assigned
+box globally.
+
+\paragraph{Artificial-face support.}
+For each refined local form, the proof must show that the topological support
+of its zero representative lies in the half-space support box.  This is the
+role of \code{zeroSupportOfSelectedSmoothRefinement}.  The local half-space
+theorem then converts this support inclusion into vanishing of all artificial
+faces.
+
+\paragraph{Interior fields.}
+For each refined box, the proof must supply the analytic fields used by box
+Stokes: closed-box continuity of signed coefficients, differentiability on the
+open interior, integrability of the divergence term, and the bridge between
+the exterior derivative coefficient and coordinate divergence.  The selected
+regularity constructor proves these fields from chartwise smoothness and
+smoothness of the refined coefficient.
+
+\paragraph{Boundary sign.}
+After artificial faces vanish, the remaining lower normal face must be
+identified with the boundary contribution.  The half-space boundary layer
+proves that the lower face carries the outward-first sign.  This is the local
+orientation content currently needed by the represented theorem.
+
+\subsection{Endpoint obligations}
+
+\paragraph{Per-box equality.}
+The half-space theorem gives equality of local bulk and true boundary terms
+for each active refined piece.  These are the equalities that will be summed.
+
+\paragraph{Finite-sum reconstruction.}
+The endpoint layer proves that summing the local bulk terms over the selected
+finite pieces gives the generated represented bulk endpoint, and similarly for
+the boundary terms.  The same finite index family is used throughout, avoiding
+any hidden reindexing mismatch.
+
+\paragraph{Top-level compression.}
+The intrinsic theorem packages all generated obligations into a route
+certificate.  The first-principles theorem then generates the intrinsic input
+from chartwise smoothness and compact closed support.  Thus the final public
+theorem has small input not because the obligations disappeared, but because
+they have named discharge points in the proof.

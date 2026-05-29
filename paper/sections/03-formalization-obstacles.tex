@@ -1,0 +1,202 @@
+\section{Formalization Obstacles as Mathematical Lemmas}
+\label{sec:obstacles}
+
+The development repeatedly encountered situations where a sentence that is
+acceptable in a paper proof was not a well-formed theorem in Lean.  The useful
+lesson is not that Lean is fussy.  Rather, the formalization identifies the
+mathematical lemma that the sentence was abbreviating.  This section collects
+five such obstacles.  They are the main reason the final theorem is stronger
+than a certificate-consuming assembly theorem: each obstacle was eventually
+turned into a constructor or theorem generated from compact support,
+chartwise smoothness, and half-space geometry.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{0.19\textwidth}p{0.25\textwidth}p{0.24\textwidth}p{0.15\textwidth}}
+\hline
+Paper phrase & Ill-shaped Lean theorem & Corrected theorem/API & Role in Stokes \\
+\hline
+``smooth on the boundary box'' &
+ambient smoothness on an open neighborhood of a closed box touching
+\(x_0=0\) &
+interior Stokes fields and open-interior/closed-box regularity &
+legal boundary local Stokes \\
+
+``the chart representative is supported in the box'' &
+support of the totalized chart representative &
+zero-localized representative and selected zero-support theorem &
+support theorem for the correct representative \\
+
+``the artificial faces vanish'' &
+face integrals are zero by informal inspection &
+face-coefficient support predicate and artificial-face remainder theorems &
+removes all non-boundary box faces \\
+
+``choose finitely many charts'' &
+an arbitrary finite cover disconnected from partition support &
+open shrinks, selected finite covers, and support-controlled partitions &
+turns compact support into usable local data \\
+
+``sum the local identities'' &
+local sums and endpoint definitions use different finite indices &
+generated represented endpoints over the same refined pieces &
+global represented equality \\
+\hline
+\end{tabular}
+\caption{Five paper-level phrases and the precise theorem shapes needed in
+Lean.  The final first-principles theorem is small because the corrected
+theorems are generated internally rather than exposed as public hypotheses.}
+\label{tab:obstacle-map}
+\end{table}
+
+\Cref{tab:obstacle-map} is the organizing principle for this section.  Each
+row is an instance of the same pattern.  The informal phrase is not false in
+ordinary mathematical practice; it is a compressed reference to a more precise
+lemma.  A certificate-consuming formalization can stop by asking the user to
+provide that lemma.  The contribution of the final route is that the lemma is
+proved from the preceding data and no longer appears as a theorem-facing
+field.
+
+\subsection{Boundary smoothness is not ambient closed-box smoothness}
+
+The informal local proof near a boundary point often says that a coordinate
+representative is smooth on a box.  If the model is a half-space, the word
+``box'' hides a choice.  The closed coordinate box may touch the boundary
+face \(x_0=0\).  Requiring an ambient open neighborhood of the closed box
+inside the chart target is then too strong: it asks for Euclidean data across
+the boundary, where the boundary chart is not intended to provide it.
+
+The corrected mathematical lemma separates the roles of the box:
+\begin{itemize}
+  \item differentiability for the bulk term is needed on the open interior
+  \(\prod_i(a_i,b_i)\);
+  \item continuity and integrability are needed on the closed box and its
+  faces;
+  \item the lower normal face \(x_0=0\) is allowed to lie on the model
+  boundary.
+\end{itemize}
+The Lean record \code{HalfSpaceBoxInteriorStokesFields} is exactly this
+separation.  It is not a bureaucratic certificate; it is the local theorem
+shape that avoids an invalid boundary-chart smoothness hypothesis.
+
+The corrected theorem is not weaker; it is better aligned with the analysis.
+It asks for differentiability exactly where the bulk derivative is evaluated
+and for closed-box regularity exactly where the face integrals and
+measure-theoretic bridges need it.  This is the difference between assuming a
+Euclidean extension across the boundary and proving a half-space theorem.
+
+\subsection{Support in a chart is not support of a total function}
+
+The phrase ``the chart representative is supported in the box'' normally means
+that the representative is supported in the box where the chart expression is
+meaningful.  Lean functions are total, so the ordinary representative has
+values outside the meaningful chart region.  If a theorem quantifies over the
+ordinary support of that total function, it may be asking for facts about
+values introduced only to make the function total.
+
+The corrected lemma changes the representative.  This is stronger than adding
+an auxiliary hypothesis to the old theorem.  The old theorem speaks about a
+total function whose off-source values are artifacts of totalization; the new
+theorem speaks about the local representative intended by the proof.  The
+development defines a zero-localized representative which agrees with the
+ordinary representative on the chart source and is zero outside.  The support
+theorem is then a genuine topological statement:
+\[
+  \tsupp(\operatorname{ZeroRep}_{x,x}(\rho\omega))
+  \subseteq Q(a,b).
+\]
+The Lean theorem
+\code{zeroSupportOfSelectedSmoothRefinement} proves this statement for the
+actual coefficients generated by the selected smooth refinement.
+
+This is one of the main places where the formalization discovers a better
+mathematical interface.  Asking the user for a support assumption on
+\code{transitionPullbackInChart} would have hidden the problem.  Proving
+\code{zeroSupportOfSelectedSmoothRefinement} removes the assumption by proving
+that the generated representative has the support property that the informal
+proof silently uses.
+
+The theorem therefore has two parts that must travel together.  First, the
+zero-localized representative agrees with the ordinary representative on the
+source where the local integral is evaluated.  Second, it has global support
+properties because it is zero outside the source.  Without the agreement
+theorem the proof would be about the wrong local form; without the support
+theorem artificial-face cancellation would still be a public assumption.
+
+\subsection{Artificial faces vanish by support, not by notation}
+
+When Stokes is applied on a coordinate box, every face of the box appears.  In
+a boundary chart only the lower normal face is the manifold boundary.  The
+other faces are artifacts of the localization.  A paper proof may say that
+they vanish because the support is inside the box.  Lean requires the exact
+disjointness statement for each face coefficient and each artificial face.
+
+The corrected lemma has the following structure:
+\[
+  \tsupp(\alpha)\subseteq Q(a,b)
+  \Longrightarrow
+  \text{every artificial face integral of }\alpha\text{ is }0.
+\]
+This is implemented through the face-support API in the half-space layer.  The
+global proof does not assume artificial-face cancellation; it derives it from
+the zero-localized support theorem for each refined local representative.
+
+The important point is that the support statement is made for face
+coefficients, not only for the form as an abstract object.  The box theorem
+integrates coefficients on coordinate faces.  The formalization proves that
+evaluating the form on a fixed face frame does not enlarge topological
+support, then uses the half-space support region to show that the artificial
+face set is disjoint from those coefficient supports.
+
+\subsection{Compactness is a construction principle}
+
+Compact support is not merely a hypothesis that allows one to write a finite
+sum.  The proof uses it to construct the finite index type, the selected
+charts, the open shrinks, the partition coefficients, and the boundary
+refinement.  If any of these choices is made independently, later support and
+endpoint reconstruction statements can fail to line up.
+
+The corrected lemma is a compactness-to-data theorem: compactness of \(K\)
+together with pointwise chart-box neighborhoods produces a finite selected
+cover with a support-controlled partition.
+The selected cover remembers both the open sets used for the partition and the
+closed or half-space boxes used for support.  This dual memory is what lets the
+local support facts feed into half-space Stokes.
+
+Thus compactness is used to generate an indexed object with invariants, not
+only to prove existence of finitely many open sets.  The finite selected data
+must remember enough information for three later consumers: the partition of
+unity, the half-space local theorem, and the endpoint summation.
+
+\subsection{Represented endpoints are finite coordinate theorems}
+
+The last hidden step is endpoint reconstruction.  Once each local piece
+satisfies Stokes, the proof still has to show that the finite sum of local
+bulk terms is the generated represented bulk endpoint, and similarly for the
+boundary terms.  This is not a definition-free conclusion: the local pieces
+are sigma-indexed by boundary chart and refined box data.
+
+The corrected theorem keeps the endpoint generated from the same finite data
+used by the local proof.  This prevents a common mismatch: proving local
+equalities over one index family and defining the global endpoint over a
+slightly different one.  In the final route, the represented endpoints are
+canonical because they are induced by the selected finite route itself.
+
+This is why the represented endpoint layer is a mathematical layer rather
+than a naming layer.  The endpoint is not chosen after the local proof; it is
+the finite sum whose index family is shared by the cover, the refinement, the
+zero-support theorem, and the local Stokes theorem.
+
+\subsection{Summary of the compression}
+
+Each obstacle has the same final form:
+\[
+  \text{informal paper step}
+  \quad\leadsto\quad
+  \text{precise generated Lean theorem}.
+\]
+The final first-principles API is small because these generated theorems
+replace the large certificates that earlier routes exposed.  This is the
+central mathematical engineering pattern of the project.

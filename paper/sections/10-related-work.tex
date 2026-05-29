@@ -1,0 +1,93 @@
+\section{Related Work}
+\label{sec:related-work}
+
+\subsection{Lean and mathlib}
+
+The formalization is implemented in Lean 4
+\cite{demoura2015lean,demoura2021lean4,leanprover,tpil4} and builds on mathlib
+\cite{mathlib2020,mathlibdocs,vandoorn2020maintaining,baanen2025growing}.  The project follows the mathlib-compatible
+strategy of using existing topology, analysis, manifolds, finite-dimensional
+calculus, and exterior-algebra infrastructure where possible.  The local box
+Stokes layer is organized around mathlib-style divergence and differentiability
+interfaces rather than a separate analytic foundation.
+
+The theorem also exposes places where future mathlib APIs would be valuable.
+In particular, the represented-to-native bridge would naturally depend on a
+stable API for integrating differential forms on oriented manifolds with
+boundary, together with chart-independence and boundary-orientation comparison
+theorems.
+
+\subsection{Prior Lean Stokes artifacts}
+
+The repository treats \code{d0d1/lean-stokes-theorem} as prior work and a Lake
+dependency reference \cite{leanstokes}.  That project is useful prior art for
+Stokes formalization, especially around cubical or smooth-singular-cube
+approaches.  Because of licensing considerations, this project uses external
+developments as references rather than as copied source.  The present
+contribution is different in emphasis: it formalizes a compact-support
+coordinate-represented local-to-global route through chart boxes,
+support-controlled partitions, half-space boundary boxes, zero-localized
+representatives, and generated represented endpoints.
+
+\subsection{Classical manifold treatments}
+
+Classical treatments of manifolds and differential forms provide the
+mathematical background for chartwise local arguments, partitions of unity,
+compact support, boundary orientations, and Stokes' theorem
+\cite{spivak1965calculus,munkres1991analysis,guillemin1974differential,bott1982differential,hirsch1976differential,warner1983foundations,abraham1988manifolds,lang1995differential,tu2011introduction,lee2013smooth,morita2001geometry}.
+The formalization can be read as a detailed elaboration of the proof steps
+that such texts compress.  The point is not that those steps are
+mathematically surprising to a geometer.  The point is that their exact
+dependencies become visible when the proof is checked by Lean.
+
+This is especially visible for boundary charts.  Classical accounts freely
+move between the local half-space model, the true boundary face, and the
+auxiliary faces of a coordinate box.  In Lean these become separate theorems:
+the lower face must be identified with the boundary contribution, the sign
+must match the outward-first convention, and every artificial face must be
+removed by a support theorem.
+
+\subsection{Formalized mathematics and proof engineering}
+
+The work also sits in a broader theorem-proving ecosystem.  Coq/Rocq,
+Isabelle/HOL, and HOL Light have long provided reference points for formalized
+mathematics and proof engineering
+\cite{bertot2004coqart,nipkow2002isabelle,harrison2009handbook,wiedijk2006seventeen,harrison2014history}.
+Within that ecosystem, formalized analysis and geometry have repeatedly
+required substantial library and interface work, for example filters and
+analysis in Isabelle/HOL, smooth manifolds in Isabelle/HOL, formalized Haar
+measure, and the change-of-variables theorem in mathlib
+\cite{holzl2013filters,immler2019smooth,vandoorn2021haar,gouezel2022change}.
+
+Large formalizations often spend much of their effort on interfaces: finding
+the right theorem boundary, replacing manual certificates by constructors, and
+organizing local lemmas so that global statements have natural hypotheses.
+Prominent formalization projects such as CompCert
+\cite{leroy2009formal}, the formal four-color theorem
+\cite{gonthier2008fourcolor}, the machine-checked odd-order theorem
+\cite{gonthier2013machine}, the formal proof of the Kepler conjecture
+\cite{hales2017kepler}, Schemes in Lean \cite{buzzard2022schemes},
+formalized Galois theory \cite{browning2022galois}, and the Liquid Tensor
+Experiment \cite{scholze2022liquid} illustrate that the
+architecture of a large proof artifact is part of the contribution.  This
+project is an example in differential geometry and analysis.  The intermediate
+routes were not abandoned failures; they were stages in identifying which
+fields were true mathematical hypotheses and which were internal proof
+objects.  The first-principles theorem is the compressed result of that
+interface work.
+
+This distinction matters for evaluating formalized mathematics.  A
+certificate-consuming theorem may be enough to close a proof internally, but it
+does not yet present the theorem in the form a mathematician expects to use.
+The present artifact treats assumption compression as part of the mathematical
+work.  Covers, refinements, support facts, local regularity records, and
+endpoint reconstruction are not left as user obligations once they can be
+generated from compact support and chartwise smoothness.  This agrees with a
+broader view of formalization as both theorem proving and mathematical
+interface design \cite{avigad2018mechanization,baanen2022instance}.
+
+The support and zero-localization layer is also an example of a common
+phenomenon in formalization: a statement that is harmless on paper becomes
+false or ill-shaped when all functions are total.  The solution is not merely a
+technical patch.  It identifies the correct formal representative of the
+informal mathematical object.

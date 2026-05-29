@@ -1,0 +1,148 @@
+\section{Theorem and API Map}
+\label{app:theorem-map}
+
+This appendix lists the main Lean names used by the first-principles
+represented Stokes route.  It is not a complete module index.  The goal is to
+help readers locate the mathematical layers discussed in the paper.
+
+\subsection{Public first-principles route}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Stokes/Global/CoverIndexedZeroCompactRepresentedStokesFirstPrinciples.lean
+Stokes/Global/CoverIndexedFirstPrinciples.lean
+Stokes/Global/CoverIndexed.lean
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput
+CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.supportCarrier
+CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.intrinsicInput
+CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.canonicalRepresentedBulkIntegral
+CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.canonicalRepresentedBoundaryIntegral
+CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.representedStokes
+\end{lstlisting}
+
+\subsection{Half-space model and pointwise chart boxes}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Stokes/Global/HalfSpaceModel.lean
+Stokes/Global/PointwiseChartBoxFromHalfSpaceModel.lean
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+HalfSpaceModel
+HalfSpaceModel.extChartAt_target_subset_upperHalfSpace
+HalfSpaceModel.self_coord_mem_upperHalfSpace
+HalfSpaceModel.boundaryChartBoxNeighborhood_mem_nhds_of_coordWithin
+PointwiseCompactSupportChartBoxData.ofHalfSpaceModelSelfCharts
+\end{lstlisting}
+
+\subsection{Intrinsic selected cover and partition}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Stokes/Global/CoverIndexedZeroCompactRepresentedStokesIntrinsic.lean
+Stokes/Global/CoverIndexedPointwiseOpenSelection.lean
+Stokes/Global/CoverIndexedOpenSupportControlledPartition.lean
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.openSelectedCover
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.selectedCover
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.openSelectedPartition
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.selectedPartition
+PointwiseCompactSupportChartBoxData.selectedOpenCoverOfPointwise
+PointwiseCompactSupportChartBoxData.selectedOpenSupportControlledPartition
+OpenSupportControlledSelectedPartition
+\end{lstlisting}
+
+\subsection{Boundary finite cover and smooth refinement}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Stokes/Global/CoverIndexedSelectedBoundaryBoxFiniteCover.lean
+Stokes/Global/CoverIndexedIntrinsicSmoothRefinementConstructor.lean
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+SupportControlledSelectedPartition.finiteHalfSpaceCoverOfSelectedBoundaryBoxes
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.selectedBoundaryFiniteCover
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.selectedSmoothRefinementAmbientOpen
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.selectedSmoothRefinement
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.selectedSmoothRefinement_boundaryPieces
+\end{lstlisting}
+
+\subsection{Zero-localized support}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Stokes/ManifoldFormZero.lean
+Stokes/Global/CoverIndexedZeroLocalizedSupport.lean
+Stokes/Global/CoverIndexedIntrinsicZeroSupportConstructor.lean
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+zeroOutside
+support_zeroOutside_subset
+ManifoldForm.transitionPullbackInChartZero
+ManifoldForm.transitionPullbackInChartZero_support_subset_source
+ManifoldForm.transitionPullbackInChartZero_support_subset_target
+ManifoldForm.transitionPullbackInChartZero_support_subset_overlap
+ManifoldForm.transitionPullbackInChartZero_eqOn_transitionPullbackInChart
+ManifoldForm.transitionPullbackInChartZero_localizedForm
+ManifoldForm.transitionPullbackInChartZero_localizedForm_tsupport_subset_halfSpaceSupportBox_of_support_subset_K
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.zeroSupportOfSelectedSmoothRefinement
+\end{lstlisting}
+
+\subsection{Selected regularity and half-space local Stokes}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Stokes/Global/CoverIndexedIntrinsicSelectedRegularityConstructor.lean
+Stokes/HalfSpace/BoxInteriorSmoothness.lean
+Stokes/HalfSpace/BoxInteriorStokes.lean
+Stokes/HalfSpace/Faces.lean
+Stokes/HalfSpace/BoundaryIntegral.lean
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.interiorFieldsOfSelectedSmoothRefinement
+HalfSpaceBoxInteriorStokesFields
+HalfSpaceBoxOpenInteriorSmoothnessFields
+HalfSpaceBoxInteriorStokesFields.ofOpenInteriorSmoothness
+halfSpaceLocalStokes_compactSupport_of_openInteriorSmoothness
+halfSpaceLocalStokes_compactSupport_of_interiorFields
+halfSpaceLocalBoundaryRemainder_eq_zero_of_tsupport_subset_halfSpaceSupportBox
+halfSpaceBoundarySign_eq_outwardFirstBoundaryOrientationSign
+\end{lstlisting}
+
+\subsection{Localized endpoint and intrinsic route}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Stokes/Global/CoverIndexedLocalizedRefinedEndpoint.lean
+Stokes/Global/CoverIndexedZeroLocalizedIntrinsicCertificate.lean
+Stokes/Global/CoverIndexedIntrinsicEndpointConstructor.lean
+Stokes/Global/CoverIndexedIntrinsicRouteConstructor.lean
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+CoverIndexedBoundaryLocalizedRefinedPartition
+CoverIndexedBoundaryLocalizedRefinedPartition.generatedRepresentedBulkIntegral
+CoverIndexedBoundaryLocalizedRefinedPartition.generatedRepresentedBoundaryIntegral
+CoverIndexedBoundaryLocalizedRefinedPartition.representedStokes_of_localStokes
+CoverIndexedBoundaryLocalizedRefinedPartition.ZeroLocalStokesData
+CoverIndexedBoundaryLocalizedRefinedPartition.ZeroLocalStokesData.localStokes_of_interiorFields
+CoverIndexedBoundaryLocalizedRefinedPartition.representedStokes_of_zeroLocalStokesData
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.hasIntrinsicRoute_of_selectedSmoothRefinement
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.hasIntrinsicRoute_intrinsic
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.representedStokes
+\end{lstlisting}
+
+\subsection{Axiom audit command}
+
+The theorem-level audit command is:
+\begin{lstlisting}[language=Lean]
+#print axioms
+  Stokes.CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.representedStokes
+\end{lstlisting}
+The expected axioms are:
+\[
+\code{propext},\quad \code{Classical.choice},\quad \code{Quot.sound}.
+\]

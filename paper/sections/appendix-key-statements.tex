@@ -1,0 +1,132 @@
+\section{Key Lean Statements}
+\label{app:key-statements}
+
+This appendix records simplified versions of the main Lean statements.  The
+snippets omit universe parameters, typeclass context, and many implicit
+arguments.  They are intended as a reader's guide to the formal theorem shapes,
+not as copy-paste source.
+
+\subsection{First-principles input and theorem}
+
+\begin{lstlisting}[language=Lean,basicstyle=\ttfamily\footnotesize]
+structure CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput
+    (I : ModelWithCorners Real (Fin (n + 1) -> Real) H)
+    (omega : ManifoldForm I M n) where
+  chartwiseSmooth : ManifoldForm.ChartwiseSmooth I omega
+  compactSupport : IsCompact (closure (ManifoldForm.support I omega))
+
+def supportCarrier : Set M :=
+  closure (ManifoldForm.support I omega)
+
+def canonicalRepresentedBulkIntegral : Real := ...
+def canonicalRepresentedBoundaryIntegral : Real := ...
+
+theorem representedStokes :
+    X.canonicalRepresentedBulkIntegral =
+      X.canonicalRepresentedBoundaryIntegral
+\end{lstlisting}
+
+Mathematically, this says that chartwise smoothness and compactness of the
+closed support generate the represented local-to-global Stokes route and prove
+equality of the generated endpoints.
+
+\subsection{Zero-localized chart representative}
+
+\begin{lstlisting}[language=Lean,basicstyle=\ttfamily\footnotesize]
+def ManifoldForm.transitionPullbackInChartZero
+    (x0 x1 : M) (omega : ManifoldForm I M n) :
+    (Fin (n + 1) -> Real) ->
+      (Fin (n + 1) -> Real) [/\^Fin n]->L[Real] Real := ...
+
+theorem transitionPullbackInChartZero_support_subset_source :
+    Function.support (transitionPullbackInChartZero I x0 x1 omega) <=
+      (extChartAt I x0).target
+
+theorem transitionPullbackInChartZero_eqOn_transitionPullbackInChart :
+    EqOn (transitionPullbackInChartZero I x0 x1 omega)
+      (transitionPullbackInChart I x0 x1 omega)
+      (ManifoldForm.chartTransitionSource I x0 x1)
+\end{lstlisting}
+
+The zero representative is the formal substitute for the informal convention
+that chart representatives are considered only where charts are valid.
+
+\subsection{Selected zero support}
+
+\begin{lstlisting}[language=Lean,basicstyle=\ttfamily\scriptsize]
+theorem zeroSupportOfSelectedSmoothRefinement :
+    forall i (q : Fin (n + 1) -> Real),
+      q in selectedBoundaryFiniteCover.activePieces i ->
+        tsupport
+          (ManifoldForm.transitionPullbackInChartZero I
+            (selectedCover.boundaryChart i.1)
+            (selectedCover.boundaryChart i.1)
+            (ManifoldForm.localizedForm I
+              (selectedSmoothRefinement.coefficient i <i,q>) omega))
+        <= halfSpaceSupportBox
+            (selectedBoundaryFiniteCover.lowerCorner i q)
+            (selectedBoundaryFiniteCover.upperCorner i q)
+\end{lstlisting}
+
+This is the theorem that turns support-controlled partitions and smooth
+refinement into the support condition used by half-space local Stokes.
+
+\subsection{Half-space local Stokes}
+
+\begin{lstlisting}[language=Lean,basicstyle=\ttfamily\footnotesize]
+structure HalfSpaceBoxInteriorStokesFields
+    (omega : CoordNForm n) (a b : Fin (n + 1) -> Real) where
+  le : a <= b
+  lower_zero : a 0 = 0
+  continuous_signedCoeff : ...
+  hasFDerivAt_signedCoeff : ...
+  integrable_divergence : ...
+  bulk_eq_boxIntegral : ...
+
+theorem halfSpaceLocalStokes_compactSupport_of_interiorFields
+    (D : HalfSpaceBoxInteriorStokesFields omega a b)
+    (hsupp : boxFaceCoeffTSupportInHalfSpaceBox omega a b) :
+    halfSpaceLocalBulkIntegral omega a b =
+      halfSpaceBoundarySign n * halfSpaceBoundaryFormIntegral omega a b
+\end{lstlisting}
+
+The local theorem isolates the true boundary face and removes all artificial
+faces through the support condition.
+
+\subsection{Automatic interior fields}
+
+\begin{lstlisting}[language=Lean,basicstyle=\ttfamily\scriptsize]
+def interiorFieldsOfSelectedSmoothRefinement :
+    forall i, i in Finset.univ ->
+      forall q, q in selectedBoundaryFiniteCover.activePieces i ->
+        HalfSpaceBoxInteriorStokesFields
+          (ManifoldForm.transitionPullbackInChart I
+            (selectedCover.boundaryChart i.1)
+            (selectedCover.boundaryChart i.1)
+            (ManifoldForm.localizedForm I
+              (selectedSmoothRefinement.coefficient i <i,q>) omega))
+          (selectedBoundaryFiniteCover.lowerCorner i q)
+          (selectedBoundaryFiniteCover.upperCorner i q)
+\end{lstlisting}
+
+This constructor is where chartwise smoothness of \(\omega\), smoothness of the
+refined coefficient, and selected box geometry produce the local analytic data
+needed by the half-space theorem.
+
+\subsection{Endpoint reconstruction}
+
+\begin{lstlisting}[language=Lean,basicstyle=\ttfamily\footnotesize]
+def CoverIndexedBoundaryLocalizedRefinedPartition.
+    generatedRepresentedBulkIntegral : Real := ...
+
+def CoverIndexedBoundaryLocalizedRefinedPartition.
+    generatedRepresentedBoundaryIntegral : Real := ...
+
+theorem representedStokes_of_zeroLocalStokesData :
+    endpoint.generatedRepresentedBulkIntegral =
+      endpoint.generatedRepresentedBoundaryIntegral
+\end{lstlisting}
+
+The endpoint theorem sums the per-box local Stokes equalities over the finite
+boundary chart and refined piece indices, producing the represented global
+equality.

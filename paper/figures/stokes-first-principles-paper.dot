@@ -1,0 +1,88 @@
+digraph StokesFirstPrinciplesPaper {
+  graph [
+    rankdir=TB,
+    splines=ortho,
+    overlap=false,
+    bgcolor="transparent",
+    pad=0.20,
+    nodesep=0.38,
+    ranksep=0.44,
+    fontname="Arial"
+  ];
+
+  node [
+    style="filled",
+    fontname="Arial",
+    fontsize=10.5,
+    margin="0.10,0.06",
+    color="#007f36",
+    penwidth=1.2,
+    fillcolor="#1CAC78",
+    shape=box
+  ];
+
+  edge [
+    color="#333333",
+    arrowsize=0.65,
+    fontname="Arial",
+    fontsize=9
+  ];
+
+  public_input [
+    label="Public input:\nChartwiseSmooth omega\n+\ncompact closure(support omega)",
+    penwidth=1.8
+  ];
+  support_carrier [
+    label="supportCarrier :=\nclosure (support omega)"
+  ];
+  pointwise [
+    label="Pointwise chart boxes\nfrom HalfSpaceModel\nand self charts"
+  ];
+  intrinsic_input [
+    label="IntrinsicInput:\npointwise boxes + compact carrier\n+ smoothness + support control"
+  ];
+  selected_cover [
+    label="Open selected cover\nand support-controlled partition"
+  ];
+  finite_cover [
+    label="Finite selected boundary\nhalf-space box cover"
+  ];
+  smooth_refinement [
+    label="Selected smooth refinement\nof boundary active carriers"
+  ];
+  zero_support [
+    label="zeroSupportOfSelectedSmoothRefinement:\nzero-localized support lies in boxes",
+    shape=ellipse
+  ];
+  regularity [
+    label="interiorFieldsOfSelectedSmoothRefinement:\nlocal analytic Stokes fields",
+    shape=ellipse
+  ];
+  intrinsic_route [
+    label="hasIntrinsicRoute_intrinsic",
+    shape=ellipse,
+    penwidth=1.8
+  ];
+  endpoints [
+    label="Canonical represented endpoints:\nBulkRep(d omega), BoundaryRep(omega)"
+  ];
+  theorem [
+    label="representedStokes:\nBulkRep(d omega) = BoundaryRep(omega)",
+    shape=ellipse,
+    penwidth=2.0
+  ];
+
+  public_input -> support_carrier;
+  public_input -> pointwise;
+  support_carrier -> intrinsic_input;
+  pointwise -> intrinsic_input;
+  intrinsic_input -> selected_cover;
+  selected_cover -> finite_cover;
+  finite_cover -> smooth_refinement;
+  smooth_refinement -> zero_support;
+  smooth_refinement -> regularity;
+  zero_support -> intrinsic_route;
+  regularity -> intrinsic_route;
+  intrinsic_route -> endpoints;
+  endpoints -> theorem;
+}

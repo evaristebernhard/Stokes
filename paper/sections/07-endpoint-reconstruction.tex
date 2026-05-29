@@ -1,0 +1,216 @@
+\section{Endpoint Reconstruction}
+\label{sec:endpoint-reconstruction}
+
+After each refined local piece satisfies half-space Stokes, the proof still has
+to reconstruct a global represented equality.  This section explains why the
+endpoint layer is a mathematical component of the formalization rather than a
+renaming of local terms.
+
+\subsection{Nested finite sums}
+
+The selected boundary refinement is indexed in two stages.  There is a finite
+set of boundary chart indices \(i\), and for each \(i\) a finite set of active
+refined pieces \(q\).  The local theorem gives
+\[
+  \code{localBulkTerm}(i,q)=\code{localBoundaryTerm}(i,q)
+\]
+for every active pair.  Summing gives
+\[
+  \sum_i\sum_{q\in Q_i}\code{localBulkTerm}(i,q)
+  =
+  \sum_i\sum_{q\in Q_i}\code{localBoundaryTerm}(i,q).
+\]
+
+In Lean, this is not merely an algebraic observation.  The finite sets
+\(Q_i\) must be definitionally or propositionally connected with the selected
+half-space cover, the smooth refinement, and the local Stokes data.  The
+endpoint structure is designed to keep those indices aligned.
+
+The guiding invariant is that the same active pair \((i,q)\) performs three
+roles at once: it chooses the half-space box, chooses the refined coefficient,
+and appears in the endpoint sum.
+If any of these are separated, the proof acquires adapter fields whose only
+purpose is to prove that two finite descriptions are the same.  The localized
+endpoint layer avoids this by generating the endpoint from the refined pieces
+that already carry the local Stokes data.
+
+\begin{lemma}[Finite endpoint summation]
+\label{lem:endpoint-summation}
+Given a localized refined endpoint with finite boundary pieces \(Q_i\), if
+\[
+  B_{i,q}=C_{i,q}
+\]
+for every active refined piece \(q\in Q_i\), then the generated represented
+endpoints satisfy
+\[
+  \sum_i\sum_{q\in Q_i} B_{i,q}
+  =
+  \sum_i\sum_{q\in Q_i} C_{i,q}.
+\]
+The Lean endpoint layer instantiates \(B_{i,q}\) as
+\code{localBulkTerm i q} and \(C_{i,q}\) as
+\code{localBoundaryTerm i q}.
+\end{lemma}
+
+The lemma looks elementary, but its Lean version is valuable because it fixes
+the finite index family once and for all.  The same membership proof
+\(q\in Q_i\) is used to access the box corners, the coefficient, the local
+form, the zero-support theorem, and the local Stokes fields.  This prevents
+the proof from silently changing finite sums when moving between local and
+global layers.
+
+The proof itself has three algebraic steps.  First, it rewrites the generated
+bulk endpoint as the nested sum of the local bulk terms.  Second, it rewrites
+each local bulk term using the per-box Stokes equality.  Third, it folds the
+resulting nested sum back into the generated boundary endpoint.  In a paper
+proof these are often collapsed into the phrase ``summing over the cover.''
+In Lean they are separate because every sum carries its index type and
+membership conditions.
+
+\subsection{Localized refined partitions}
+
+The core endpoint structure is
+\[
+\code{CoverIndexedBoundaryLocalizedRefinedPartition}.
+\]
+It stores the refined boundary pieces and the generated local bulk and
+boundary terms.  Its definitions
+\[
+\code{generatedRepresentedBulkIntegral}
+\]
+and
+\[
+\code{generatedRepresentedBoundaryIntegral}
+\]
+are the represented endpoints at this layer.  The theorem
+\[
+\code{representedStokes_of_localStokes}
+\]
+turns a finite family of local equalities into equality of these generated
+endpoints.
+
+The zero-localized route refines this through
+\[
+\code{CoverIndexedBoundaryLocalizedRefinedPartition.ZeroLocalStokesData}.
+\]
+This record stores the specific local data needed to apply the half-space
+local theorem to zero-localized representatives.  It includes source and
+target charts, local forms, box corners, zero-support information, and the
+local terms whose equality will be summed.
+
+The localized refined partition is intentionally smaller than the older global
+endpoint certificates.  It does not attempt to encode every possible future
+native integral comparison.  It records the data needed to state and prove the
+represented finite-sum equality.  This makes it a stable target: future
+comparison theorems can map from this generated endpoint to native integrals
+without changing the local Stokes proof.
+
+This design also prevents the represented theorem from depending on a future
+choice of native manifold integration API.  The endpoint structure fixes the
+finite coordinate equality now; a later native bridge can prove that this
+finite coordinate quantity agrees with a chosen global integral definition.
+
+\subsection{From zero local Stokes data to endpoints}
+
+The theorem
+\[
+\code{ZeroLocalStokesData.localStokes_of_interiorFields}
+\]
+builds the per-box local Stokes equality from interior fields and zero support.
+Then
+\[
+\code{boundaryHalfSpaceBulkSum_eq_trueBoundarySum_of_zeroLocalStokesData}
+\]
+proves the nested finite-sum equality.  Finally,
+\[
+\code{representedStokes_of_zeroLocalStokesData}
+\]
+reconstructs equality of the generated represented endpoints.
+
+\begin{theorem}[Zero-localized endpoint reconstruction]
+For the localized refined partition generated by the intrinsic route, the
+combination of zero support and half-space interior fields implies equality of
+the generated represented bulk and boundary endpoints.  In Lean this is the
+role of:
+\begin{lstlisting}[language=Lean]
+CoverIndexedBoundaryLocalizedRefinedPartition.
+  representedStokes_of_zeroLocalStokesData
+\end{lstlisting}
+\end{theorem}
+
+The first-principles route uses the constructor
+\[
+\code{hasIntrinsicRoute_of_selectedSmoothRefinement}
+\]
+to assemble the endpoint, zero-localized local data, boundary piece equality,
+zero support, and interior fields into an intrinsic certificate.  Once the
+canonical selected smooth refinement supplies the last two ingredients, the
+intrinsic route has a canonical endpoint equality.
+
+The role of this constructor is precisely to avoid exposing an endpoint
+adapter to the final user.  It proves that the endpoint, local Stokes data,
+zero-support theorem, and regularity fields are all generated from the same
+selected smooth refinement.  Thus the endpoint equality is not imported from
+outside the proof; it is assembled from the local Stokes theorem over the
+canonical finite route.
+
+\subsection{Canonical endpoints at the top level}
+
+The intrinsic input defines
+\[
+\code{canonicalRepresentedBulkIntegral}
+\quad\text{and}\quad
+\code{canonicalRepresentedBoundaryIntegral}
+\]
+by choosing the route generated from the canonical selected smooth refinement:
+\[
+\code{hasIntrinsicRoute_intrinsic}.
+\]
+The first-principles input then projects these endpoints through its generated
+intrinsic input.  Thus the top-level definitions are not external names.  They
+are the endpoint definitions induced by the canonical finite selected route.
+
+\subsection{Why reconstruction matters}
+
+Endpoint reconstruction is where the represented theorem becomes global.  The
+half-space local theorem knows only about one coordinate box.  Zero-localized
+support knows only how to kill artificial faces for one refined representative.
+Compactness and refinement know how to generate finitely many such pieces.
+The endpoint layer proves that all of these local facts assemble into one
+equality between the two canonical represented quantities associated with the
+input form.
+
+This is also the layer that makes the represented-to-native future work
+well-posed.  A future theorem comparing represented endpoints with native
+manifold integrals can target
+\[
+\code{canonicalRepresentedBulkIntegral}
+\quad\text{and}\quad
+\code{canonicalRepresentedBoundaryIntegral}
+\]
+directly.  It does not need to rediscover the local proof route.
+
+There is an important conceptual payoff here.  The proof does not define a
+global endpoint first and then ask local lemmas to match it.  Instead, the
+endpoint is generated from the same local pieces used by the proof.  This
+removes a common source of mismatch in large formalizations: the local theorem,
+the summation theorem, and the final theorem all quantify over the same finite
+piece data.
+
+This is why the word canonical is warranted in the represented theorem.  It
+does not mean independent of every possible choice of partition or chart cover;
+that would be the native comparison problem.  It means canonical relative to
+the generated first-principles route: once the input form is fixed, the route
+constructs a selected finite proof object, and the endpoints are the finite
+sums determined by that object.
+
+\subsection{What remains for native integrals}
+
+Endpoint reconstruction stops at the finite coordinate equality.  To obtain a
+future native theorem, one must prove two comparison results.  The bulk
+comparison identifies the represented bulk sum with the chosen definition of
+\(\int_M\dd\omega\).  The boundary comparison identifies the represented
+lower-face sum with the chosen definition of \(\int_{\partial M}\omega\) under
+the global boundary orientation.  These comparisons are logically downstream
+from the represented theorem: they should not be mixed into the proof that the
+finite coordinate endpoints are equal.

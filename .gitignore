@@ -1,5 +1,6 @@
 target/
 external/
+archive/nodal-surfaces/
 .lake/
 tmp/
 Scratch.lean
@@ -10,3 +11,11 @@ blueprint/src/*.log
 blueprint/src/*.out
 blueprint/src/*.pdf
 !blueprint/stokes-blueprint.pdf
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.fls
+paper/*.fdb_latexmk

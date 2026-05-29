@@ -1,0 +1,230 @@
+\section{The Represented Stokes Theorem}
+\label{sec:represented-stokes}
+
+The central statement of this artifact is a represented Stokes theorem.  The
+word represented is meant in the same mathematical spirit as a represented
+measure, a coordinate expression, or a chain-level representative: the theorem
+chooses a canonical finite coordinate expression produced by the proof and
+proves Stokes at that level.  It is not a statement about approximation, and it
+is not a placeholder for a missing equality.
+
+\subsection{The classical finite-coordinate endpoint}
+
+Let \(\omega\) be a compactly supported \(n\)-form on a manifold modeled on a
+half-space.  The usual proof of Stokes begins by choosing a finite family of
+charts and a partition of unity \((\rho_j)\) on the compact support.  The bulk
+side is decomposed formally as
+\[
+  \int_M \dd\omega
+  =
+  \sum_j \int_M \dd(\rho_j\omega),
+\]
+up to the standard partition and support arguments.  For interior charts, the
+coordinate theorem reduces the local term to an ordinary box theorem whose
+boundary contributions are artificial and vanish by support.  For boundary
+charts, each localized term is further refined into finitely many half-space
+boxes.  On such a box \(Q_{i,q}\), the local theorem gives a term of the form
+\[
+  B_{i,q}(\omega) = C_{i,q}(\omega),
+\]
+where \(B_{i,q}\) is the local bulk integral of the coordinate representative
+of a localized form and \(C_{i,q}\) is the true lower-face boundary contribution
+with the half-space boundary sign.
+
+The represented bulk endpoint is the nested finite sum of the \(B_{i,q}\).  The
+represented boundary endpoint is the nested finite sum of the \(C_{i,q}\).  In
+schematic form,
+\[
+  \BulkRep(\omega)
+    = \sum_i \sum_{q \in Q_i} B_{i,q}(\omega),
+  \qquad
+  \BoundaryRep(\omega)
+    = \sum_i \sum_{q \in Q_i} C_{i,q}(\omega).
+\]
+The theorem proves \(\BulkRep(\omega)=\BoundaryRep(\omega)\) for the canonical
+finite data generated from compact support and chartwise smoothness.
+
+\begin{definition}[Represented Stokes route]
+A represented Stokes route for a compactly supported form consists of finite
+boundary chart indices \(i\), finite refined half-space pieces \(q\in Q_i\),
+box corners \(a_{i,q}\le b_{i,q}\) with \((a_{i,q})_0=0\), localized
+coefficients \(\rho_{i,q}\), and coordinate representatives
+\(\alpha_{i,q}\) satisfying the following conditions.
+\begin{enumerate}
+  \item The coefficients arise from a support-controlled partition and smooth
+  refinement of the compact carrier.
+  \item The topological support of \(\alpha_{i,q}\) is contained in the
+  assigned half-space support box, so every artificial face of the coordinate
+  box gives zero.
+  \item The representative \(\alpha_{i,q}\) satisfies the open-interior and
+  closed-box regularity assumptions needed for the half-space local theorem.
+  \item The local bulk and lower-face boundary terms assemble into generated
+  finite endpoint sums.
+\end{enumerate}
+The represented endpoints of the route are the two finite sums produced by the
+last item.
+\end{definition}
+
+The Lean construction makes this definition concrete.  The endpoint layer
+stores the refined pieces and local terms in
+\code{CoverIndexedBoundaryLocalizedRefinedPartition}; the zero-localized
+certificate supplies the support condition; and the selected regularity
+constructor supplies the analytic fields.  The first-principles theorem proves
+that the route exists canonically from the theorem hypotheses.
+
+\subsection{Endpoint algebra}
+
+The represented endpoint is best understood as a finite algebraic object.  For
+each active pair \((i,q)\), the route assigns a localized coefficient
+\(\rho_{i,q}\), a boundary chart \(x_i\), and half-space box corners
+\((a_{i,q},b_{i,q})\).  The local bulk term has the form
+\[
+  B_{i,q}
+  =
+  \int_{[a_{i,q},b_{i,q}]}
+    \operatorname{coeff}_{\mathrm{top}}
+      \bigl(\dd(\operatorname{ZeroRep}_{x_i,x_i}(\rho_{i,q}\omega))\bigr),
+\]
+where the integral notation abbreviates the coordinate box integral used by
+the formal local theorem.  The boundary term is
+\[
+  C_{i,q}
+  =
+  \operatorname{sgn}_{\partial\HH}
+  \int_{\{x_0=0\}\cap [a_{i,q},b_{i,q}]}
+    \operatorname{coeff}_{\partial}
+      \bigl(\operatorname{ZeroRep}_{x_i,x_i}(\rho_{i,q}\omega)\bigr).
+\]
+The represented endpoints are then exactly
+\[
+  \BulkRep(\omega)=\sum_i\sum_{q\in Q_i} B_{i,q},
+  \qquad
+  \BoundaryRep(\omega)=\sum_i\sum_{q\in Q_i} C_{i,q}.
+\]
+
+This display is schematic, but it captures the formal structure: both
+endpoints use the same finite selected pieces, the same refined coefficients,
+and the same chart choices.  The local Stokes theorem proves \(B_{i,q}=C_{i,q}\)
+piecewise; endpoint reconstruction proves that summing these equalities gives
+the equality of the generated endpoint definitions.
+
+This is exactly the equality obtained in the middle of the textbook proof,
+after localization and before comparison with a global manifold integration
+interface.  In informal mathematics one usually identifies this finite
+coordinate expression with the left and right sides of the global theorem
+immediately.  In Lean, that comparison should be a theorem about the chosen
+global integration API.  The present work isolates and proves the coordinate
+Stokes content independently of that future comparison layer.
+
+\subsection{What is generated, and what is not supplied}
+
+The strongest evidence that the represented endpoints are mathematical rather
+than arbitrary is their construction.  In the final route, the user does not
+provide the endpoints.  The top-level structure
+\[
+\code{CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput}
+\]
+has two fields:
+\begin{lstlisting}[language=Lean]
+structure CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput
+    (I : ModelWithCorners Real (Fin (n + 1) -> Real) H)
+    (omega : ManifoldForm I M n) where
+  chartwiseSmooth : ManifoldForm.ChartwiseSmooth I omega
+  compactSupport : IsCompact (closure (ManifoldForm.support I omega))
+\end{lstlisting}
+The canonical bulk and boundary endpoints are definitions in the namespace of
+this structure:
+\begin{lstlisting}[language=Lean]
+def canonicalRepresentedBulkIntegral : Real := ...
+def canonicalRepresentedBoundaryIntegral : Real := ...
+\end{lstlisting}
+They are obtained by first building an intrinsic input on the compact carrier
+\(\overline{\supp(\omega)}\), then following the canonical selected-cover and
+refinement route.  The theorem is:
+\begin{lstlisting}[language=Lean]
+theorem representedStokes :
+    X.canonicalRepresentedBulkIntegral (I := I) (omega := omega) =
+      X.canonicalRepresentedBoundaryIntegral (I := I) (omega := omega)
+\end{lstlisting}
+
+This shape matters.  A certificate-consuming theorem would have asked the user
+to provide a finite cover, local Stokes data, endpoint adapters, and finally
+the names of the two real numbers to compare.  The first-principles theorem
+does the opposite.  It internalizes the choices and exposes the generated
+endpoint names as projections of the proof route.
+
+The noncomputable choices inside the proof do not weaken the statement.  They
+are the ordinary choices already present in the classical proof: finite
+subcovers and subordinate partitions.  The theorem fixes a construction path
+and proves the equality for the endpoints generated by that path.  A future
+native-integral comparison theorem can then prove that these generated
+endpoints agree with a chart-independent integral, but the Stokes equality of
+the generated endpoints is already a theorem.
+
+\subsection{The represented-to-native boundary}
+
+The represented theorem should be read as a theorem at a stable mathematical
+boundary.  It proves the finite coordinate equality produced by the classical
+proof.  It does not yet assert:
+\[
+  \BulkRep(\omega) = \int_M \dd\omega,
+  \qquad
+  \BoundaryRep(\omega) = \int_{\partial M} \omega
+\]
+for a particular future or external native manifold integration API.  Such a
+comparison requires a convention for integrating differential forms over
+oriented manifolds with boundary in mathlib, boundary orientation data, measure
+normalization, chart-independence theorems, and partition-independence
+theorems.
+
+The distinction is useful rather than apologetic.  It separates two logically
+different parts of Stokes:
+\begin{itemize}
+  \item the local-to-global Stokes proof, where compact support, charts,
+  partitions, half-space boxes, artificial faces, and signs are handled;
+  \item the representation theorem identifying the resulting finite coordinate
+  sums with a native manifold integral interface.
+\end{itemize}
+The artifact formalizes the first part at scale.  The second part is the
+natural next interface once a suitable native integration API is available.
+
+\subsection{Why represented endpoints are canonical}
+
+There are several sources of noncomputability in the theorem: finite
+subcovers, partitions of unity, and choices of refinements.  This does not make
+the endpoint arbitrary.  In Lean, ``canonical'' here means canonical relative
+to the chosen construction path in the theorem namespace.  The endpoint is
+defined by that path, and the theorem proves equality for those generated
+definitions.  This is analogous to choosing a proof-generated representative
+in homological algebra and proving a chain-level equality before proving
+independence of representative.
+
+The formal route fixes the carrier \(K\), extracts a selected open cover from
+pointwise chart-box data, constructs a support-controlled partition, refines
+boundary active carriers, builds local zero-localized Stokes data, and then
+defines the endpoints by finite sums over the resulting boundary pieces.  Thus
+the represented values are stable enough to state, audit, and use as the target
+of future native comparison theorems.
+
+\begin{theorem}[Represented local-to-global Stokes, mathematical reading]
+Let \(\omega\) be a chartwise smooth compactly supported \(n\)-form in the
+half-space model context of the artifact.  For the finite represented Stokes
+route generated from \(\overline{\supp(\omega)}\), every refined local
+half-space term satisfies local Stokes, artificial coordinate faces vanish, and
+therefore the generated represented endpoints satisfy
+\[
+  \BulkRep(\omega)=\BoundaryRep(\omega).
+\]
+\end{theorem}
+
+\begin{definition}[Coordinate-represented compact-support Stokes]
+In this paper, a coordinate-represented compact-support Stokes theorem is a
+Lean theorem which, from chartwise smoothness and compactness of the closed
+support, constructs finite coordinate data following the standard local proof
+and proves equality of the generated finite bulk and boundary coordinate
+endpoints.
+\end{definition}
+
+This definition is the claim made by the artifact.  It is deliberately stronger
+than a local Euclidean theorem and deliberately narrower than a full
+mathlib-native manifold integral statement.

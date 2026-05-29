@@ -1,0 +1,304 @@
+\section{Support and Zero-Localization}
+\label{sec:zero-localization}
+
+The most deceptive obstacle in the formalization is support.  Mathematicians
+habitually speak about a chart representative only where the chart is defined.
+Lean does not.  A chart representative is a total function, and its support is
+a global statement about that total function.  The central discovery of this
+part of the development is that the problem cannot be solved by asking for a
+stronger support hypothesis on the same representative.  The representative
+itself has to be changed.
+
+\subsection{The false support theorem}
+
+Suppose \(\rho\) is a partition coefficient and \(\omega\) is a form.  A paper
+proof may say that the coordinate representative of \(\rho\omega\) is
+supported in a coordinate box \(Q\).  In Lean, the corresponding ordinary
+representative is
+\[
+\code{ManifoldForm.transitionPullbackInChart}.
+\]
+It has a value at every coordinate point.  Outside the chart source, target, or
+overlap, those values are artifacts of totalization.  Thus a theorem of the
+form
+\[
+\tsupp(\code{transitionPullbackInChart}(\rho\omega)) \subseteq Q
+\]
+may be too strong or simply unrelated to the informal argument.  It asks Lean
+to control the chart representative even at points where the coordinate
+description should not be considered part of the local proof.
+
+This problem explains several early certificate fields in the development.  It
+is easy to request a support assumption from the user.  It is harder, and more
+mathematically faithful, to prove the right theorem from compact support and
+partition support control.  The right theorem is not about the unrestricted
+total representative.
+
+One can view the issue as a small counterexample pattern.  Suppose a chart
+expression is mathematically intended only on a set \(U\), but Lean represents
+it by some total function \(f : E \to V\).  Even if \(f\) is perfectly
+controlled on \(U\), its values on \(E\setminus U\) may enlarge
+\(\operatorname{support}(f)\).  A theorem about \(\operatorname{support}(f)\)
+is therefore not the same as a theorem about the local representative on
+\(U\).  The zero-localized representative replaces \(f\) by
+\[
+  y\mapsto
+  \begin{cases}
+    f(y), & y\in U,\\
+    0, & y\notin U,
+  \end{cases}
+\]
+so that global support again expresses the intended local support.  This is a
+change of object, not a notational convenience.
+
+\begin{remark}[The false support theorem]
+The tempting theorem is:
+\[
+  \tsupp(\code{transitionPullbackInChart}(\rho\omega))\subseteq Q.
+\]
+The formalization treats this as the wrong target.  The values of
+\code{transitionPullbackInChart} outside the transition source are present
+because Lean functions are total, not because the local coordinate proof has
+mathematical content there.  Strengthening the hypotheses to control those
+values would make the final theorem depend on an artifact of representation.
+The corrected target is the same inclusion for the zero-localized
+representative, together with an agreement theorem on the transition source.
+\end{remark}
+
+\subsection{Zero outside the chart domain}
+
+The project introduces a zero-localized representative:
+\[
+\code{ManifoldForm.transitionPullbackInChartZero}.
+\]
+It agrees with \code{transitionPullbackInChart} on the relevant chart source
+and is zero outside.  The basic API proves:
+\begin{itemize}
+  \item support is contained in the source;
+  \item support is contained in the target;
+  \item support is contained in the overlap;
+  \item the zero representative agrees with the ordinary representative on
+  the chart source.
+\end{itemize}
+The core names are:
+\begin{lstlisting}[language=Lean]
+transitionPullbackInChartZero_support_subset_source
+transitionPullbackInChartZero_support_subset_target
+transitionPullbackInChartZero_support_subset_overlap
+transitionPullbackInChartZero_eqOn_transitionPullbackInChart
+\end{lstlisting}
+
+This changes the meaning of support control.  Instead of proving that a
+totalized chart function behaves well outside its mathematical domain, the
+proof makes the representative zero there by definition and proves support
+properties for the resulting function.  The point is not simply that zero
+extension is available; it is that the zero extension is the formal object
+corresponding to the informal phrase ``the local chart representative''.
+
+The equality theorem is as important as the support theorem.  The zero
+representative must agree with the ordinary representative on the region where
+local integration is performed; otherwise the theorem would prove Stokes for a
+different object.  This is why the API includes both support inclusions and
+agreement theorems such as
+\code{transitionPullbackInChartZero_eqOn_transitionPullbackInChart}.
+
+The zero-localization API therefore has a three-part mathematical shape:
+\[
+\begin{array}{ll}
+\text{definition} & \text{make the off-source representative zero},\\
+\text{support theorem} & \text{prove source, target, and overlap support},\\
+\text{agreement theorem} & \text{recover the ordinary chart expression on the
+source}.
+\end{array}
+\]
+All three are needed.  The definition alone would give a different
+representative; the agreement theorem makes it harmless for integration on
+the selected box; the support theorem makes artificial-face cancellation
+available.
+
+\subsection{Localized forms}
+
+The global proof uses localized forms \(\rho\omega\).  Zero-localization has to
+interact with localization.  The theorem
+\[
+\code{ManifoldForm.transitionPullbackInChartZero_localizedForm}
+\]
+rewrites the zero-localized representative of a localized form as the product
+of the coefficient representative and the zero-localized representative of the
+base form.  From this, the project proves support inclusions such as
+\[
+\code{transitionPullbackInChartZero_localizedForm_tsupport_subset_coefficient}
+\]
+and
+\[
+\code{transitionPullbackInChartZero_localizedForm_tsupport_subset_form}.
+\]
+
+The decisive bridge is:
+\begin{lstlisting}[language=Lean,basicstyle=\ttfamily\scriptsize]
+transitionPullbackInChartZero_localizedForm_tsupport_subset_halfSpaceSupportBox_of_support_subset_K
+\end{lstlisting}
+It formalizes the following argument:
+\[
+\begin{array}{c}
+\supp(\omega)\subseteq K,\\
+\tsupp(\rho)\cap K\text{ is controlled by the selected chart box},\\
+\text{the coordinate image of the active carrier is controlled},\\
+\hline
+\tsupp(\text{zero-localized representative of }\rho\omega)
+  \subseteq \text{selected half-space support box}.
+\end{array}
+\]
+This is the support theorem the half-space local Stokes layer needs.
+
+\begin{lemma}[Zero-localized support bridge]
+\label{lem:zero-support}
+Let \(K\) be a compact carrier containing \(\supp(\omega)\).  Let \(\rho\) be a
+localization coefficient whose topological support on \(K\) is contained in a
+coordinate carrier, and suppose that the coordinate image of that carrier is
+contained in a half-space support box \(Q(a,b)\).  Then the zero-localized chart
+representative of \(\rho\omega\) has topological support contained in
+\(Q(a,b)\).
+\end{lemma}
+
+This lemma is the formal replacement for the informal statement that
+``\(\rho\omega\) is supported in the selected box.''  The latter statement is
+ambiguous in a total-function setting; the former is a precise theorem about
+the representative actually used by the local Stokes theorem.
+
+At the level of Lean proof dependencies, the bridge decomposes as follows:
+\[
+\begin{array}{c}
+\tsupp(\operatorname{ZeroRep}(\rho\omega))
+  \subseteq
+  \tsupp(\rho\text{ in chart}),\\[2mm]
+\tsupp(\operatorname{ZeroRep}(\rho\omega))
+  \subseteq
+  \tsupp(\operatorname{ZeroRep}(\omega)),\\[2mm]
+\tsupp(\operatorname{ZeroRep}(\omega))
+  \subseteq \operatorname{chartImage}(K),\\[2mm]
+\tsupp(\rho\text{ in chart})\cap \operatorname{chartImage}(K)
+  \subseteq Q(a,b),\\[2mm]
+\hline
+\tsupp(\operatorname{ZeroRep}(\rho\omega))\subseteq Q(a,b).
+\end{array}
+\]
+The first two inclusions are product-support facts.  The third is the global
+compact-support input transported through the zero representative.  The last
+line is the selected-refinement support control.  Their combination is exactly
+the support bridge displayed above.
+
+There are two support operations in the proof.  Ordinary support is algebraic:
+it records where a function is nonzero.  Topological support is the closure of
+ordinary support and is the right object for face-disjointness and vanishing
+integrals.  The development therefore does not stop at ordinary nonzero-set
+control.  The final local Stokes input is a \(\tsupp\)-level inclusion into a
+selected half-space support region.  That region is designed to allow contact
+with the true boundary face \(x_0=0\) while strictly avoiding the artificial
+faces of the coordinate box.
+
+\subsection{Selected smooth refinement}
+
+The final route applies the preceding bridge to the canonical smooth
+refinement selected by the first-principles theorem.  The theorem is:
+\begin{lstlisting}[language=Lean]
+CoverIndexedZeroCompactRepresentedStokesIntrinsicInput.
+  zeroSupportOfSelectedSmoothRefinement
+\end{lstlisting}
+states that for every selected boundary index \(i\) and active refined
+half-space piece \(q\), the topological support of the zero-localized
+representative of the refined localized form is contained in the selected
+half-space support box:
+\[
+\tsupp
+  \left(
+    \operatorname{ZeroRep}
+    \bigl(\rho_{i,q}\omega\bigr)
+  \right)
+  \subseteq
+  \code{halfSpaceSupportBox}(a_{i,q},b_{i,q}).
+\]
+Here \(\rho_{i,q}\) is not a user-supplied coefficient.  It is the coefficient
+generated by the selected smooth refinement.
+
+This point is crucial for the first-principles theorem.  If \(\rho_{i,q}\)
+were arbitrary, the zero-support theorem would be false.  It is true because
+\(\rho_{i,q}\) is built from the selected boundary partition and the selected
+smooth subpartition, both of which carry support-control data from the
+compactness construction.
+
+The proof uses a two-stage localization identity.  The refined coefficient is
+the product of the selected boundary partition coefficient and the smooth
+subpartition coefficient.  The proof rewrites
+\[
+  \rho_{i,q}\omega
+  =
+  \theta_{i,q}(\rho_i\omega)
+\]
+and then uses the support of \(\rho_i\omega\) to place the form in the
+boundary active carrier, while the support of \(\theta_{i,q}\) places the
+coordinate representative inside the refined half-space box.
+
+\begin{proof}[Proof idea for the selected theorem]
+The proof first shows that the boundary-localized form \(\rho_i\omega\) is
+supported in the boundary active carrier.  This uses the algebraic fact that
+support of a localized form is contained in the support of the coefficient and
+in the support of the original form, together with
+\(\supp(\omega)\subseteq K\).  Next, the smooth subpartition coefficient
+\(\theta_{i,q}\) is known, on that active carrier, to be supported inside the
+selected refined half-space box.  The zero-localized product formula transfers
+these two support facts to the chart representative.  The proof is carried out
+at the level of topological support for the coefficient and the zero base
+representative, using the product-support inclusions
+\[
+  \tsupp(fg)\subseteq\tsupp(f),
+  \qquad
+  \tsupp(fg)\subseteq\tsupp(g).
+\]
+Thus the theorem delivered to the half-space layer is already the required
+\(\tsupp\)-inclusion; it is not a fragile ordinary-support statement later
+patched by hand.
+\end{proof}
+
+\subsection{Ordinary support versus topological support}
+
+Another formal distinction is ordinary support versus topological support.
+Many algebraic arguments first show that if a function is nonzero at a point,
+then that point lies in a desired set.  But artificial-face vanishing is a
+closed-support statement.  The theorem must control
+\[
+  \tsupp(f)=\overline{\{x\mid f(x)\ne0\}}.
+\]
+In the half-space box proof the target support region is not a naive closed
+box.  The set \(\code{halfSpaceSupportBox}(a,b)\) allows the support to meet
+the true lower normal face, but uses strict inequalities in the directions
+corresponding to artificial faces.  This is exactly the geometry needed by the
+face-cancellation theorem: it proves that the artificial face set is disjoint
+from the topological support.  Consequently the proof is organized to produce
+\(\tsupp\)-statements directly for the localized coefficients and
+zero-localized representatives.
+
+Closed-set upgrades still appear in the surrounding support infrastructure in
+the familiar form
+\[
+  \operatorname{support}(f)\subseteq C,\quad C\text{ closed}
+  \quad\Longrightarrow\quad
+  \tsupp(f)\subseteq C.
+\]
+But the final half-space input is more specific: it is a topological-support
+inclusion into a region chosen so that artificial faces are avoided and the
+true boundary face is retained.  This is why the support theorem is not merely
+``the coefficient is zero on the face.''  It is a coordinated package of
+zero-extension, product support, compact carrier support, and half-space box
+geometry.
+
+\subsection{Contribution to the global theorem}
+
+Zero-localized support is the bridge between compact finite data and local
+Stokes.  The support-controlled partition and smooth refinement produce
+coefficient support information.  Zero-localization turns it into support
+information for the coordinate form representative.  The half-space layer then
+uses that support information to remove artificial faces.  Without this bridge,
+the final theorem would have to expose an unnatural support assumption for
+ordinary total chart representatives.  With it, the first-principles theorem
+requires no such field.

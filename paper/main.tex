@@ -1,0 +1,133 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1.05in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage[colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+
+\setlist[itemize]{leftmargin=1.4em}
+\setlist[enumerate]{leftmargin=1.6em}
+\sloppy
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\tsupp}{\operatorname{tsupp}}
+\newcommand{\BulkRep}{\operatorname{BulkRep}}
+\newcommand{\BoundaryRep}{\operatorname{BoundaryRep}}
+\newcommand{\Lean}{Lean 4}
+\newcommand{\mathlib}{mathlib}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
+\lstdefinelanguage{Lean}{
+  morekeywords={
+    theorem,def,structure,where,by,namespace,end,variable,variables,
+    import,noncomputable,section,open,scoped,class,Prop,Type,Sort,
+    if,then,else,let,have,show,exact,refine,fun,forall
+  },
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]"
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  frame=single,
+  framerule=0.3pt,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+\newcommand{\HH}{\mathbb{H}}
+
+\title{Formalizing Compactly Supported Stokes' Theorem in Lean 4 via Coordinate-Represented Integrals}
+\author{Chaoyu Hu\thanks{Artifact repository:
+\url{https://github.com/evaristebernhard/Stokes}.}\\
+Hangzhou Dianzi University\\
+\texttt{evaristebernhardwiener@gmail.com}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We present a large-scale \Lean{} formalization of the local-to-global core of
+the compactly supported Stokes theorem for manifolds modeled on a half-space.
+The main public theorem is a coordinate-represented compact-support Stokes
+theorem: from chartwise smoothness of an \(n\)-form and compactness of the
+closure of its support, the development constructs a finite chart-box
+localization, support-controlled smooth refinements, zero-localized chart
+representatives, half-space local Stokes data, and canonical represented bulk
+and boundary endpoints, and proves that the two endpoints are equal.
+
+The adjective ``represented'' is a precise statement about the theorem's
+interface.  The endpoints are the finite coordinate sums produced by the
+classical proof after choosing charts, boxes, and a partition of unity.  They
+are not approximations, placeholders, or user-supplied certificates.  The
+formalization proves the substantive Stokes proof payload at this represented
+level: compact support is turned into finite data, totalized chart
+representatives are replaced by zero-localized representatives, artificial box
+faces vanish by topological support control, the lower half-space face carries
+the outward-first boundary sign, and the local identities are reconstructed as
+global represented endpoints.
+
+The active project contains 544 Lean files and about \(1.65\times 10^5\) lines
+under \code{Stokes/}.  The preferred public entry point is the
+first-principles \code{representedStokes} theorem; its public fields are
+chartwise smoothness and compactness of the closed support.  The artifact
+builds without \code{sorry}, \code{admit}, or project axioms, and the
+theorem-level axiom audit reports only the standard Lean/mathlib axioms
+\code{propext}, \code{Classical.choice}, and \code{Quot.sound}.  A central
+engineering contribution is the passage from certificate-consuming theorem
+shapes to a certificate-generating one: finite covers, refinements,
+zero-support facts, local regularity fields, and endpoint reconstruction are
+not public hypotheses, but consequences constructed by the proof.  What
+remains beyond the present claim is the comparison of the represented
+endpoints with a future or external mathlib-native manifold integration API.
+\end{abstract}
+
+\tableofcontents
+
+\input{sections/01-introduction}
+\input{sections/02-represented-stokes}
+\input{sections/03-proof-decomposition}
+\input{sections/03-formalization-obstacles}
+\input{sections/04-halfspace-local-stokes}
+\input{sections/05-zero-localization}
+\input{sections/06-compact-finite-data}
+\input{sections/07-endpoint-reconstruction}
+\input{sections/08-main-theorem}
+\input{sections/09-artifact-scale}
+\input{sections/10-related-work}
+\input{sections/11-limitations}
+
+\section*{Acknowledgements}
+The author used AI-assisted programming and proof-engineering tools during the
+development of the Lean artifact and the preparation of this manuscript.  All
+mathematical statements, Lean theorem references, citations, and final claims
+were reviewed and are the responsibility of the author.
+
+\appendix
+\input{sections/appendix-key-statements}
+\input{sections/appendix-proof-obligations}
+\input{sections/appendix-theorem-index}
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
