@@ -1,194 +1,368 @@
-# Lean 4 Stokes Formalization Workspace
+# Formalizing Compactly Supported Stokes' Theorem in Lean 4
 
-This repository is pivoting to a Lean 4 formalization project for Stokes'
-theorem, with the long-term target including smooth manifolds with boundary.
+This repository contains a large Lean 4 formalization artifact for a
+coordinate-represented compact-support version of Stokes' theorem.
 
-## Current Direction
+The preferred public theorem is:
 
-Working goal:
-
-```text
-local Euclidean Stokes -> differential-form integration -> manifold Stokes
+```lean
+Stokes.CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.representedStokes
 ```
 
-The project should build on mathlib's existing analysis, differential-form, and
-smooth-manifold infrastructure. The first milestones are Euclidean box Stokes,
-smooth singular cubes, and a clean bridge to mathlib's `extDeriv`; the later
-milestones add chartwise integration, orientation, boundary orientation, and
-global manifold integration.
+It states, in the half-space model context, that chartwise smoothness of a
+form and compactness of the closure of its support generate a canonical
+finite coordinate Stokes route and prove equality of the generated represented
+bulk and boundary endpoints.
 
-See [ROADMAP.md](ROADMAP.md) for the external progress review and staged plan.
-
-## Current Lean Baseline
-
-The root Lake project is pinned to Lean 4.29.1 and imports the LeanStokes prior
-artifact at commit `adffb99be9fd00a42369561068c9d11475cbedb8`.
-
-The first project modules are:
+In slogan form:
 
 ```text
-Stokes.Box
-Stokes.SingularCube
-Stokes.ManifoldForm
-Stokes.HalfSpace
+chartwise smoothness + compact closed support
+  => finite chart-box decomposition
+  => support-controlled smooth refinement
+  => zero-localized chart representatives
+  => half-space local Stokes on refined boxes
+  => equality of canonical represented endpoints
 ```
 
-They expose the current baseline theorems under the `Stokes` namespace:
+## Draft Paper
 
-- `Stokes.box_stokes_on_box`
-- `Stokes.box_stokes_extDeriv_smooth`
-- `Stokes.singular_pullback_extDeriv`
-- `Stokes.singular_cube_stokes`
-- `Stokes.singular_cube_boundary_stokes`
-- `Stokes.singular_cube_chain_stokes`
-- `Stokes.singular_chain_stokes`
-- `Stokes.singular_boundary_boundary_zero`
-- `Stokes.singular_boundary_boundary_zero_general`
-- `Stokes.ModelForm`
-- `Stokes.ManifoldForm`
-- `Stokes.ManifoldForm.inChart`
-- `Stokes.ManifoldForm.inChart_chartTransition`
-- `Stokes.ContinuousAlternatingMap.contDiffOn_compContinuousLinearMap`
-- `Stokes.ManifoldForm.contDiffOn_chartTransition`
-- `Stokes.ManifoldForm.contDiffOn_chartTransitionDeriv`
-- `Stokes.ManifoldForm.chartTransitionDeriv_eq_fderivWithin`
-- `Stokes.ManifoldForm.contDiffOn_transitionPullbackInChart_of_contDiffOn`
-- `Stokes.ManifoldForm.contDiffOn_inChart_of_transitionPullback`
-- `Stokes.ManifoldForm.contDiffOn_transitionPullbackInChart_of_contDiffOn_inChart`
-- `Stokes.ManifoldForm.contDiffOn_transitionPullbackInChart_iff`
-- `Stokes.ManifoldForm.pullback`
-- `Stokes.ManifoldForm.ChartwiseSmooth`
-- `Stokes.ManifoldForm.ChartwiseSmooth.contDiffOn_inChart`
-- `Stokes.ManifoldForm.ChartwiseSmooth.contDiffOn_transitionPullbackInChart_of_contDiffOn`
-- `Stokes.ManifoldForm.ChartwiseSmooth.contDiffOn_transitionPullbackInChart_of_chartAPI`
-- `Stokes.ManifoldForm.ChartwiseSmooth.contDiffOn_transitionPullbackInChart`
-- `Stokes.boundaryInclusion`
-- `Stokes.outwardNormal`
-- `Stokes.boundaryTangentInclusion`
-- `Stokes.boundaryTangentProjection`
-- `Stokes.det_outwardFirstBoundaryMatrix`
-- `Stokes.coordinateOrientationSign`
-- `Stokes.outwardFirstBoundaryOrientationSign`
-- `Stokes.halfSpaceBoundarySign_eq_outwardFirstBoundaryOrientationSign`
-- `Stokes.halfSpaceBoundarySign_eq`
-- `Stokes.outwardFirstHalfSpaceBoundaryFormIntegral`
-- `Stokes.boundaryTangentPullbackForm`
-- `Stokes.boundaryTangentPullbackForm_comp_apply_basisFun_eq_det_mul`
-- `Stokes.ambientBoundaryForm_tangentMap_eq_det_mul`
-- `Stokes.boundaryInclusion_mem_Icc_of_mem_lowerZeroFaceDomain`
-- `Stokes.boxUpperCoordFaceTerm`
-- `Stokes.boxLowerCoordFaceTerm`
-- `Stokes.boxUpperFormFaceIntegral`
-- `Stokes.boxLowerFormFaceIntegral`
-- `Stokes.halfSpaceSupportBox`
-- `Stokes.boxFaceCoeffTSupportInHalfSpaceBox`
-- `Stokes.boxFormFaceCoeff_tsupport_subset`
-- `Stokes.boxFaceCoeffTSupportInHalfSpaceBox_of_tsupport_subset`
-- `Stokes.toCoordNForm_contDiffOn`
-- `Stokes.exists_halfSpaceSupportBox_of_isCompact`
-- `Stokes.boxRemainingFormFaceTerms`
-- `Stokes.boxRemainingFormFaceTerms_eq_zero_of_face_cancellation`
-- `Stokes.boxRemainingFormFaceTerms_eq_zero_of_support_disjoint`
-- `Stokes.boxRemainingFormFaceTerms_eq_zero_of_tsupport_disjoint`
-- `Stokes.boxRemainingFormFaceTerms_eq_zero_of_tsupport_subset_halfSpaceSupportBox`
-- `Stokes.bdryIntegral_eq_lowerZero_add_remaining`
-- `Stokes.box_stokes_extDeriv_contDiffOn_isOpen`
-- `Stokes.halfSpaceLocalStokes_with_remainder`
-- `Stokes.halfSpaceLocalStokes_with_remainder_of_contDiffOn_isOpen`
-- `Stokes.halfSpaceLocalStokes_of_remainder_eq_zero`
-- `Stokes.halfSpaceLocalStokes_of_remainder_eq_zero_of_contDiffOn_isOpen`
-- `Stokes.halfSpaceLocalStokes_of_face_cancellation`
-- `Stokes.halfSpaceLocalStokes_of_support_disjoint`
-- `Stokes.halfSpaceLocalStokes_of_tsupport_disjoint`
-- `Stokes.halfSpaceLocalStokes_compactSupport`
-- `Stokes.halfSpaceLocalStokes_compactSupport_of_contDiffOn_isOpen`
-- `Stokes.localHalfSpaceStokes_compactSupport`
-- `Stokes.localHalfSpaceStokes_compactSupport_of_contDiffOn_isOpen`
-- `Stokes.boxLowerZeroCoordFaceTerm_toCoordNForm_eq_halfSpaceBoundaryFormTerm`
-- `Stokes.boxFaceCoeffTSupportInHalfSpaceBox_transitionPullback_of_tsupport_subset`
-- `Stokes.halfSpaceTransitionFaceCoeffTSupportInHalfSpaceBox_of_tsupport_subset`
-- `Stokes.exists_halfSpaceTransitionFaceCoeffTSupportInHalfSpaceBox_of_isCompact`
-- `Stokes.boundaryChartDomain`
-- `Stokes.boundaryChartSelectedBox`
-- `Stokes.boundaryChartExtendedBox`
-- `Stokes.boundaryChartTransition`
-- `Stokes.boundaryChartTransitionTangentMap`
-- `Stokes.boundaryChartTransitionMatrix`
-- `Stokes.boundaryChartTransitionJacobian`
-- `Stokes.boundaryChartTransitionPreservesBoundaryAt`
-- `Stokes.boundaryChartTransitionDerivPreservesTangentAt`
-- `Stokes.boundaryChartTransition_pointwise_pullback_det`
-- `Stokes.boundaryChartTransitionCompatibleOn`
-- `Stokes.boundaryChartOrientationCompatibleOn`
-- `Stokes.boundaryChartTransitionJacobianIntegrand`
-- `Stokes.boundaryChartOrientedChangeOfVariables`
-- `Stokes.halfSpaceBoundaryTransitionFormIntegral_eq_inChart_of_orientedChangeOfVariables`
-- `Stokes.outwardFirstBoundaryChartIntegral_eq_inChart_of_orientedChangeOfVariables`
-- `Stokes.halfSpaceBoundaryInChartIntegral`
-- `Stokes.outwardFirstBoundaryInChartIntegral`
-- `Stokes.boundaryChartChangeCompatible`
-- `Stokes.halfSpaceBoundaryTransitionFormIntegral_eq_inChart_of_boundaryFace_subset_overlap`
-- `Stokes.outwardFirstBoundaryChartIntegral_eq_inChart_of_boundaryFace_subset_overlap`
-- `Stokes.outwardFirstBoundaryChartIntegral_chartChange_invariant`
-- `Stokes.outwardFirstBoundaryChartIntegral_chartChange_invariant_of_selectedBoxes`
-- `Stokes.outwardFirstBoundaryChartIntegral_chartChange_invariant_of_extendedBoxes`
-- `Stokes.outwardFirstBoundaryChartIntegral_chartChange_invariant_of_orientedChangeOfVariables`
-- `Stokes.outwardFirstBoundaryChartIntegral_chartChange_invariant_of_orientedChangeOfVariables_selected`
-- `Stokes.outwardFirstBoundaryChartIntegral_chartChange_invariant_of_orientedChangeOfVariables_extended`
-- `Stokes.contDiffOn_transitionPullbackInChart_upperHalfSpaceBoundary`
-- `Stokes.contDiffOn_transitionPullbackInChart_halfSpaceBox`
-- `Stokes.boxLowerZeroCoordFaceTerm_transitionPullback_eq_halfSpaceBoundaryTransitionFormTerm`
-- `Stokes.halfSpaceLocalStokes_transitionPullback_with_remainder`
-- `Stokes.halfSpaceLocalStokes_transitionPullback_of_remainder_eq_zero`
-- `Stokes.halfSpaceLocalStokes_transitionPullback_of_face_cancellation`
-- `Stokes.halfSpaceLocalStokes_transitionPullback_of_support_disjoint`
-- `Stokes.halfSpaceLocalStokes_transitionPullback_of_tsupport_disjoint`
-- `Stokes.halfSpaceLocalStokes_transitionPullback_compactSupport`
-- `Stokes.halfSpaceLocalStokes_transitionPullback_compactSupport_of_contDiffOn_isOpen`
-- `Stokes.localHalfSpaceStokes_transitionPullback_compactSupport`
-- `Stokes.localHalfSpaceStokes_transitionPullback_compactSupport_of_contDiffOn_isOpen`
-- `Stokes.boundaryChartLocalStokes_transitionPullback_compactSupport`
-- `Stokes.boundaryChartLocalStokes_transitionPullback_compactSupport_eq`
-- `Stokes.outwardFirstBoundaryChartIntegral`
-- `Stokes.outwardFirstBoundaryChartIntegral_eq_halfSpaceBoundarySign_mul`
-- `Stokes.boundaryChartLocalStokes_transitionPullback_of_extendedBox`
-- `Stokes.boundaryChartLocalStokes_transitionPullback_of_extendedBox_package`
-- `Stokes.boundaryChartLocalStokes_transitionPullback_of_extendedBox_outwardFirst`
-- `Stokes.boundaryChartLocalStokes_transitionPullback_of_extendedBox_outwardFirst_package`
+The current arXiv draft is:
 
-Build and check:
+- [paper/main.pdf](paper/main.pdf)
+- [paper/main.tex](paper/main.tex)
+
+Title:
 
 ```text
-lake build
+Formalizing Compactly Supported Stokes' Theorem in Lean 4
+via Coordinate-Represented Integrals
+```
+
+The paper explains the mathematical statement, the represented endpoint
+interface, the local-to-global proof decomposition, zero-localized support,
+half-space boundary boxes, endpoint reconstruction, and the artifact audit.
+
+## What Is Proved
+
+The main theorem is a **coordinate-represented compact-support Stokes
+theorem**.  The represented endpoints are not placeholders and are not
+user-supplied numbers.  They are the finite coordinate sums generated by the
+formal proof route from compact support and chartwise smoothness.
+
+The top-level input is intentionally small:
+
+```lean
+structure CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput
+    (I : ModelWithCorners Real (Fin (n + 1) → Real) H)
+    (ω : ManifoldForm I M n) where
+  chartwiseSmooth : ManifoldForm.ChartwiseSmooth I ω
+  compactSupport : IsCompact (closure (ManifoldForm.support I ω))
+```
+
+The theorem then proves:
+
+```lean
+theorem representedStokes :
+    X.canonicalRepresentedBulkIntegral (I := I) (ω := ω) =
+      X.canonicalRepresentedBoundaryIntegral (I := I) (ω := ω)
+```
+
+The finite cover, support-controlled partition, smooth refinement,
+zero-support facts, half-space local Stokes fields, and endpoint
+reconstruction are constructed internally.
+
+## What Is Not Claimed
+
+This repository does **not** claim a finished mathlib-native manifold integral
+statement of the form
+
+```text
+∫_M dω = ∫_∂M ω
+```
+
+for a future global integration API for differential forms on oriented
+manifolds with boundary.  The remaining bridge is to compare the generated
+represented endpoints with such a native manifold integration interface.
+
+The current result formalizes the substantial local-to-global Stokes proof
+payload at the represented coordinate level.
+
+## Why the Formalization Is Substantive
+
+The active Lean development under `Stokes/` contains:
+
+- 544 Lean files;
+- about 165,006 Lean lines;
+- a first-principles public API;
+- proof archaeology documents explaining the hidden mathematical obligations.
+
+Several paper-proof phrases become real Lean theorems here:
+
+- boundary charts require a genuine half-space local Stokes theorem, not a
+  fake ambient-open Euclidean theorem;
+- ordinary support of totalized chart representatives is the wrong object;
+- zero-localized chart representatives are needed to state the correct
+  support theorem;
+- artificial coordinate faces vanish by topological support control;
+- compactness constructs finite selected data, rather than serving as a
+  passive side condition;
+- represented endpoints are reconstructed from the same refined finite index
+  family used by local Stokes.
+
+This is the main proof-engineering contribution: the development moves from
+certificate-consuming theorem shapes to a certificate-generating theorem.
+
+## Repository Layout
+
+```text
+Stokes/                         Lean 4 formalization sources
+paper/                          arXiv draft source and compiled PDF
+docs/formalization-log/          bilingual-readable proof archaeology notes
+blueprint/                       older blueprint material and diagrams
+ROADMAP.md                       historical roadmap and execution notes
+lakefile.toml                    Lake package definition
+lean-toolchain                   Lean toolchain pin
+```
+
+The historical `archive/nodal-surfaces/` material is intentionally ignored by
+Git in the current Stokes repository.
+
+## Main Public Import
+
+For the preferred route:
+
+```lean
+import Stokes.Global.CoverIndexedFirstPrinciples
+```
+
+The slim cover-indexed public aggregator is:
+
+```lean
+import Stokes.Global.CoverIndexed
+```
+
+Historical Raw/Clean/Natural/FromCollar routes remain in the repository as
+implementation or compatibility modules, but they are not the preferred public
+surface.
+
+## Verification
+
+The project is pinned to:
+
+```text
+Lean: leanprover/lean4:v4.29.1
+mathlib: inherited through the pinned Lake manifest
+LeanStokes prior artifact: d0d1/lean-stokes-theorem at adffb99...
+```
+
+Typical verification commands:
+
+```text
+lake exe cache get
+lake build Stokes.Global.CoverIndexed
+lake build Stokes
 rg "\bsorry\b|\badmit\b|^\s*axiom\b" --glob "*.lean"
 ```
 
-The LeanStokes dependency is GPL-3.0-only. This repository currently imports it
-as a pinned Lake dependency rather than copying its source.
+For the main theorem, the axiom audit command is:
 
-## Archive
-
-The previous nodal-surface project has been archived at:
-
-```text
-archive/nodal-surfaces/
+```lean
+#print axioms Stokes.CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.representedStokes
 ```
 
-It contains the old Rust workspace, documents, arXiv references, search notes,
-and degree02-degree08 reproduction code. Treat it as historical material, not as
-the active project root.
-
-To inspect or rerun the old workspace:
+The expected theorem-level axioms are the standard Lean/mathlib axioms:
 
 ```text
-cd archive/nodal-surfaces
-cargo test --workspace
+propext
+Classical.choice
+Quot.sound
 ```
 
-## Near-Term Plan
+## Reading Guide
 
-1. Decide the repository license strategy around the GPL-3.0-only dependency.
-2. Lift the M5.1 outward-normal-first sign bridge toward chart-change
-   invariance for oriented boundary integrals.
-3. Keep public APIs mathlib-native and avoid leaking coordinate-only helper
-   types into future manifold-facing statements.
+Start here if you want the shortest route through the project:
+
+1. [paper/main.pdf](paper/main.pdf) for the mathematical and artifact story.
+2. [docs/formalization-log/README.md](docs/formalization-log/README.md) for
+   proof archaeology notes.
+3. [docs/formalization-log/07-theorem-api-map.md](docs/formalization-log/07-theorem-api-map.md)
+   for a theorem/API map.
+4. `Stokes/Global/CoverIndexedZeroCompactRepresentedStokesFirstPrinciples.lean`
+   for the preferred public theorem.
+5. `Stokes/Global/CoverIndexedIntrinsicZeroSupportConstructor.lean` and
+   `Stokes/HalfSpace/BoxInteriorStokes.lean` for two of the central technical
+   layers.
+
+## Prior Art and Licensing Note
+
+This project depends on the prior Lean Stokes artifact
+[`d0d1/lean-stokes-theorem`](https://github.com/d0d1/lean-stokes-theorem) as a
+pinned Lake dependency.  That project is GPL-3.0-only; this repository treats
+it as an external dependency and does not vendor its source.
+
+## Contact
+
+- Author: Chaoyu Hu
+- Affiliation: Hangzhou Dianzi University
+- Email: <evaristebernhardwiener@gmail.com>
+
+---
+
+# Lean 4 中紧支撑 Stokes 定理的形式化
+
+本仓库是一个 Lean 4 形式化数学项目，目标是形式化紧支撑 Stokes 定理的
+局部到整体核心证明链。当前主结果是一个 **coordinate-represented**
+版本的紧支撑 Stokes 定理。
+
+首选公开定理是：
+
+```lean
+Stokes.CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.representedStokes
+```
+
+它说明：在半空间模型背景下，如果一个形式在 chart 中光滑，并且其支撑闭包
+紧，那么 Lean 会自动构造有限坐标盒覆盖、支撑受控分解、光滑细分、
+zero-localized chart representative、局部半空间 Stokes 数据以及 canonical
+represented bulk/boundary endpoint，并证明这两个 endpoint 相等。
+
+简化地说：
+
+```text
+chartwise smoothness + compact closed support
+  => finite chart-box decomposition
+  => support-controlled smooth refinement
+  => zero-localized chart representatives
+  => half-space local Stokes on refined boxes
+  => equality of canonical represented endpoints
+```
+
+## 论文草稿
+
+当前 arXiv 草稿在：
+
+- [paper/main.pdf](paper/main.pdf)
+- [paper/main.tex](paper/main.tex)
+
+标题是：
+
+```text
+Formalizing Compactly Supported Stokes' Theorem in Lean 4
+via Coordinate-Represented Integrals
+```
+
+论文解释了 represented endpoint 的含义、局部到整体证明分解、zero-localized
+support、半空间边界盒、人工边界 face 消失、endpoint 重构以及 artifact audit。
+
+## 证明了什么
+
+当前结果不是在旧证明外面简单包一层接口。主定理的公开输入只有两个数学假设：
+
+```lean
+chartwiseSmooth : ManifoldForm.ChartwiseSmooth I ω
+compactSupport : IsCompact (closure (ManifoldForm.support I ω))
+```
+
+有限覆盖、分割函数、光滑细分、局部 Stokes fields、zero-support 证明和 endpoint
+reconstruction 都由 Lean 在内部自动生成。
+
+最终证明的是：
+
+```lean
+canonicalRepresentedBulkIntegral =
+canonicalRepresentedBoundaryIntegral
+```
+
+这里的 represented endpoints 是经典证明展开后得到的有限坐标和，不是用户手填的
+占位符。
+
+## 没有声称什么
+
+本仓库暂时不声称已经完成 mathlib-native 的流形积分版本：
+
+```text
+∫_M dω = ∫_∂M ω
+```
+
+剩下的桥接工作是：把当前生成的 represented coordinate endpoints 与未来或外部的
+流形微分形式积分 API 进行比较。当前结果已经形式化了紧支撑 Stokes 定理中最核心的
+局部到整体证明负载。
+
+## 为什么这个形式化有内容
+
+`Stokes/` 下当前有：
+
+- 544 个 Lean 文件；
+- 约 165,006 行 Lean 代码；
+- 一个 first-principles 公开入口；
+- 一组 proof archaeology 文档，记录形式化过程中暴露出的数学问题。
+
+形式化过程中几个纸面证明中被压缩掉的问题变成了真正的 Lean theorem：
+
+- 边界 chart 不能假装成普通 Euclidean ambient-open 情况；
+- totalized chart representative 的普通 support 命题形状是错的；
+- 需要 zero-localized representative 才能得到正确的 support theorem；
+- 人工坐标边界 face 依赖 topological support 控制而消失；
+- compactness 不是被动假设，而是生成有限数据的机制；
+- represented endpoint 必须从同一套 refined finite index family 重构。
+
+因此，本项目的核心工程贡献之一是把早期“消费大证书”的 theorem 逐步压缩为
+“自动生成证书”的 first-principles theorem。
+
+## 仓库结构
+
+```text
+Stokes/                         Lean 4 形式化源码
+paper/                          arXiv 草稿源码和 PDF
+docs/formalization-log/          中文 proof archaeology 文档
+blueprint/                       早期 blueprint 和图
+ROADMAP.md                       历史路线和执行记录
+lakefile.toml                    Lake 项目定义
+lean-toolchain                   Lean 版本 pin
+```
+
+当前 Stokes 仓库已经不再跟踪旧的 `archive/nodal-surfaces/` 历史项目。
+
+## 验证方式
+
+常用检查命令：
+
+```text
+lake exe cache get
+lake build Stokes.Global.CoverIndexed
+lake build Stokes
+rg "\bsorry\b|\badmit\b|^\s*axiom\b" --glob "*.lean"
+```
+
+主定理 axiom audit：
+
+```lean
+#print axioms Stokes.CoverIndexedZeroCompactRepresentedStokesFirstPrinciplesInput.representedStokes
+```
+
+期望只出现 Lean/mathlib 的标准公理：
+
+```text
+propext
+Classical.choice
+Quot.sound
+```
+
+## 阅读顺序
+
+建议先看：
+
+1. [paper/main.pdf](paper/main.pdf)：论文草稿；
+2. [docs/formalization-log/README.md](docs/formalization-log/README.md)：形式化洞见文档；
+3. [docs/formalization-log/07-theorem-api-map.md](docs/formalization-log/07-theorem-api-map.md)：theorem/API map；
+4. `Stokes/Global/CoverIndexedZeroCompactRepresentedStokesFirstPrinciples.lean`：
+   首选公开定理；
+5. `Stokes/Global/CoverIndexedIntrinsicZeroSupportConstructor.lean` 和
+   `Stokes/HalfSpace/BoxInteriorStokes.lean`：zero-support 与半空间局部 Stokes
+   两个核心技术层。
+
+## 联系方式
+
+- 作者：Chaoyu Hu
+- 单位：杭州电子科技大学
+- 邮箱：<evaristebernhardwiener@gmail.com>
